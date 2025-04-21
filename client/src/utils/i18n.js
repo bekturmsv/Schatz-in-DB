@@ -8,7 +8,7 @@ i18n
   .use(initReactI18next)
   .use(
     resourcesToBackend((language, namespace) =>
-      import(`../../public/locales/${language}/${namespace}.json`)
+      import(`../assets/locales/${language}/${namespace}.json`)
     )
   )
   .init({

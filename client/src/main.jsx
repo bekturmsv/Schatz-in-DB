@@ -1,11 +1,30 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
 import "./index.css";
 import "./styles/theme.css";
-import App from "./App.jsx";
+import "./utils/i18n";
+import { store } from "./store/store";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import Home from "./pages/Home/Home";
+
+const router = createBrowserRouter([
+  {
+    element: <MainLayout />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+    ],
+  },
+]);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </StrictMode>
 );
