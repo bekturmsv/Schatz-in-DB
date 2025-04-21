@@ -1,0 +1,5 @@
+{
+  "welcome": "Willkommen bei der SQL-Lernplattform",
+  "profile": "Dein Profil",
+  "points": "Points: {{count}}"
+}
