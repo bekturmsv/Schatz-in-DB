@@ -26,7 +26,7 @@ function App() {
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
       </div>
-      <p className="text-3xl text-red-700 font-bold underline">
+      <p className="text-3xl text-primary font-bold underline">
         Click on the Vite and React logos to learn more
       </p>
 
