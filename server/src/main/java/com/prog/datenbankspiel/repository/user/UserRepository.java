@@ -1,4 +1,7 @@
 package com.prog.datenbankspiel.repository.user;
 
-public interface UserRepository {
+import com.prog.datenbankspiel.model.user.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
 }
