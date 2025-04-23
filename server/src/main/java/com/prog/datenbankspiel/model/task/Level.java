@@ -17,10 +17,10 @@ public class Level {
     private LevelDifficulty difficulty;
 
     @OneToMany(mappedBy = "level")
-    private List<Task> tasks;
+    private List<TaskQuery> taskQueries;
 
     @OneToMany(mappedBy = "level")
-    private List<Test> tests;
+    private List<TaskTest> taskTests;
 
     @OneToMany(mappedBy = "level")
     private List<Topic> topics;

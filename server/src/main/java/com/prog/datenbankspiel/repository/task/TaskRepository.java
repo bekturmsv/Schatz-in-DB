@@ -1,11 +1,8 @@
 package com.prog.datenbankspiel.repository.task;
 
 
-import com.prog.datenbankspiel.model.task.Task;
-import com.prog.datenbankspiel.model.task.enums.TaskType;
+import com.prog.datenbankspiel.model.task.TaskQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskRepository extends JpaRepository<TaskQuery, Long> {
 }

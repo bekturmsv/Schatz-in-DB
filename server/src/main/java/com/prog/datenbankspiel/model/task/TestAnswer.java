@@ -11,7 +11,7 @@ public class TestAnswer {
 
     @ManyToOne
     @JoinColumn(name = "test_id")
-    private Test test;
+    private TaskTest taskTest;
 
     private String answer;
 

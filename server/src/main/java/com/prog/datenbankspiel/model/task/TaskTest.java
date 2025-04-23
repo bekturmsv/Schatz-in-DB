@@ -1,18 +1,17 @@
 package com.prog.datenbankspiel.model.task;
 
-import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
-public class Test extends AbstractTask {
+public class TaskTest extends AbstractTask {
 
     private Long teacherId;
     private String title;
     private String description;
 
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "taskTest", cascade = CascadeType.ALL)
     private List<TestAnswer> answers;
 
     @OneToOne

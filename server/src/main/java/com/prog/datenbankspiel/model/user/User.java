@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.model.user;
 
+import com.prog.datenbankspiel.model.task.AbstractTask;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import jakarta.persistence.*;
 
@@ -13,6 +14,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     public Roles role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Progress progress;
 
     public String username;
 
