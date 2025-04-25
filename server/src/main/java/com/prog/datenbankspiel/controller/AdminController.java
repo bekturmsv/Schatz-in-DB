@@ -1,28 +1,33 @@
 package com.prog.datenbankspiel.controller;
 
-import com.prog.datenbankspiel.dto.TeacherDTO;
-import com.prog.datenbankspiel.service.TeacherServiceImpl;
+import com.prog.datenbankspiel.dto.RegisterTeacherRequest;
+import com.prog.datenbankspiel.dto.TeacherDto;
+import com.prog.datenbankspiel.mappers.TeacherMapper;
+import com.prog.datenbankspiel.repository.user.TeacherRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
 
 @RequestMapping("api/admin")
-@Controller
+@RestController
 @AllArgsConstructor
 public class AdminController {
 
-    private final TeacherServiceImpl teacherServiceImpl;
+    private final TeacherMapper teacherMapper;
+    private final TeacherRepository teacherRepository;
 
-    // method to create new account for teacher
-    // admin access only
     @PostMapping("/createTeacher")
-    public ResponseEntity<TeacherDTO> createTeacher(@RequestBody TeacherDTO teacherDTO) {
+    public ResponseEntity<TeacherDto> createTeacher(
+            @RequestBody RegisterTeacherRequest request,
+            UriComponentsBuilder uriBuilder) {
+        var teacher = teacherMapper.dtoToTeacher(request);
+        teacherRepository.save(teacher);
 
-        TeacherDTO teacherCreatedDTO = teacherServiceImpl.createTeacher(teacherDTO);
-        return ResponseEntity.ok().body(teacherCreatedDTO);
+        var teacherDto = teacherMapper.teacherToDto(teacher);
+        var uri = uriBuilder.path("/teachers/{id}").buildAndExpand(teacherDto.getId()).toUri();
 
+        return ResponseEntity.created(uri).body(teacherDto);
     }
 }
