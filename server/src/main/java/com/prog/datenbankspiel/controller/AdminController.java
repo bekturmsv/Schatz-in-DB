@@ -22,10 +22,10 @@ public class AdminController {
     public ResponseEntity<TeacherDto> createTeacher(
             @RequestBody RegisterTeacherRequest request,
             UriComponentsBuilder uriBuilder) {
-        var teacher = teacherMapper.dtoToTeacher(request);
+        var teacher = teacherMapper.fromRegisterRequest(request);
         teacherRepository.save(teacher);
 
-        var teacherDto = teacherMapper.teacherToDto(teacher);
+        var teacherDto = teacherMapper.toDto(teacher);
         var uri = uriBuilder.path("/teachers/{id}").buildAndExpand(teacherDto.getId()).toUri();
 
         return ResponseEntity.created(uri).body(teacherDto);

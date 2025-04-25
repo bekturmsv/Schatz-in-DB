@@ -27,7 +27,7 @@ public class GroupController {
             @RequestBody CreateGroupRequest request,
             UriComponentsBuilder uriBuilder) {
 
-        var group = groupMapper.fromDto(request);
+        var group = groupMapper.fromCreateRequest(request);
         groupRepository.save(group);
 
         var groupDto = groupMapper.toDto(group);

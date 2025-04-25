@@ -8,5 +8,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface GroupMapper {
     GroupDto toDto(Group group);
-    Group fromDto(CreateGroupRequest groupDto);
+    Group fromCreateRequest(CreateGroupRequest request);
 }
