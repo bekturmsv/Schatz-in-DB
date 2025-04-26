@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "@/components/custom/LanguageSelector";
+import ThemeSelector from "@/components/custom/ThemeSelector";
 // import ThemeSelector from "../components/ThemeSelector";
 
 const Home = () => {
@@ -15,6 +16,8 @@ const Home = () => {
       <div className="mt-4">{/* <ThemeSelector /> */}</div>
       <div className="mt-4">
         <LanguageSelector />
+
+        <ThemeSelector />
       </div>
     </div>
   );
