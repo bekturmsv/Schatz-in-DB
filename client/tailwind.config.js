@@ -10,6 +10,7 @@ module.exports = {
       },
       fontFamily: {
         custom: ["var(--font-family)"],
+        navbarBungee: ["Bungee Inline", "sans-serif"],
       },
       backgroundImage: (theme) => ({
         "theme-bg": "var(--bg-image)",

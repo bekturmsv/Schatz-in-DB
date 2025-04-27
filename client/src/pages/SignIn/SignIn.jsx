@@ -78,7 +78,7 @@ export default function SignIn() {
         </form>
         <p className="mt-4 text-center text-sm">
           {t("noAccount")}{" "}
-          <Link to="/signup" className="text-blue-500 hover:underline">
+          <Link to="/register" className="text-blue-500 hover:underline">
             {t("register")}
           </Link>
         </p>

@@ -1,5 +1,21 @@
 {
-  "welcome": "Willkommen bei der SQL-Lernplattform",
+  "welcome": "Willkommen zur SQL-Lernplattform",
   "profile": "Dein Profil",
-  "points": "Points: {{count}}"
+  "points": "Punkte: {{count}}",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "signIn": "Anmelden",
+  "noAccount": "Du hast kein Konto?",
+  "register": "Registrieren",
+  "firstname": "Vorname",
+  "lastname": "Nachname",
+  "nickname": "Spitzname",
+  "repeatPassword": "Passwort wiederholen",
+  "signUp": "Registrieren",
+  "alreadyHaveAccount": "Ich habe bereits ein Konto",
+  "home": "Startseite",
+  "play": "Spielen",
+  "training": "Training",
+  "leaderboard": "Rangliste",
+  "logout": "Abmelden"
 }

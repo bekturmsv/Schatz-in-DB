@@ -137,7 +137,7 @@ export default function SignUp() {
         </form>
         <p className="mt-4 text-center text-sm">
           {t("alreadyHaveAccount")}{" "}
-          <Link to="/signin" className="text-blue-500 hover:underline">
+          <Link to="/login" className="text-blue-500 hover:underline">
             {t("login")}
           </Link>
         </p>
