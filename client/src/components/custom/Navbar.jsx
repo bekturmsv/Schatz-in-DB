@@ -9,7 +9,7 @@ export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const [isOpen, setIsOpen] = useState(false); // Для бургер-меню
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -21,18 +21,19 @@ export default function Navbar() {
     { to: "/play", label: t("play") },
     { to: "/training", label: t("training") },
     { to: "/leaderboard", label: t("leaderboard") },
-    { to: "/profile", label: t("profile") },
   ];
 
+  if (isAuthenticated) {
+    navLinks.push({ to: "/profile", label: t("profile") });
+  }
+
   return (
-    <nav className="bg-gray-300 border-b-2 border-green-400 font-navbarBungee text-green-400">
+    <nav className="bg-gray-300 border-b-2 border-green-400 font-mono text-green-400">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        {/* Logo */}
         <Link to="/" className="text-2xl font-bold">
           LOGO
         </Link>
 
-        {/* Burger menu */}
         <button
           className="md:hidden focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}
@@ -53,7 +54,6 @@ export default function Navbar() {
           </svg>
         </button>
 
-        {/* Nav Links */}
         <div
           className={`${
             isOpen ? "flex" : "hidden"

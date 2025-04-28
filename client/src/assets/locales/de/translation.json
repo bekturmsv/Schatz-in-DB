@@ -26,5 +26,14 @@
   "progressSummary": "Zusammenfassung: 'Du hast 3 von 10 Quests auf dem aktuellen Level abgeschlossen'",
   "newsAndUpdates": "Neuigkeiten und Updates",
   "copyright": "URHEBERRECHT",
-  "socialMediaLinks": "Links zu sozialen Medien"
+  "socialMediaLinks": "Links zu sozialen Medien",
+  "myAccount": "Mein Konto",
+  "editProfile": "Profil bearbeiten",
+  "difficulty": "Schwierigkeit",
+  "currentTopic": "Aktuelles Thema",
+  "outOf": "von",
+  "tasksSolved": "Aufgaben gelöst",
+  "type": "TYP",
+  "theme": "THEMA",
+  "styles": "Stile"
 }

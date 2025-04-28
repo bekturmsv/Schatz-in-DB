@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { setUser, setToken } from "../../features/auth/authSlice";
-import { useLoginMutation } from "../../features/auth/authApi";
 import { mockUser } from "@/data/mockUser";
+import { toast } from "sonner";
+import { setUser, setToken } from "@/features/auth/authSlice";
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -14,76 +14,44 @@ export default function SignIn() {
     email: "",
     password: "",
   });
-  const [login, { isLoading, error }] = useLoginMutation();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Real
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const data = await login(formData).unwrap();
-  //     dispatch(
-  //       setUser({
-  //         nickname: data.nickname,
-  //         points: data.points || 0,
-  //         purchasedThemes: data.purchasedThemes || ["default"],
-  //         email: data.email || "",
-  //         firstname: data.firstname || "",
-  //         lastname: data.lastname || "",
-  //       })
-  //     );
-  //     dispatch(setToken(data.token)); //Save token
-  //     navigate("/");
-  //   } catch (err) {
-  //     console.error("Login error:", err);
-  //   }
-  // };
-
-  // Test
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Проверка с моковыми данными
-    if (
-      formData.email === mockUser.email &&
-      formData.password === mockUser.password
-    ) {
-      dispatch(
-        setUser({
-          nickname: mockUser.nickname,
-          points: mockUser.points,
-          purchasedThemes: mockUser.purchasedThemes,
-          email: mockUser.email,
-          firstname: mockUser.firstname,
-          lastname: mockUser.lastname,
-        })
-      );
-      dispatch(setToken("mock-jwt-token")); // Моковый токен
-      // toast({
-      //   title: "Success",
-      //   description: "Logged in successfully!",
-      //   variant: "success",
-      // });
-      console.log("Gut");
-      navigate("/");
-    } else {
-      // toast({
-      //   title: "Error",
-      //   description: "Invalid email or password.",
-      //   variant: "destructive",
-      // });
-      console.log("error");
-    }
+    setIsLoading(true);
+    setTimeout(() => {
+      if (
+        formData.email === mockUser.email &&
+        formData.password === mockUser.password
+      ) {
+        dispatch(
+          setUser({
+            nickname: mockUser.nickname,
+            points: mockUser.points,
+            purchasedThemes: mockUser.purchasedThemes,
+            email: mockUser.email,
+            firstname: mockUser.firstname,
+            lastname: mockUser.lastname,
+          })
+        );
+        dispatch(setToken("mock-jwt-token"));
+        toast.success("Logged in successfully!");
+        navigate("/");
+      } else {
+        toast.error("Invalid email or password.");
+      }
+      setIsLoading(false);
+    }, 1000);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-sm">
         <h2 className="text-3xl font-bold text-center mb-6">SIGN IN</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <input

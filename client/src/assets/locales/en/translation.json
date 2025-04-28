@@ -26,5 +26,14 @@
   "progressSummary": "Summary: 'You have completed 3 out of 10 quests at the current level'",
   "newsAndUpdates": "News and updates",
   "copyright": "COPYRIGHT",
-  "socialMediaLinks": "Links to social media"
+  "socialMediaLinks": "Links to social media",
+  "myAccount": "My account",
+  "editProfile": "Edit profile",
+  "difficulty": "Difficulty",
+  "currentTopic": "Current topic",
+  "outOf": "out of",
+  "tasksSolved": "tasks solved",
+  "type": "TYPE",
+  "theme": "THEME",
+  "styles": "Styles"
 }
