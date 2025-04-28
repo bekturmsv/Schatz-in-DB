@@ -13,6 +13,9 @@ public class Group {
 
     private String name;
 
+    @Column(length = 6)
+    private String code;
+
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;

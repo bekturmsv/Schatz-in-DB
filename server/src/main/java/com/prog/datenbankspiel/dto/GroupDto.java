@@ -7,4 +7,5 @@ import lombok.Data;
 public class GroupDto {
     private Long id;
     private String name;
+    private String code;
 }
