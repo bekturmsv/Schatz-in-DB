@@ -1,6 +1,5 @@
 package com.prog.datenbankspiel.model.user;
 
-import com.prog.datenbankspiel.model.task.AbstractTask;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,22 +12,19 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    public Long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    public Roles role;
+    private Roles role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Progress progress;
+    private String username;
 
-    public String username;
+    private String password;
 
-    public String password;
+    private String email;
 
-    public String email;
+    private String firstName;
 
-    public String first_name;
-
-    public String last_name;
+    private String lastName;
 
 }

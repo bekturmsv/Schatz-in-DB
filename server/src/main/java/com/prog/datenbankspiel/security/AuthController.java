@@ -51,8 +51,8 @@ public class AuthController {
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         newUser.setEmail(registerRequest.getEmail());
-        newUser.setFirst_name(registerRequest.getFirstName());
-        newUser.setLast_name(registerRequest.getLastName());
+        newUser.setFirstName(registerRequest.getFirstName());
+        newUser.setLastName(registerRequest.getLastName());
 
         newUser.setRole(Roles.valueOf(registerRequest.getRole().toUpperCase()));
 

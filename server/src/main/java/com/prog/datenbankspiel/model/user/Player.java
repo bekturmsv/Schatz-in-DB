@@ -16,6 +16,9 @@ public class Player extends User {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private Group group_id;
+    private Group groupId;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Progress progress;
 
 }
