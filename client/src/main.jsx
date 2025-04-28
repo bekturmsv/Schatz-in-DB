@@ -12,6 +12,8 @@ import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import Profile from "./pages/Profile/Profile";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
+import DifficultyLevel from "./pages/DifficultyLevel/DifficultyLevel";
+import Level from "./pages/Level/Level";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/play",
+        element: (
+          <ProtectedRoute>
+            <DifficultyLevel />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/level/:difficulty",
+        element: (
+          <ProtectedRoute>
+            <Level />
           </ProtectedRoute>
         ),
       },
