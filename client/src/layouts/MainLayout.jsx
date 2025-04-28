@@ -1,3 +1,4 @@
+import Footer from "@/components/custom/Footer";
 import Navbar from "@/components/custom/Navbar";
 import React from "react";
 import { Outlet } from "react-router-dom";
@@ -5,12 +6,12 @@ import { Outlet } from "react-router-dom";
 const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <header>{/* ваш хэдер */}</header>
+      <Navbar />
+
       <main className="flex‑1">
-        <Navbar />
-        <Outlet />{" "}
+        <Outlet />
       </main>
-      <footer></footer>
+      <Footer />
     </div>
   );
 };

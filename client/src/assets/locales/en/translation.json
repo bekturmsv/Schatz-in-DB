@@ -17,5 +17,14 @@
   "play": "Play",
   "training": "Training",
   "leaderboard": "Leaderboard",
-  "logout": "Logout"
+  "logout": "Logout",
+  "heroTitle": "SQL QUEST: UPGRADE YOUR SKILLS THROUGH ADVENTURE!",
+  "heroSubtitle": "Learn SQL through the game and become a data master!",
+  "startJourney": "Start the Journey",
+  "gameProgress": "Game progress",
+  "progressDescription": "Progress bar by the current level.",
+  "progressSummary": "Summary: 'You have completed 3 out of 10 quests at the current level'",
+  "newsAndUpdates": "News and updates",
+  "copyright": "COPYRIGHT",
+  "socialMediaLinks": "Links to social media"
 }

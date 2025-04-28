@@ -17,5 +17,14 @@
   "play": "Spielen",
   "training": "Training",
   "leaderboard": "Rangliste",
-  "logout": "Abmelden"
+  "logout": "Abmelden",
+  "heroTitle": "SQL QUEST: VERBESSERE DEINE FÄHIGKEITEN DURCH ABENTEUER!",
+  "heroSubtitle": "Lerne SQL durch das Spiel und werde ein Datenmeister!",
+  "startJourney": "Starte die Reise",
+  "gameProgress": "Spiel Fortschritt",
+  "progressDescription": "Fortschrittsleiste nach dem aktuellen Level.",
+  "progressSummary": "Zusammenfassung: 'Du hast 3 von 10 Quests auf dem aktuellen Level abgeschlossen'",
+  "newsAndUpdates": "Neuigkeiten und Updates",
+  "copyright": "URHEBERRECHT",
+  "socialMediaLinks": "Links zu sozialen Medien"
 }
