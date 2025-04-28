@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { setUser, setToken } from "../../features/auth/authSlice";
 import { useLoginMutation } from "../../features/auth/authApi";
+import { mockUser } from "@/data/mockUser";
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -19,24 +20,62 @@ export default function SignIn() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  // Real
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const data = await login(formData).unwrap();
+  //     dispatch(
+  //       setUser({
+  //         nickname: data.nickname,
+  //         points: data.points || 0,
+  //         purchasedThemes: data.purchasedThemes || ["default"],
+  //         email: data.email || "",
+  //         firstname: data.firstname || "",
+  //         lastname: data.lastname || "",
+  //       })
+  //     );
+  //     dispatch(setToken(data.token)); //Save token
+  //     navigate("/");
+  //   } catch (err) {
+  //     console.error("Login error:", err);
+  //   }
+  // };
+
+  // Test
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const data = await login(formData).unwrap();
+    // Проверка с моковыми данными
+    if (
+      formData.email === mockUser.email &&
+      formData.password === mockUser.password
+    ) {
       dispatch(
         setUser({
-          nickname: data.nickname,
-          points: data.points || 0,
-          purchasedThemes: data.purchasedThemes || ["default"],
-          email: data.email || "",
-          firstname: data.firstname || "",
-          lastname: data.lastname || "",
+          nickname: mockUser.nickname,
+          points: mockUser.points,
+          purchasedThemes: mockUser.purchasedThemes,
+          email: mockUser.email,
+          firstname: mockUser.firstname,
+          lastname: mockUser.lastname,
         })
       );
-      dispatch(setToken(data.token)); //Save token
+      dispatch(setToken("mock-jwt-token")); // Моковый токен
+      // toast({
+      //   title: "Success",
+      //   description: "Logged in successfully!",
+      //   variant: "success",
+      // });
+      console.log("Gut");
       navigate("/");
-    } catch (err) {
-      console.error("Login error:", err);
+    } else {
+      // toast({
+      //   title: "Error",
+      //   description: "Invalid email or password.",
+      //   variant: "destructive",
+      // });
+      console.log("error");
     }
   };
 
