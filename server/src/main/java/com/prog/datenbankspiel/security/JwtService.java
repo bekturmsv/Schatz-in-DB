@@ -22,8 +22,8 @@ public class JwtService {
         claims.put("role", userDetails.getAuthorities().stream()
                 .findFirst()
                 .get()
-                .getAuthority()
-                .replace("ROLE_", ""));
+                .getAuthority());
+//                .replace("ROLE_", ""));
 
         return createToken(claims, userDetails.getUsername());
     }
