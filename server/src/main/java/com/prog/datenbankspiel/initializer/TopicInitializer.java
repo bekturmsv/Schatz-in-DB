@@ -31,6 +31,7 @@ public class TopicInitializer {
             topic.setName(name);
             Level level = levelRepository.findByDifficulty(difficulty);
             topic.setLevel(level);
+            topic.setDifficulty(difficulty);
             topicRepository.save(topic);
         }
     }
