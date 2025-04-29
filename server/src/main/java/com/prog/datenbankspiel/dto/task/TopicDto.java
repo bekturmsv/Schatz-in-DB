@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class TopicDto {
     private String name;
+    private LevelDifficulty difficulty;
 }
