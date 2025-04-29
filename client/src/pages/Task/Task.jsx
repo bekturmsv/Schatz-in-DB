@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'; // Добавляем useDispatch
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import mockTasks from '../../data/mockTasks.js';
+import mockTasks from '../../data/mockTasks';
+import { getUser, updateUser } from '../../data/mockUser';
+import { setUser } from '../../features/auth/authSlice'; // Импортируем setUser
 
 export default function Task() {
     const { difficulty, taskId } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch(); // Добавляем dispatch
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     // Проверяем авторизацию
@@ -49,12 +52,55 @@ export default function Task() {
         if (answer.trim().toUpperCase() === task.correctAnswer.toUpperCase()) {
             toast.success(t('correctAnswer'));
             setIsCompleted(true);
+
+            // Обновляем данные пользователя
+            const user = getUser();
+
+            // Обновляем completedTasks
+            const updatedCompletedTasks = {
+                ...user.completedTasks,
+                [difficulty.toLowerCase()]: [
+                    ...user.completedTasks[difficulty.toLowerCase()],
+                    parseInt(taskId),
+                ],
+            };
+
+            // Обновляем tasks
+            const updatedTasks = user.tasks.map((userTask) => {
+                if (
+                    userTask.type.toLowerCase() === difficulty.toLowerCase() &&
+                    userTask.theme === task.topic
+                ) {
+                    return {
+                        ...userTask,
+                        completed: userTask.completed + 1,
+                    };
+                }
+                return userTask;
+            });
+
+            // Обновляем progress и points
+            const updatedProgress = {
+                ...user.progress,
+                tasksSolved: user.progress.tasksSolved + 1,
+            };
+            const updatedPoints = user.points + task.points;
+
+            const updatedUser = {
+                completedTasks: updatedCompletedTasks,
+                tasks: updatedTasks,
+                progress: updatedProgress,
+                points: updatedPoints,
+            };
+
+            updateUser(updatedUser);
+            dispatch(setUser({ ...user, ...updatedUser })); // Обновляем данные в Redux
+
             setTimeout(() => navigate(`/level/${difficulty}`), 1000);
         } else {
             toast.error(t('incorrectAnswer'));
         }
     };
-
 
     // Сброс ответа
     const handleReset = () => {
@@ -76,7 +122,7 @@ export default function Task() {
             {/* Модальное окно с подсказкой */}
             {showHint && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-20 bg flex items-center justify-center z-50"
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
                     onClick={handleCloseHint}
                 >
                     <div

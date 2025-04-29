@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'; // Добавляем useDispatch
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { completeLevel } from '../../features/auth/authSlice.js';
-import mockTasks from '../../data/mockTasks.js';
+import mockTasks from '../../data/mockTasks';
+import { getUser, updateUser } from '../../data/mockUser';
+import { setUser } from '../../features/auth/authSlice'; // Импортируем setUser
 
 export default function FinalTest() {
     const { difficulty } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useDispatch(); // Добавляем dispatch
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     // Проверяем авторизацию
@@ -34,7 +35,7 @@ export default function FinalTest() {
     const tasks = levelData.finalTest.tasks;
     const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
     const [completedTasks, setCompletedTasks] = useState([]);
-    const [answer, setAnswer] = useState('');
+    const [answers, setAnswers] = useState(tasks.map(() => '')); // Сохраняем ответы для каждой задачи
     const [showHint, setShowHint] = useState(false);
     const [timer, setTimer] = useState(0);
     const [isTimerRunning, setIsTimerRunning] = useState(true);
@@ -61,7 +62,7 @@ export default function FinalTest() {
 
     // Проверка ответа
     const handleSubmit = () => {
-        if (answer.trim().toUpperCase() === currentTask.correctAnswer.toUpperCase()) {
+        if (answers[currentTaskIndex].trim().toUpperCase() === currentTask.correctAnswer.toUpperCase()) {
             toast.success(t('correctAnswer'));
             setCompletedTasks([...completedTasks, currentTask.id]);
 
@@ -69,20 +70,63 @@ export default function FinalTest() {
             if (completedTasks.length + 1 === tasks.length) {
                 setIsTimerRunning(false);
                 toast.success(t('levelCompleted', { time: formatTime(timer) }));
-                dispatch(completeLevel({ difficulty: difficulty.toLowerCase() }));
+
+                // Обновляем данные пользователя
+                const user = getUser();
+
+                // Обновляем completedLevels
+                const updatedCompletedLevels = {
+                    ...user.completedLevels,
+                    [difficulty.toLowerCase()]: true,
+                };
+
+                // Обновляем tasks
+                const updatedTasks = user.tasks.map((task) => {
+                    if (task.type.toLowerCase() === difficulty.toLowerCase()) {
+                        return { ...task, completed: task.total };
+                    }
+                    return task;
+                });
+
+                // Обновляем progress и points
+                const totalPoints = tasks.reduce((sum, task) => sum + task.points, 0);
+                const updatedProgress = {
+                    ...user.progress,
+                    tasksSolved: user.progress.tasksSolved + tasks.length,
+                };
+                const updatedPoints = user.points + totalPoints;
+
+                const updatedUser = {
+                    completedLevels: updatedCompletedLevels,
+                    tasks: updatedTasks,
+                    progress: updatedProgress,
+                    points: updatedPoints,
+                };
+
+                updateUser(updatedUser);
+                dispatch(setUser({ ...user, ...updatedUser })); // Обновляем данные в Redux
+
                 setTimeout(() => navigate('/play'), 2000);
             } else {
                 setCurrentTaskIndex((prev) => (prev + 1) % tasks.length);
-                setAnswer('');
             }
         } else {
             toast.error(t('incorrectAnswer'));
         }
     };
 
-    // Сброс ответа
+    // Сброс ответа для текущей задачи
     const handleReset = () => {
-        setAnswer('');
+        const updatedAnswers = [...answers];
+        updatedAnswers[currentTaskIndex] = '';
+        setAnswers(updatedAnswers);
+    };
+
+    // Обновление ответа
+    const handleAnswerChange = (e) => {
+        const updatedAnswers = [...answers];
+        updatedAnswers[currentTaskIndex] = e.target.value;
+        setAnswers(updatedAnswers);
     };
 
     // Показать подсказку
@@ -98,12 +142,10 @@ export default function FinalTest() {
     // Переключение задач
     const handleNext = () => {
         setCurrentTaskIndex((prev) => (prev + 1) % tasks.length);
-        setAnswer('');
     };
 
     const handlePrevious = () => {
         setCurrentTaskIndex((prev) => (prev - 1 + tasks.length) % tasks.length);
-        setAnswer('');
     };
 
     return (
@@ -170,8 +212,8 @@ export default function FinalTest() {
                         <div className="bg-gray-200 p-6 rounded-lg shadow-md flex-1">
                             <h2 className="text-xl font-bold mb-4">{t('answerBox')}</h2>
                             <textarea
-                                value={answer}
-                                onChange={(e) => setAnswer(e.target.value)}
+                                value={answers[currentTaskIndex]}
+                                onChange={handleAnswerChange}
                                 className="w-full h-32 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                                 placeholder={t('typeYourQueryHere')}
                             />
