@@ -11,6 +11,12 @@ const initialState = {
   },
   token: null,
   isAuthenticated: false,
+  completedLevels: {
+    easy: false,
+    medium: false,
+    hard: false,
+  },
+
 };
 
 const authSlice = createSlice({
@@ -35,9 +41,13 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
     },
+    completeLevel: (state, action) => {
+      const {difficulty} = action.payload;
+      state.completedLevels[difficulty] = true;
+    }
   },
 });
 
-export const { setUser, setToken, addPoints, purchaseTheme, logout } =
+export const { setUser, setToken, addPoints, purchaseTheme, logout, completeLevel } =
   authSlice.actions;
 export default authSlice.reducer;
