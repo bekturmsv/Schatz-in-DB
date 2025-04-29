@@ -4,6 +4,8 @@ import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 public class Topic {
@@ -14,11 +16,7 @@ public class Topic {
 
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    private LevelDifficulty difficulty;
-
-    @ManyToOne
-    @JoinColumn(name = "level_id")
-    private Level level;
+    @OneToMany(mappedBy = "topic")
+    private List<AbstractTask> tasks;
 
 }

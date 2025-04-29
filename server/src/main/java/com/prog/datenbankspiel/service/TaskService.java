@@ -3,6 +3,7 @@ package com.prog.datenbankspiel.service;
 import com.prog.datenbankspiel.dto.task.TaskDragAndDropDto;
 import com.prog.datenbankspiel.dto.task.TaskQueryDto;
 import com.prog.datenbankspiel.dto.task.TaskTestDto;
+import com.prog.datenbankspiel.dto.task.TopicDto;
 import com.prog.datenbankspiel.model.task.*;
 
 import java.util.List;

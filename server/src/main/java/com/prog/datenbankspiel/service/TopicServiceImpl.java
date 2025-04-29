@@ -1,6 +1,7 @@
 package com.prog.datenbankspiel.service;
 
 
+import com.prog.datenbankspiel.dto.task.TopicDto;
 import com.prog.datenbankspiel.model.task.Topic;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.repository.task.TopicRepository;
@@ -18,7 +19,9 @@ public class TopicServiceImpl implements TopicService {
     private TopicRepository topicRepository;
 
     @Override
-    public Topic createTopic(Topic topic) {
+    public Topic createTopic(TopicDto topicDto) {
+        Topic topic = new Topic();
+        topic.setName(topicDto.getName());
         return topicRepository.save(topic);
     }
 
@@ -31,11 +34,6 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<Topic> getAllTopics() {
         return topicRepository.findAll();
-    }
-
-    @Override
-    public List<Topic> getTopicsByDifficulty(LevelDifficulty difficulty) {
-        return topicRepository.findByDifficulty(difficulty);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.prog.datenbankspiel.service;
 
-import com.prog.datenbankspiel.dto.task.TaskDragAndDropDto;
-import com.prog.datenbankspiel.dto.task.TaskQueryDto;
-import com.prog.datenbankspiel.dto.task.TaskTestDto;
-import com.prog.datenbankspiel.dto.task.TestAnswerDto;
+import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
