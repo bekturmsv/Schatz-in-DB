@@ -1,12 +1,10 @@
 package com.prog.datenbankspiel.controller;
 
 import com.prog.datenbankspiel.dto.task.*;
-import com.prog.datenbankspiel.model.task.AbstractTask;
-import com.prog.datenbankspiel.model.task.TaskDragAndDrop;
-import com.prog.datenbankspiel.model.task.TaskQuery;
-import com.prog.datenbankspiel.model.task.TaskTest;
+import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.service.PlayerService;
 import com.prog.datenbankspiel.service.TaskService;
+import com.prog.datenbankspiel.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +21,15 @@ public class TaskController {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private TopicService topicService;
+
+    @PostMapping("/create/topic")
+    public ResponseEntity<Topic> createTopic(@RequestBody TopicDto topicDto) {
+        Topic topic = topicService.createTopic(topicDto);
+        return ResponseEntity.ok(topic);
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/query")
@@ -70,6 +77,31 @@ public class TaskController {
     @GetMapping
     public ResponseEntity<List<AbstractTask>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
+    }
+
+    @GetMapping("/topic")
+    public ResponseEntity<List<AbstractTask>> getTasksByTopic(@RequestParam Long topicId) {
+        return ResponseEntity.ok(taskService.getTasksByTopic());
+    }
+
+    @GetMapping("/difficulty")
+    public ResponseEntity<List<AbstractTask>> getTasksByDifficulty(@RequestParam String difficulty) {
+        return ResponseEntity.ok(taskService.getTasksByDifficulty());
+    }
+
+    @GetMapping("/level")
+    public ResponseEntity<List<AbstractTask>> getTasksByLevel(@RequestParam Long levelId) {
+        return ResponseEntity.ok(taskService.getTasksByLevel());
+    }
+
+    @GetMapping("/level/topic")
+    public ResponseEntity<List<AbstractTask>> getTasksByLevelAndTopic(@RequestParam Long levelId, @RequestParam Long topicId) {
+        return ResponseEntity.ok(taskService.getTasksByLevelAndTopic());
+    }
+
+    @GetMapping("/finished")
+    public ResponseEntity<List<AbstractTask>> getFinishedTasks(@RequestParam Long userId) {
+        return ResponseEntity.ok(taskService.getFinishedTasks());
     }
 
     @GetMapping("/query/{id}")
