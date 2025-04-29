@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface LevelRepository extends JpaRepository<Level, Long> {
 
-    List<Level> findByDifficulty(LevelDifficulty difficulty);
+    Level findByDifficulty(LevelDifficulty difficulty);
+
+    boolean existsByDifficulty(LevelDifficulty difficulty);
 }

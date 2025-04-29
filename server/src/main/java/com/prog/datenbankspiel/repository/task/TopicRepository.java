@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    List<Topic> findByDifficulty(LevelDifficulty difficulty);
+    List<Topic> findByLevelDifficulty(LevelDifficulty difficulty);
+
+    boolean existsByNameAndDifficulty(String name, LevelDifficulty difficulty);
 }

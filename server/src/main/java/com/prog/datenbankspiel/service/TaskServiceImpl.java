@@ -4,13 +4,16 @@ import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
+import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.repository.task.AbstractTaskRepository;
+import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -18,10 +21,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private AbstractTaskRepository taskRepository;
+    @Autowired
+    private ProgressRepository progressRepository;
 
     @Autowired
     private TopicService topicService;
-
     @Autowired
     private LevelService levelService;
 
@@ -80,6 +84,46 @@ public class TaskServiceImpl implements TaskService {
     public List<AbstractTask> getAllTasks() {
         return taskRepository.findAll();
     }
+
+    @Override
+    public List<AbstractTask> getTasksByTopic(Long topicId) {
+        return taskRepository.findAll().stream()
+                .filter(task -> task.getTopic() != null && task.getTopic().getId().equals(topicId))
+                .toList();
+    }
+
+    @Override
+    public List<AbstractTask> getTasksByDifficulty(String difficulty) {
+        LevelDifficulty diff = LevelDifficulty.valueOf(difficulty.toUpperCase());
+        return taskRepository.findAll().stream()
+                .filter(task -> task.getDifficulty() == diff)
+                .toList();
+    }
+
+    @Override
+    public List<AbstractTask> getTasksByLevel(Long levelId) {
+        return taskRepository.findAll().stream()
+                .filter(task -> task.getLevel() != null && task.getLevel().getId().equals(levelId))
+                .toList();
+    }
+
+    @Override
+    public List<AbstractTask> getTasksByLevelAndTopic(Long levelId, Long topicId) {
+        return taskRepository.findAll().stream()
+                .filter(task -> task.getLevel() != null && task.getLevel().getId().equals(levelId))
+                .filter(task -> task.getTopic() != null && task.getTopic().getId().equals(topicId))
+                .toList();
+    }
+
+    @Override
+    public List<AbstractTask> getFinishedTasks(Long userId) {
+        Progress progress = progressRepository.findByUserId(userId);
+        Set<Long> completedIds = progress.getCompletedTaskIds();
+        return taskRepository.findAll().stream()
+                .filter(task -> completedIds.contains(task.getId()))
+                .toList();
+    }
+
 
 
     private void fillCommonFields(AbstractTask task, TaskType taskType, String title, String description, Long points, LevelDifficulty difficulty, Long topicId, Long levelId) {

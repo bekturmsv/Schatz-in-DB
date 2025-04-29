@@ -22,6 +22,11 @@ public interface TaskService {
 
     List<AbstractTask> getAllTasks();
 
+    List<AbstractTask> getTasksByTopic(Long topicId);
+    List<AbstractTask> getTasksByDifficulty(String difficulty);
+    List<AbstractTask> getTasksByLevel(Long levelId);
+    List<AbstractTask> getTasksByLevelAndTopic(Long levelId, Long topicId);
+    List<AbstractTask> getFinishedTasks(Long userId);
 }
 
 

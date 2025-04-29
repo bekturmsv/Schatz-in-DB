@@ -14,9 +14,15 @@ public class Topic {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private LevelDifficulty difficulty;
+
     private String name;
 
     @OneToMany(mappedBy = "topic")
     private List<AbstractTask> tasks;
 
+    @ManyToOne
+    @JoinColumn(name = "level_id")
+    private Level level;
 }
