@@ -1,18 +1,27 @@
 package com.prog.datenbankspiel.model.task;
 
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.model.task.enums.TaskType;
 import com.prog.datenbankspiel.model.user.Progress;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Data
 public abstract class AbstractTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private TaskType taskType;
+
+    private String title;
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "topic_id")

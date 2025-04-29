@@ -2,8 +2,10 @@ package com.prog.datenbankspiel.model.task;
 
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class Topic {
 
     @Id
