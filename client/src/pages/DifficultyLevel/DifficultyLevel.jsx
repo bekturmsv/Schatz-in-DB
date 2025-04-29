@@ -32,7 +32,7 @@ export default function DifficultyLevel() {
             {diff.label}
               {completedLevels[diff.key] && (
                   <span className={"absolute right-2 top-1/2 transform-y-1/2"}>
-                      ✅
+                      ✅ testing
                   </span>
               )}
           </button>
