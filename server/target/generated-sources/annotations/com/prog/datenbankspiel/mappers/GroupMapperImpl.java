@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-04-28T15:57:52+0200",
-    comments = "version: 1.6.1, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
+    date = "2025-04-30T22:50:25+0200",
+    comments = "version: 1.6.1, compiler: javac, environment: Java 21.0.5 (Oracle Corporation)"
 )
 @Component
 public class GroupMapperImpl implements GroupMapper {
@@ -24,6 +24,7 @@ public class GroupMapperImpl implements GroupMapper {
 
         groupDto.setId( group.getId() );
         groupDto.setName( group.getName() );
+        groupDto.setCode( group.getCode() );
 
         return groupDto;
     }
@@ -39,5 +40,14 @@ public class GroupMapperImpl implements GroupMapper {
         group.setName( request.getName() );
 
         return group;
+    }
+
+    @Override
+    public void update(CreateGroupRequest request, Group group) {
+        if ( request == null ) {
+            return;
+        }
+
+        group.setName( request.getName() );
     }
 }

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-04-28T15:57:52+0200",
-    comments = "version: 1.6.1, compiler: javac, environment: Java 22.0.2 (Oracle Corporation)"
+    date = "2025-04-30T22:50:25+0200",
+    comments = "version: 1.6.1, compiler: javac, environment: Java 21.0.5 (Oracle Corporation)"
 )
 @Component
 public class TeacherMapperImpl implements TeacherMapper {
@@ -25,8 +25,6 @@ public class TeacherMapperImpl implements TeacherMapper {
         teacherDto.id( teacher.getId() );
         teacherDto.username( teacher.getUsername() );
         teacherDto.email( teacher.getEmail() );
-        teacherDto.first_name( teacher.getFirstName() );
-        teacherDto.last_name( teacher.getLastName() );
         teacherDto.subject( teacher.getSubject() );
 
         return teacherDto.build();
@@ -43,10 +41,20 @@ public class TeacherMapperImpl implements TeacherMapper {
         teacher.setUsername( request.getUsername() );
         teacher.setPassword( request.getPassword() );
         teacher.setEmail( request.getEmail() );
-        teacher.setFirstName( request.getFirst_name() );
-        teacher.setLastName( request.getLast_name() );
         teacher.setSubject( request.getSubject() );
 
         return teacher;
+    }
+
+    @Override
+    public void update(RegisterTeacherRequest request, Teacher teacher) {
+        if ( request == null ) {
+            return;
+        }
+
+        teacher.setUsername( request.getUsername() );
+        teacher.setPassword( request.getPassword() );
+        teacher.setEmail( request.getEmail() );
+        teacher.setSubject( request.getSubject() );
     }
 }

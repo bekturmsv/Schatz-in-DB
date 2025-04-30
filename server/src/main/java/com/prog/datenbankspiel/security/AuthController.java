@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.security;
 
+import com.prog.datenbankspiel.model.user.Player;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.user.UserRepository;
@@ -47,7 +48,15 @@ public class AuthController {
             return ResponseEntity.status(403).body("Forbidden: Cannot register as ADMIN");
         }
 
-        User newUser = new User();
+        Roles role = Roles.valueOf(registerRequest.getRole().toUpperCase());
+        User newUser;
+
+        if (role == Roles.PLAYER) {
+            Player player = new Player();
+            newUser = player;
+        } else {
+            newUser = new User();
+        }
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         newUser.setEmail(registerRequest.getEmail());
