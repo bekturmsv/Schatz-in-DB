@@ -1,95 +1,76 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { mockUser } from "@/data/mockUser";
-import { toast } from "sonner";
-import { setUser, setToken } from "@/features/auth/authSlice";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { setUser, setToken } from '../../features/auth/authSlice';
+import { getUser } from '../../data/mockUser';
 
 export default function SignIn() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      if (
-        formData.email === mockUser.email &&
-        formData.password === mockUser.password
-      ) {
-        dispatch(
-          setUser({
-            nickname: mockUser.nickname,
-            points: mockUser.points,
-            purchasedThemes: mockUser.purchasedThemes,
-            email: mockUser.email,
-            firstname: mockUser.firstname,
-            lastname: mockUser.lastname,
-          })
-        );
-        dispatch(setToken("mock-jwt-token"));
-        toast.success("Logged in successfully!");
-        navigate("/");
-      } else {
-        toast.error("Invalid email or password.");
-      }
-      setIsLoading(false);
-    }, 1000);
+  const handleLogin = () => {
+    const user = getUser();
+    if (user.email === email && user.password === password) {
+      dispatch(setUser(user));
+      dispatch(setToken('mock-token'));
+      toast.success(t('loginSuccess'));
+      navigate('/');
+    } else {
+      toast.error(t('loginFailed'));
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-sm">
-        <h2 className="text-3xl font-bold text-center mb-6">SIGN IN</h2>
-        <form onSubmit={handleSubmit}>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
+        <h1 className="text-4xl font-bold mb-8 text-black uppercase">{t('signIn')}</h1>
+        <div className="bg-gray-300 p-8 rounded-lg shadow-md w-full max-w-md">
           <div className="mb-4">
+            <label className="block text-black text-lg mb-2" htmlFor="email">
+              {t('email')}
+            </label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder={t("email")}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder={t('enterEmail')}
             />
           </div>
           <div className="mb-6">
+            <label className="block text-black text-lg mb-2" htmlFor="password">
+              {t('password')}
+            </label>
             <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={t("password")}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder={t('enterPassword')}
             />
           </div>
           <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition disabled:opacity-50"
+              onClick={handleLogin}
+              className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition"
           >
-            {isLoading ? "Loading..." : t("signIn")}
+            {t('signIn')}
           </button>
-        </form>
-        <p className="mt-4 text-center text-sm">
-          {t("noAccount")}{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">
-            {t("register")}
-          </Link>
-        </p>
+          <p className="mt-4 text-center text-black">
+            {t('dontHaveAccount')}{' '}
+            <span
+                className="text-green-500 hover:underline cursor-pointer"
+                onClick={() => navigate('/register')}
+            >
+            {t('signUp')}
+          </span>
+          </p>
+        </div>
       </div>
-    </div>
   );
 }

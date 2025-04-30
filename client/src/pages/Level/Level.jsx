@@ -1,70 +1,97 @@
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-
-// Моковые данные для уровней сложности
-const levelData = {
-  easy: {
-    title: "easyLevel",
-    description: "This is the easy level with basic SQL tasks.",
-    tasks: [
-      { id: 1, name: "SELECT Basics", completed: false },
-      { id: 2, name: "Simple JOIN", completed: false },
-    ],
-  },
-  medium: {
-    title: "mediumLevel",
-    description: "This is the medium level with intermediate SQL tasks.",
-    tasks: [
-      { id: 1, name: "Complex JOINs", completed: false },
-      { id: 2, name: "WHERE Clauses", completed: false },
-    ],
-  },
-  hard: {
-    title: "hardLevel",
-    description: "This is the hard level with advanced SQL tasks.",
-    tasks: [
-      { id: 1, name: "GROUP BY Challenges", completed: false },
-      { id: 2, name: "Subqueries", completed: false },
-    ],
-  },
-};
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import mockTasks from '../../data/mockTasks';
+import { getUser } from '../../data/mockUser.js';
 
 export default function Level() {
-  const { difficulty } = useParams(); // Извлекаем уровень сложности из URL
-  const { t } = useTranslation();
+    const { difficulty } = useParams();
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // Проверяем, существует ли уровень
-  const level = levelData[difficulty.toLowerCase()];
-  if (!level) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
-        <h1 className="text-4xl font-bold text-black uppercase">
-          {t("levelNotFound")}
-        </h1>
-      </div>
+    // Проверяем авторизацию
+    if (!isAuthenticated) {
+        navigate('/login');
+        return null;
+    }
+
+    // Получаем данные пользователя
+    const user = getUser();
+    const completedTasks = user.completedTasks[difficulty.toLowerCase()] || [];
+    const isLevelCompleted = user.completedLevels[difficulty.toLowerCase()];
+    const userTasks = user.tasks.filter((task) => task.type.toLowerCase() === difficulty.toLowerCase());
+
+    // Получаем данные уровня
+    const level = mockTasks[difficulty.toLowerCase()];
+    if (!level) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
+                <h1 className="text-4xl font-bold text-black uppercase">
+                    {t('levelNotFound')}
+                </h1>
+            </div>
+        );
+    }
+
+    // Проверяем, все ли обычные задачи завершены
+    const allRegularTasksCompleted = level.regularTasks.every((task) =>
+        completedTasks.includes(task.id)
     );
-  }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
-      <h1 className="text-4xl font-bold text-black uppercase mb-4">
-        {t(level.title)}
-      </h1>
-      <p className="text-lg text-gray-700 mb-6">{level.description}</p>
-      <div className="w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">{t("tasks")}</h2>
-        <ul className="space-y-2">
-          {level.tasks.map((task) => (
-            <li
-              key={task.id}
-              className="bg-gray-300 p-4 rounded-lg text-black flex justify-between items-center"
-            >
-              <span>{task.name}</span>
-              <span>{task.completed ? "✅" : "⬜"}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
+    const handleTaskClick = (taskId) => {
+        navigate(`/level/${difficulty}/task/${taskId}`);
+    };
+
+    const handleFinalTestClick = () => {
+        if (allRegularTasksCompleted) {
+            navigate(`/level/${difficulty}/final-test`);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
+            <h1 className="text-4xl font-bold text-black uppercase mb-4">
+                {t(`${difficulty.toLowerCase()}Level`)}
+            </h1>
+            <p className="text-lg text-gray-700 mb-6">
+                {t(`${difficulty.toLowerCase()}Description`)}
+            </p>
+            <div className="w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-4">{t('tasks')}</h2>
+                <ul className="space-y-2">
+                    {level.regularTasks.map((task) => (
+                        <li
+                            key={task.id}
+                            className="bg-gray-300 p-4 rounded-lg text-black flex justify-between items-center cursor-pointer hover:bg-gray-400 transition"
+                            onClick={() => handleTaskClick(task.id)}
+                        >
+                            <span>{task.name}</span>
+                            <span>{completedTasks.includes(task.id) || isLevelCompleted ? '✅' : '⬜'}</span>
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-4">
+                    <h3 className="text-xl font-bold">{t('progress')}</h3>
+                    {userTasks.map((task, index) => (
+                        <p key={index} className="text-gray-700">
+                            {task.theme}: {task.completed}/{task.total} {t('tasksCompleted')}
+                        </p>
+                    ))}
+                </div>
+                <button
+                    onClick={handleFinalTestClick}
+                    className={`mt-4 flex items-center justify-center space-x-2 py-2 px-4 rounded-lg transition ${
+                        allRegularTasksCompleted && !isLevelCompleted
+                            ? 'bg-yellow-500 text-black hover:bg-yellow-600'
+                            : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                    }`}
+                    disabled={!allRegularTasksCompleted || isLevelCompleted}
+                >
+                    <span>{t('finalTest')}</span>
+                    {!allRegularTasksCompleted && <span>🔒</span>}
+                </button>
+            </div>
+        </div>
+    );
 }

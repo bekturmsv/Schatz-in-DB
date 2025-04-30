@@ -14,6 +14,8 @@ import Profile from "./pages/Profile/Profile";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
 import DifficultyLevel from "./pages/DifficultyLevel/DifficultyLevel";
 import Level from "./pages/Level/Level";
+import Task from "@/pages/Task/Task.jsx";
+import FinalTest from "@/pages/FinalTest/FinalTest.jsx";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +57,22 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "/level/:difficulty/task/:taskId",
+        element: (
+            <ProtectedRoute>
+              <Task/>
+            </ProtectedRoute>
+        )
+      },
+      {
+        path: "level/:difficulty/final-test",
+        element: (
+            <ProtectedRoute>
+              <FinalTest/>
+            </ProtectedRoute>
+        )
+      }
     ],
   },
 ]);
