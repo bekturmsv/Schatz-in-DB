@@ -4,6 +4,7 @@ import com.prog.datenbankspiel.model.user.Player;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
+import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import com.prog.datenbankspiel.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public class AuthController {
     private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ProgressRepository progressRepository;
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
@@ -56,10 +58,22 @@ public class AuthController {
 
         if (role == Roles.PLAYER) {
             Player player = new Player();
+            player.setUsername(registerRequest.getUsername());
+            player.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            player.setEmail(registerRequest.getEmail());
+            player.setFirstName(registerRequest.getFirstName());
+            player.setLastName(registerRequest.getLastName());
+            player.setRole(Roles.PLAYER);
             player.setTotal_points(0L);
+            player.setLevel_id(1L);
+            player.setDesign("default");
+
             Progress progress = new Progress();
             progress.setUser(player);
+            progress.setCurrentLevelId(1L);
+            progress.setCompletedTaskIds(new HashSet<>());
             player.setProgress(progress);
+
             newUser = player;
         } else {
             newUser = new User();

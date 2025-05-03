@@ -11,7 +11,7 @@ public class LevelRequest {
     private LevelDifficulty difficulty;
 
     private List<AbstractTaskRequest> tasks;
-    private List<CreateTaskTestRequest> testTasks;
+    private List<TaskTestRequest> testTasks;
 }
 
 

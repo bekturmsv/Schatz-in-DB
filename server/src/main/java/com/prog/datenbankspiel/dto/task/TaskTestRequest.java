@@ -5,5 +5,5 @@ import java.util.List;
 public class TaskTestRequest extends AbstractTaskRequest{
     private String question;
     private Long timeLimit;
-    private List<CreateTestAnswerRequest> answers;
+    private List<TestAnswerRequest> answers;
 }
