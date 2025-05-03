@@ -24,8 +24,6 @@ public class Progress {
 
     private Set<Long> completedTaskIds = new HashSet<>();
 
-    private LevelDifficulty difficulty;
-
-    private Long current_task;
+    private Long currentLevelId;
 
 }

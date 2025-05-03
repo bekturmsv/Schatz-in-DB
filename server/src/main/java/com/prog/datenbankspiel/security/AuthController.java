@@ -1,6 +1,7 @@
 package com.prog.datenbankspiel.security;
 
 import com.prog.datenbankspiel.model.user.Player;
+import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.user.UserRepository;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashSet;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -53,6 +56,10 @@ public class AuthController {
 
         if (role == Roles.PLAYER) {
             Player player = new Player();
+            player.setTotal_points(0L);
+            Progress progress = new Progress();
+            progress.setUser(player);
+            player.setProgress(progress);
             newUser = player;
         } else {
             newUser = new User();

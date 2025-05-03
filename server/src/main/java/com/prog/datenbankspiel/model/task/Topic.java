@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.model.task;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class Topic {
     private String name;
 
     @OneToMany(mappedBy = "topic")
+    @JsonIgnore
     private List<AbstractTask> tasks;
 
     @ManyToOne

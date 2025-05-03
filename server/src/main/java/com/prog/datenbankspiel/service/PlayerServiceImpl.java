@@ -4,14 +4,17 @@ import com.prog.datenbankspiel.dto.task.PlayerDragAndDropAnswerDto;
 import com.prog.datenbankspiel.dto.task.PlayerQueryAnswerDto;
 import com.prog.datenbankspiel.dto.task.PlayerTestAnswerDto;
 import com.prog.datenbankspiel.model.task.*;
+import com.prog.datenbankspiel.model.user.Player;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.repository.task.AbstractTaskRepository;
+import com.prog.datenbankspiel.repository.user.PlayerRepository;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -22,6 +25,8 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private ProgressRepository progressRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     @Override
     public boolean submitQuerySolution(PlayerQueryAnswerDto solutionDto, Long playerId) {
@@ -33,6 +38,7 @@ public class PlayerServiceImpl implements PlayerService {
         boolean correct = checkQuerySolution((TaskQuery) task, solutionDto.getQueryAnswer());
         if (correct) {
             updateProgress(playerId, task);
+
         }
         return correct;
     }
@@ -92,8 +98,12 @@ public class PlayerServiceImpl implements PlayerService {
 
     private void updateProgress(Long playerId, AbstractTask task) {
         Progress progress = progressRepository.findByUserId(playerId);
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Player not found with id: " + playerId));
         progress.getCompletedTaskIds().add(task.getId());
+        player.setTotal_points(player.getTotal_points() + task.getPoints());
         progressRepository.save(progress);
+        playerRepository.save(player);
     }
 }
 

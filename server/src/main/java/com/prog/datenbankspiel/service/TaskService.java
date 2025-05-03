@@ -1,33 +1,33 @@
 package com.prog.datenbankspiel.service;
 
-import com.prog.datenbankspiel.dto.task.TaskDragAndDropDto;
-import com.prog.datenbankspiel.dto.task.TaskQueryDto;
-import com.prog.datenbankspiel.dto.task.TaskTestDto;
-import com.prog.datenbankspiel.dto.task.TopicDto;
+import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 
 import java.util.List;
 
 public interface TaskService {
 
-    TaskQuery createTaskQuery(TaskQueryDto taskQueryDto);
+    // --- Task Creation ---
+    TaskQuery createTaskQuery(TaskQueryDto dto);
+    TaskTest createTaskTest(TaskTestDto dto);
+    TaskDragAndDrop createTaskDragAndDrop(TaskDragAndDropDto dto);
 
-    TaskTest createTaskTest(TaskTestDto taskTestDto);
-
-    TaskDragAndDrop createTaskDragAndDrop(TaskDragAndDropDto taskDragAndDropDto);
-
+    // --- Task Access / Queries ---
+    AbstractTask getTaskById(Long id);
+    List<AbstractTask> getAllTasks();
     void deleteTask(Long id);
 
-    AbstractTask getTaskById(Long id);
-
-    List<AbstractTask> getAllTasks();
-
+    // --- Filtering ---
     List<AbstractTask> getTasksByTopic(Long topicId);
     List<AbstractTask> getTasksByDifficulty(String difficulty);
     List<AbstractTask> getTasksByLevel(Long levelId);
-    List<AbstractTask> getTasksByLevelAndTopic(Long levelId, Long topicId);
     List<AbstractTask> getFinishedTasks(Long userId);
+
+    // --- DTO-based Responses ---
+    List<AbstractTaskDto> getLevelTaskQueryAndDragAndDrop(Long levelId);
+    List<TaskTestDto> getLevelTests(Long levelId);
 }
+
 
 
 

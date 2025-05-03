@@ -6,20 +6,10 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TaskDragAndDropDto {
-
-    private String title;
-    private String description;
-    private Long points;
-    private LevelDifficulty difficulty;
-    private Long topicId;
-    private Long levelId;
-
+public class TaskDragAndDropDto extends AbstractTaskDto {
     private String setupText;
-
     private String correctText;
-
     private List<String> words;
-
 }
+
 

@@ -6,19 +6,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TaskTestDto {
-
-    private String title;
-    private String description;
-    private Long points;
-    private LevelDifficulty difficulty;
-    private Long topicId;
-    private Long levelId;
-
+public class TaskTestDto extends AbstractTaskDto {
     private String question;
     private Long timeLimit;
-
     private List<TestAnswerDto> answers;
 }
+
 
 

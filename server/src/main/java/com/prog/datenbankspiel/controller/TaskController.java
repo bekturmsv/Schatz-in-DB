@@ -35,9 +35,9 @@ public class TaskController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/topic")
-    public ResponseEntity<Topic> createTopic(@RequestBody TopicDto topicDto) {
+    public ResponseEntity<TopicDto> createTopic(@RequestBody TopicDto topicDto) {
         Topic topic = topicService.createTopic(topicDto);
-        return ResponseEntity.ok(topic);
+        return ResponseEntity.ok(topicDto);
     }
 
     /**
@@ -165,20 +165,6 @@ public class TaskController {
     @GetMapping("/level")
     public ResponseEntity<List<AbstractTask>> getTasksByLevel(@RequestParam Long levelId) {
         return ResponseEntity.ok(taskService.getTasksByLevel(levelId));
-    }
-
-    /**
-     * Retrieve tasks by level ID and topic ID.
-     *
-     * @param levelId ID of the level.
-     * @param topicId ID of the topic.
-     * @return List of tasks matching both level and topic.
-     */
-    @GetMapping("/level/topic")
-    public ResponseEntity<List<AbstractTask>> getTasksByLevelAndTopic(
-            @RequestParam Long levelId,
-            @RequestParam Long topicId) {
-        return ResponseEntity.ok(taskService.getTasksByLevelAndTopic(levelId, topicId));
     }
 
     /**

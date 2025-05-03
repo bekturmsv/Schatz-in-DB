@@ -6,8 +6,12 @@ import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.repository.task.AbstractTaskRepository;
+import com.prog.datenbankspiel.repository.task.TaskDragAndDropRepository;
+import com.prog.datenbankspiel.repository.task.TaskQueryRepository;
+import com.prog.datenbankspiel.repository.task.TaskTestRepository;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,57 +21,61 @@ import java.util.Set;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-    @Autowired
-    private AbstractTaskRepository taskRepository;
-    @Autowired
-    private ProgressRepository progressRepository;
+    private final AbstractTaskRepository taskRepository;
+    private final ProgressRepository progressRepository;
+    private final TaskQueryRepository taskQueryRepository;
+    private final TaskDragAndDropRepository taskDragAndDropRepository;
+    private final TaskTestRepository taskTestRepository;
 
-    @Autowired
-    private TopicService topicService;
-    @Autowired
-    private LevelService levelService;
+    private final TopicService topicService;
+    private final LevelService levelService;
+
+    // ----------- Create Tasks -----------
 
     @Override
     public TaskQuery createTaskQuery(TaskQueryDto dto) {
         TaskQuery task = new TaskQuery();
-        fillCommonFields(task, TaskType.TASK_QUERY ,dto.getTitle(), dto.getDescription(), dto.getPoints(), dto.getDifficulty(), dto.getTopicId(), dto.getLevelId());
+        fillCommonFields(task, TaskType.TASK_QUERY, dto);
         task.setSetupSql(dto.getSetupSql());
         task.setRightAnswer(dto.getRightAnswer());
+        addHintIfExists(task, dto.getHint());
         return taskRepository.save(task);
     }
 
     @Override
     public TaskTest createTaskTest(TaskTestDto dto) {
         TaskTest task = new TaskTest();
-        fillCommonFields(task, TaskType.TEST, dto.getTitle(), dto.getDescription(), dto.getPoints(), dto.getDifficulty(), dto.getTopicId(), dto.getLevelId());
+        fillCommonFields(task, TaskType.TEST, dto);
         task.setQuestion(dto.getQuestion());
         task.setTimeLimit(dto.getTimeLimit());
 
-        List<TestAnswer> answers = new ArrayList<>();
-        for (TestAnswerDto answerDto : dto.getAnswers()) {
+        task.setAnswers(dto.getAnswers().stream().map(answerDto -> {
             TestAnswer answer = new TestAnswer();
             answer.setAnswerText(answerDto.getAnswerText());
             answer.setCorrect(answerDto.isCorrect());
             answer.setTaskTest(task);
-            answers.add(answer);
-        }
-        task.setAnswers(answers);
+            return answer;
+        }).toList());
+
+        addHintIfExists(task, dto.getHint());
         return taskRepository.save(task);
     }
-
 
     @Override
     public TaskDragAndDrop createTaskDragAndDrop(TaskDragAndDropDto dto) {
         TaskDragAndDrop task = new TaskDragAndDrop();
-        fillCommonFields(task, TaskType.DRAG_AND_DROP, dto.getTitle(), dto.getDescription(), dto.getPoints(), dto.getDifficulty(), dto.getTopicId(), dto.getLevelId());
+        fillCommonFields(task, TaskType.DRAG_AND_DROP, dto);
         task.setSetupText(dto.getSetupText());
         task.setCorrectText(dto.getCorrectText());
         task.setWords(dto.getWords());
+        addHintIfExists(task, dto.getHint());
         return taskRepository.save(task);
     }
 
+    // ----------- Queries -----------
 
     @Override
     public void deleteTask(Long id) {
@@ -108,32 +116,96 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<AbstractTask> getTasksByLevelAndTopic(Long levelId, Long topicId) {
+    public List<AbstractTask> getFinishedTasks(Long userId) {
+        Progress progress = progressRepository.findByUserId(userId);
         return taskRepository.findAll().stream()
-                .filter(task -> task.getLevel() != null && task.getLevel().getId().equals(levelId))
-                .filter(task -> task.getTopic() != null && task.getTopic().getId().equals(topicId))
+                .filter(task -> progress.getCompletedTaskIds().contains(task.getId()))
                 .toList();
+    }
+
+    // ----------- DTO Responses -----------
+
+    @Override
+    public List<AbstractTaskDto> getLevelTaskQueryAndDragAndDrop(Long levelId) {
+        List<AbstractTaskDto> dtos = new ArrayList<>();
+        dtos.addAll(taskQueryRepository.findByLevel_Id(levelId).stream().map(this::mapToQueryDto).toList());
+        dtos.addAll(taskDragAndDropRepository.findByLevel_Id(levelId).stream().map(this::mapToDragDto).toList());
+        return dtos;
     }
 
     @Override
-    public List<AbstractTask> getFinishedTasks(Long userId) {
-        Progress progress = progressRepository.findByUserId(userId);
-        Set<Long> completedIds = progress.getCompletedTaskIds();
-        return taskRepository.findAll().stream()
-                .filter(task -> completedIds.contains(task.getId()))
+    public List<TaskTestDto> getLevelTests(Long levelId) {
+        return taskTestRepository.findByLevel_Id(levelId).stream()
+                .map(this::mapToTaskTestDto)
                 .toList();
     }
 
+    // ----------- Dto/Mappers -----------
 
+    private void fillCommonFields(AbstractTask task, TaskType type, AbstractTaskDto dto) {
+        task.setTaskType(type);
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setPoints(dto.getPoints());
+        task.setDifficulty(dto.getDifficulty());
+        task.setTopic(topicService.getTopicById(dto.getTopicId()));
+        task.setLevel(levelService.getLevelById(dto.getLevelId()));
+    }
 
-    private void fillCommonFields(AbstractTask task, TaskType taskType, String title, String description, Long points, LevelDifficulty difficulty, Long topicId, Long levelId) {
-        task.setTaskType(taskType);
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setPoints(points);
-        task.setDifficulty(difficulty);
-        task.setTopic(topicService.getTopicById(topicId));
-        task.setLevel(levelService.getLevelById(levelId));
+    private void addHintIfExists(AbstractTask task, HintDto hintDto) {
+        if (hintDto != null && hintDto.getText() != null && !hintDto.getText().isBlank()) {
+            Hint hint = new Hint();
+            hint.setText(hintDto.getText());
+            hint.setTask(task);
+            task.setHint(hint);
+        }
+    }
+
+    private void fillCommonDtoFields(AbstractTaskDto dto, AbstractTask task) {
+        dto.setId(task.getId());
+        dto.setTitle(task.getTitle());
+        dto.setDescription(task.getDescription());
+        dto.setPoints(task.getPoints());
+        dto.setDifficulty(task.getDifficulty());
+        dto.setTaskType(task.getTaskType());
+        if (task.getLevel() != null) dto.setLevelId(task.getLevel().getId());
+        if (task.getTopic() != null) dto.setTopicId(task.getTopic().getId());
+        if (task.getHint() != null) {
+            HintDto hintDto = new HintDto();
+            hintDto.setId(task.getHint().getId());
+            hintDto.setText(task.getHint().getText());
+            dto.setHint(hintDto);
+        }
+    }
+
+    private TaskQueryDto mapToQueryDto(TaskQuery task) {
+        TaskQueryDto dto = new TaskQueryDto();
+        fillCommonDtoFields(dto, task);
+        dto.setSetupSql(task.getSetupSql());
+        dto.setRightAnswer(task.getRightAnswer());
+        return dto;
+    }
+
+    private TaskDragAndDropDto mapToDragDto(TaskDragAndDrop task) {
+        TaskDragAndDropDto dto = new TaskDragAndDropDto();
+        fillCommonDtoFields(dto, task);
+        dto.setSetupText(task.getSetupText());
+        dto.setCorrectText(task.getCorrectText());
+        dto.setWords(task.getWords());
+        return dto;
+    }
+
+    private TaskTestDto mapToTaskTestDto(TaskTest task) {
+        TaskTestDto dto = new TaskTestDto();
+        fillCommonDtoFields(dto, task);
+        dto.setQuestion(task.getQuestion());
+        dto.setTimeLimit(task.getTimeLimit());
+        dto.setAnswers(task.getAnswers().stream().map(answer -> {
+            TestAnswerDto a = new TestAnswerDto();
+            a.setAnswerText(answer.getAnswerText());
+            a.setCorrect(answer.isCorrect());
+            return a;
+        }).toList());
+        return dto;
     }
 }
-

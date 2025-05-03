@@ -1,19 +1,16 @@
 package com.prog.datenbankspiel.service;
 
+import com.prog.datenbankspiel.dto.task.LevelDto;
 import com.prog.datenbankspiel.model.task.Level;
 
 import java.util.List;
 
 public interface LevelService {
-
-    Level createLevel(Level level);
-
+    List<LevelDto> getAllLevels();
+    LevelDto selectLevel(Long levelId, Long userId);
+    LevelDto getLevelDtoById(Long id);
     Level getLevelById(Long id);
-
-    List<Level> getAllLevels();
-
-    Level updateLevel(Long id, Level updatedLevel);
-
-    void deleteLevel(Long id);
-
+    LevelDto deleteLevel(Long id);
 }
+
+
