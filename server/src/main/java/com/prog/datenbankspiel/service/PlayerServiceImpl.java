@@ -1,8 +1,8 @@
 package com.prog.datenbankspiel.service;
 
-import com.prog.datenbankspiel.dto.task.PlayerDragAndDropAnswerDto;
-import com.prog.datenbankspiel.dto.task.PlayerQueryAnswerDto;
-import com.prog.datenbankspiel.dto.task.PlayerTestAnswerDto;
+import com.prog.datenbankspiel.dto.task.SubmitDragAndDropRequest;
+import com.prog.datenbankspiel.dto.task.SubmitQueryRequest;
+import com.prog.datenbankspiel.dto.task.SubmitTestRequest;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.user.Player;
 import com.prog.datenbankspiel.model.user.Progress;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -22,14 +21,13 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private AbstractTaskRepository taskRepository;
-
     @Autowired
     private ProgressRepository progressRepository;
     @Autowired
     private PlayerRepository playerRepository;
 
     @Override
-    public boolean submitQuerySolution(PlayerQueryAnswerDto solutionDto, Long playerId) {
+    public boolean submitQuerySolution(SubmitQueryRequest solutionDto, Long playerId) {
         AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
         if (!(task instanceof TaskQuery)) {
@@ -38,19 +36,18 @@ public class PlayerServiceImpl implements PlayerService {
         boolean correct = checkQuerySolution((TaskQuery) task, solutionDto.getQueryAnswer());
         if (correct) {
             updateProgress(playerId, task);
-
         }
         return correct;
     }
 
     @Override
-    public boolean submitTestSolution(PlayerTestAnswerDto solutionDto, Long playerId) {
+    public boolean submitTestSolution(SubmitTestRequest solutionDto, Long playerId) {
         AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
         if (!(task instanceof TaskTest)) {
             throw new RuntimeException("Task is not a TaskTest");
         }
-        boolean correct = checkTestSolution((TaskTest) task, solutionDto.getSelectedAnswers());
+        boolean correct = checkTestSolution((TaskTest) task, solutionDto.getSelectedAnswersId());
         if (correct) {
             updateProgress(playerId, task);
         }
@@ -58,7 +55,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public boolean submitDragAndDropSolution(PlayerDragAndDropAnswerDto solutionDto, Long playerId) {
+    public boolean submitDragAndDropSolution(SubmitDragAndDropRequest solutionDto, Long playerId) {
         AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
         if (!(task instanceof TaskDragAndDrop)) {
@@ -76,7 +73,7 @@ public class PlayerServiceImpl implements PlayerService {
         return playerSolution.trim().equalsIgnoreCase(taskQuery.getRightAnswer().trim());
     }
 
-    private boolean checkTestSolution(TaskTest taskTest, List<String> playerAnswers) {
+    private boolean checkTestSolution(TaskTest taskTest, List<Long> playerAnswers) {
         if (playerAnswers == null || playerAnswers.isEmpty()) return false;
         List<String> correctAnswers = taskTest.getAnswers().stream()
                 .filter(TestAnswer::isCorrect)
@@ -85,6 +82,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .map(String::toLowerCase)
                 .toList();
         List<String> submittedAnswers = playerAnswers.stream()
+                .map(String::valueOf)
                 .map(String::trim)
                 .map(String::toLowerCase)
                 .toList();

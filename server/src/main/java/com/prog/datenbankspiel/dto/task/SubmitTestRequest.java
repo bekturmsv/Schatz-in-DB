@@ -5,8 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PlayerTestAnswerDto {
+public class SubmitTestRequest {
     private Long taskId;
-    private List<String> selectedAnswers;
+    private List<Long> selectedAnswersId;
 }
 

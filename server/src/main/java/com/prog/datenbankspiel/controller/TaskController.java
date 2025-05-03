@@ -5,7 +5,6 @@ import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.service.PlayerService;
 import com.prog.datenbankspiel.service.TaskService;
 import com.prog.datenbankspiel.service.TopicService;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,27 +29,27 @@ public class TaskController {
      * Create a new topic.
      * Requires ADMIN role.
      *
-     * @param topicDto DTO containing topic details.
+     * @param createTopicRequest DTO containing topic details.
      * @return Created topic.
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/topic")
-    public ResponseEntity<TopicDto> createTopic(@RequestBody TopicDto topicDto) {
-        Topic topic = topicService.createTopic(topicDto);
-        return ResponseEntity.ok(topicDto);
+    public ResponseEntity<CreateTopicRequest> createTopic(@RequestBody CreateTopicRequest createTopicRequest) {
+        Topic topic = topicService.createTopic(createTopicRequest);
+        return ResponseEntity.ok(createTopicRequest);
     }
 
     /**
      * Create a new TaskQuery.
      * Requires ADMIN role.
      *
-     * @param taskQueryDto DTO containing task query details.
+     * @param createTaskQueryRequest DTO containing task query details.
      * @return Created TaskQuery.
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/query")
-    public ResponseEntity<TaskQuery> createTaskQuery(@RequestBody TaskQueryDto taskQueryDto) {
-        TaskQuery task = taskService.createTaskQuery(taskQueryDto);
+    public ResponseEntity<TaskQuery> createTaskQuery(@RequestBody CreateTaskQueryRequest createTaskQueryRequest) {
+        TaskQuery task = taskService.createTaskQuery(createTaskQueryRequest);
         return ResponseEntity.ok(task);
     }
 
@@ -58,13 +57,13 @@ public class TaskController {
      * Create a new TaskTest.
      * Requires ADMIN role.
      *
-     * @param taskTestDto DTO containing task test details.
+     * @param createTaskTestRequest DTO containing task test details.
      * @return Created TaskTest.
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/test")
-    public ResponseEntity<TaskTest> createTaskTest(@RequestBody TaskTestDto taskTestDto) {
-        TaskTest task = taskService.createTaskTest(taskTestDto);
+    public ResponseEntity<TaskTest> createTaskTest(@RequestBody CreateTaskTestRequest createTaskTestRequest) {
+        TaskTest task = taskService.createTaskTest(createTaskTestRequest);
         return ResponseEntity.ok(task);
     }
 
@@ -72,13 +71,13 @@ public class TaskController {
      * Create a new TaskDragAndDrop.
      * Requires ADMIN role.
      *
-     * @param taskDragAndDropDto DTO containing drag-and-drop task details.
+     * @param createTaskDragAndDropRequest DTO containing drag-and-drop task details.
      * @return Created TaskDragAndDrop.
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/dragdrop")
-    public ResponseEntity<TaskDragAndDrop> createTaskDragAndDrop(@RequestBody TaskDragAndDropDto taskDragAndDropDto) {
-        TaskDragAndDrop task = taskService.createTaskDragAndDrop(taskDragAndDropDto);
+    public ResponseEntity<TaskDragAndDrop> createTaskDragAndDrop(@RequestBody CreateTaskDragAndDropRequest createTaskDragAndDropRequest) {
+        TaskDragAndDrop task = taskService.createTaskDragAndDrop(createTaskDragAndDropRequest);
         return ResponseEntity.ok(task);
     }
 
@@ -92,7 +91,7 @@ public class TaskController {
     @PostMapping("/submit/query/{playerId}")
     public ResponseEntity<Boolean> submitQueryAnswer(
             @PathVariable Long playerId,
-            @RequestBody PlayerQueryAnswerDto dto) {
+            @RequestBody SubmitQueryRequest dto) {
         return ResponseEntity.ok(playerService.submitQuerySolution(dto, playerId));
     }
 
@@ -106,7 +105,7 @@ public class TaskController {
     @PostMapping("/submit/dragdrop/{playerId}")
     public ResponseEntity<Boolean> submitDragAndDropAnswer(
             @PathVariable Long playerId,
-            @RequestBody PlayerDragAndDropAnswerDto dto) {
+            @RequestBody SubmitDragAndDropRequest dto) {
         return ResponseEntity.ok(playerService.submitDragAndDropSolution(dto, playerId));
     }
 
@@ -120,7 +119,7 @@ public class TaskController {
     @PostMapping("/submit/test/{playerId}")
     public ResponseEntity<Boolean> submitTestAnswer(
             @PathVariable Long playerId,
-            @RequestBody PlayerTestAnswerDto dto) {
+            @RequestBody SubmitTestRequest dto) {
         return ResponseEntity.ok(playerService.submitTestSolution(dto, playerId));
     }
 

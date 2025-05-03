@@ -8,9 +8,9 @@ import java.util.List;
 public interface TaskService {
 
     // --- Task Creation ---
-    TaskQuery createTaskQuery(TaskQueryDto dto);
-    TaskTest createTaskTest(TaskTestDto dto);
-    TaskDragAndDrop createTaskDragAndDrop(TaskDragAndDropDto dto);
+    TaskQuery createTaskQuery(CreateTaskQueryRequest dto);
+    TaskTest createTaskTest(CreateTaskTestRequest dto);
+    TaskDragAndDrop createTaskDragAndDrop(CreateTaskDragAndDropRequest dto);
 
     // --- Task Access / Queries ---
     AbstractTask getTaskById(Long id);
@@ -24,8 +24,8 @@ public interface TaskService {
     List<AbstractTask> getFinishedTasks(Long userId);
 
     // --- DTO-based Responses ---
-    List<AbstractTaskDto> getLevelTaskQueryAndDragAndDrop(Long levelId);
-    List<TaskTestDto> getLevelTests(Long levelId);
+    List<AbstractTaskRequest> getLevelTaskQueryAndDragAndDrop(Long levelId);
+    List<CreateTaskTestRequest> getLevelTests(Long levelId);
 }
 
 

@@ -12,12 +12,10 @@ import com.prog.datenbankspiel.repository.task.TaskTestRepository;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -36,7 +34,7 @@ public class TaskServiceImpl implements TaskService {
     // ----------- Create Tasks -----------
 
     @Override
-    public TaskQuery createTaskQuery(TaskQueryDto dto) {
+    public TaskQuery createTaskQuery(CreateTaskQueryRequest dto) {
         TaskQuery task = new TaskQuery();
         fillCommonFields(task, TaskType.TASK_QUERY, dto);
         task.setSetupSql(dto.getSetupSql());
@@ -46,10 +44,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskTest createTaskTest(TaskTestDto dto) {
+    public TaskTest createTaskTest(CreateTaskTestRequest dto) {
         TaskTest task = new TaskTest();
         fillCommonFields(task, TaskType.TEST, dto);
-        task.setQuestion(dto.getQuestion());
         task.setTimeLimit(dto.getTimeLimit());
 
         task.setAnswers(dto.getAnswers().stream().map(answerDto -> {
@@ -65,7 +62,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDragAndDrop createTaskDragAndDrop(TaskDragAndDropDto dto) {
+    public TaskDragAndDrop createTaskDragAndDrop(CreateTaskDragAndDropRequest dto) {
         TaskDragAndDrop task = new TaskDragAndDrop();
         fillCommonFields(task, TaskType.DRAG_AND_DROP, dto);
         task.setSetupText(dto.getSetupText());
@@ -126,15 +123,15 @@ public class TaskServiceImpl implements TaskService {
     // ----------- DTO Responses -----------
 
     @Override
-    public List<AbstractTaskDto> getLevelTaskQueryAndDragAndDrop(Long levelId) {
-        List<AbstractTaskDto> dtos = new ArrayList<>();
+    public List<AbstractTaskRequest> getLevelTaskQueryAndDragAndDrop(Long levelId) {
+        List<AbstractTaskRequest> dtos = new ArrayList<>();
         dtos.addAll(taskQueryRepository.findByLevel_Id(levelId).stream().map(this::mapToQueryDto).toList());
         dtos.addAll(taskDragAndDropRepository.findByLevel_Id(levelId).stream().map(this::mapToDragDto).toList());
         return dtos;
     }
 
     @Override
-    public List<TaskTestDto> getLevelTests(Long levelId) {
+    public List<CreateTaskTestRequest> getLevelTests(Long levelId) {
         return taskTestRepository.findByLevel_Id(levelId).stream()
                 .map(this::mapToTaskTestDto)
                 .toList();
@@ -142,7 +139,7 @@ public class TaskServiceImpl implements TaskService {
 
     // ----------- Dto/Mappers -----------
 
-    private void fillCommonFields(AbstractTask task, TaskType type, AbstractTaskDto dto) {
+    private void fillCommonFields(AbstractTask task, TaskType type, AbstractTaskRequest dto) {
         task.setTaskType(type);
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
@@ -152,16 +149,16 @@ public class TaskServiceImpl implements TaskService {
         task.setLevel(levelService.getLevelById(dto.getLevelId()));
     }
 
-    private void addHintIfExists(AbstractTask task, HintDto hintDto) {
-        if (hintDto != null && hintDto.getText() != null && !hintDto.getText().isBlank()) {
+    private void addHintIfExists(AbstractTask task, HintRequest hintRequest) {
+        if (hintRequest != null && hintRequest.getText() != null && !hintRequest.getText().isBlank()) {
             Hint hint = new Hint();
-            hint.setText(hintDto.getText());
+            hint.setText(hintRequest.getText());
             hint.setTask(task);
             task.setHint(hint);
         }
     }
 
-    private void fillCommonDtoFields(AbstractTaskDto dto, AbstractTask task) {
+    private void fillCommonDtoFields(AbstractTaskRequest dto, AbstractTask task) {
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
@@ -171,23 +168,23 @@ public class TaskServiceImpl implements TaskService {
         if (task.getLevel() != null) dto.setLevelId(task.getLevel().getId());
         if (task.getTopic() != null) dto.setTopicId(task.getTopic().getId());
         if (task.getHint() != null) {
-            HintDto hintDto = new HintDto();
-            hintDto.setId(task.getHint().getId());
-            hintDto.setText(task.getHint().getText());
-            dto.setHint(hintDto);
+            HintRequest hintRequest = new HintRequest();
+            hintRequest.setId(task.getHint().getId());
+            hintRequest.setText(task.getHint().getText());
+            dto.setHint(hintRequest);
         }
     }
 
-    private TaskQueryDto mapToQueryDto(TaskQuery task) {
-        TaskQueryDto dto = new TaskQueryDto();
+    private CreateTaskQueryRequest mapToQueryDto(TaskQuery task) {
+        CreateTaskQueryRequest dto = new CreateTaskQueryRequest();
         fillCommonDtoFields(dto, task);
         dto.setSetupSql(task.getSetupSql());
         dto.setRightAnswer(task.getRightAnswer());
         return dto;
     }
 
-    private TaskDragAndDropDto mapToDragDto(TaskDragAndDrop task) {
-        TaskDragAndDropDto dto = new TaskDragAndDropDto();
+    private CreateTaskDragAndDropRequest mapToDragDto(TaskDragAndDrop task) {
+        CreateTaskDragAndDropRequest dto = new CreateTaskDragAndDropRequest();
         fillCommonDtoFields(dto, task);
         dto.setSetupText(task.getSetupText());
         dto.setCorrectText(task.getCorrectText());
@@ -195,13 +192,12 @@ public class TaskServiceImpl implements TaskService {
         return dto;
     }
 
-    private TaskTestDto mapToTaskTestDto(TaskTest task) {
-        TaskTestDto dto = new TaskTestDto();
+    private CreateTaskTestRequest mapToTaskTestDto(TaskTest task) {
+        CreateTaskTestRequest dto = new CreateTaskTestRequest();
         fillCommonDtoFields(dto, task);
-        dto.setQuestion(task.getQuestion());
         dto.setTimeLimit(task.getTimeLimit());
         dto.setAnswers(task.getAnswers().stream().map(answer -> {
-            TestAnswerDto a = new TestAnswerDto();
+            CreateTestAnswerRequest a = new CreateTestAnswerRequest();
             a.setAnswerText(answer.getAnswerText());
             a.setCorrect(answer.isCorrect());
             return a;

@@ -3,7 +3,7 @@ package com.prog.datenbankspiel.dto.task;
 import lombok.Data;
 
 @Data
-public class PlayerQueryAnswerDto {
+public class SubmitQueryRequest {
     private Long taskId;
     private String queryAnswer;
 }

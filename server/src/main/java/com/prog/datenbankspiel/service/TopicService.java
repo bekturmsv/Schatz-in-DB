@@ -1,14 +1,13 @@
 package com.prog.datenbankspiel.service;
 
-import com.prog.datenbankspiel.dto.task.TopicDto;
-import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.dto.task.CreateTopicRequest;
 import com.prog.datenbankspiel.model.task.Topic;
 
 import java.util.List;
 
 public interface TopicService {
 
-    Topic createTopic(TopicDto topicDto);
+    Topic createTopic(CreateTopicRequest createTopicRequest);
 
     Topic getTopicById(Long id);
 

@@ -6,12 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class LevelDto {
+public class LevelRequest {
     private Long id;
     private LevelDifficulty difficulty;
 
-    private List<AbstractTaskDto> tasks;       // Optional: for combined TaskQuery/Drag
-    private List<TaskTestDto> testTasks;        // Optional: for test tasks only
+    private List<AbstractTaskRequest> tasks;
+    private List<CreateTaskTestRequest> testTasks;
 }
 
 

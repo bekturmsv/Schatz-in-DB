@@ -22,6 +22,7 @@ public class TopicInitializer {
     public void initializeTopics() {
         addTopicIfNotExists("SELECT Basics", LevelDifficulty.EASY);
         addTopicIfNotExists("JOINs and Filtering", LevelDifficulty.MEDIUM);
+        addTopicIfNotExists("DEPENDENCIES", LevelDifficulty.HARD);
     }
 
     private void addTopicIfNotExists(String name, LevelDifficulty difficulty) {

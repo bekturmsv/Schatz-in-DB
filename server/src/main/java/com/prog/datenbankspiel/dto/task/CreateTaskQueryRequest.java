@@ -1,10 +1,9 @@
 package com.prog.datenbankspiel.dto.task;
 
-import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import lombok.Data;
 
 @Data
-public class TaskQueryDto extends AbstractTaskDto {
+public class CreateTaskQueryRequest extends AbstractTaskRequest {
     private String setupSql;
     private String rightAnswer;
 }

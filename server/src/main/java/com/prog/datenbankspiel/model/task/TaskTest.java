@@ -10,8 +10,6 @@ import java.util.List;
 @Data
 public class TaskTest extends AbstractTask {
 
-    private String question;
-
     private Long timeLimit;
 
     @OneToMany(mappedBy = "taskTest", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -5,7 +5,7 @@ import com.prog.datenbankspiel.model.task.enums.TaskType;
 import lombok.Data;
 
 @Data
-public abstract class AbstractTaskDto {
+public abstract class AbstractTaskRequest {
     private Long id;
     private String title;
     private String description;
@@ -15,6 +15,6 @@ public abstract class AbstractTaskDto {
     private Long topicId;
     private Long levelId;
 
-    private HintDto hint;
+    private HintRequest hint;
 }
 
