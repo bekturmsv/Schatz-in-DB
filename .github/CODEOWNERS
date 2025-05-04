@@ -1,5 +1,5 @@
-- @bekturmsv
+.github/ @bekturmsv
 
-frontend/ @bekturmsv
+client/ @bekturmsv
 
-backend/ @bermetzz @ChingizKartanbaev
+server/ @bermetzz @ChingizKartanbaev
