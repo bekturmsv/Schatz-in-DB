@@ -11,6 +11,9 @@ public interface LevelService {
     LevelRequest finishLevel(Long levelId, Long userId);
     LevelRequest getLevelDtoById(Long id);
     Level getLevelById(Long id);
+
+    Long getLevelIdByProgress(Long userId);
+
     LevelRequest deleteLevel(Long id);
 }
 

@@ -12,4 +12,7 @@ public interface PlayerService {
 
     boolean submitDragAndDropSolution(SubmitDragAndDropRequest solutionDto, Long playerId);
 
+    Long getUserIdByUsername(String username);
+
+    boolean isTaskFinished(Long userId, Long taskId);
 }

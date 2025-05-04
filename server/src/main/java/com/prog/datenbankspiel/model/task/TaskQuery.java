@@ -1,6 +1,5 @@
 package com.prog.datenbankspiel.model.task;
 
-import com.prog.datenbankspiel.model.task.enums.TaskType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,8 +8,10 @@ import lombok.Data;
 @Data
 public class TaskQuery extends AbstractTask {
 
-    private String setupSql;
+    @Column(columnDefinition = "TEXT")
+    private String setupQuery;
 
+    @Column(columnDefinition = "TEXT")
     private String rightAnswer;
 
 }

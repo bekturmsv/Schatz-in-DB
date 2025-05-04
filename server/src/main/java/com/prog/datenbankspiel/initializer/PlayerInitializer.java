@@ -27,7 +27,7 @@ public class PlayerInitializer {
 
     @PostConstruct
     public void init() {
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 10; i++) {
             String username = "player" + i;
 
             if (userRepository.findByUsername(username).isEmpty()) {

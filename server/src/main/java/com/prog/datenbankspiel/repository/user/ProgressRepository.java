@@ -8,4 +8,5 @@ public interface ProgressRepository extends JpaRepository<Progress, Long>  {
 
     Progress findByUserId(Long playerId);
 
+    boolean existsByUser_IdAndCompletedTaskIdsContains(Long userId, Long taskId);
 }

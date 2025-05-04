@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/task")
@@ -184,8 +185,8 @@ public class TaskController {
      * @return Task details.
      */
     @GetMapping("/query/{id}")
-    public ResponseEntity<AbstractTask> getTaskQueryById(@PathVariable Long id) {
-        return ResponseEntity.ok(taskService.getTaskById(id));
+    public ResponseEntity<AbstractTaskRequest> getTaskQueryById(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getTaskQueryById(id));
     }
 
     /**
@@ -208,6 +209,23 @@ public class TaskController {
     @GetMapping("/dragdrop/{id}")
     public ResponseEntity<AbstractTask> getTaskDragAndDropById(@PathVariable Long id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
+    }
+
+    /**
+     * Retrieve all topics.
+     *
+     * @return Topics
+     */
+    @GetMapping("/all-topics")
+    public ResponseEntity<List<TopicRequest>> getAllTopics() {
+        List<TopicRequest> topics = topicService.getAllTopics().stream().map(topic -> {
+            TopicRequest dto = new TopicRequest();
+            dto.setTopicId(topic.getId());
+            dto.setName(topic.getName());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(topics);
     }
 
     /**

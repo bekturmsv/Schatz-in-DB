@@ -22,6 +22,7 @@ public class Progress {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ElementCollection
     private Set<Long> completedTaskIds = new HashSet<>();
 
     private Long currentLevelId;

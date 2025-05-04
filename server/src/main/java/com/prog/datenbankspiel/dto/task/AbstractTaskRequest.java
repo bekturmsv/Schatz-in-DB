@@ -13,8 +13,10 @@ public abstract class AbstractTaskRequest {
     private LevelDifficulty difficulty;
     private TaskType taskType;
     private Long topicId;
+    private String topicName;
     private Long levelId;
+    private boolean finished;
 
-    private HintRequest hint;
+    private String hint;
 }
 

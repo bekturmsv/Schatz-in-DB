@@ -18,6 +18,5 @@ public class TaskDragAndDrop extends AbstractTask {
 
     private String correctText;
 
-    @ElementCollection
     private List<String> words;
 }

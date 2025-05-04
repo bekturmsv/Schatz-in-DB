@@ -21,6 +21,8 @@ public abstract class AbstractTask {
     private TaskType taskType;
 
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne

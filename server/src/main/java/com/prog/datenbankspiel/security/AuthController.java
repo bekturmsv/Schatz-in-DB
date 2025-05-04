@@ -7,6 +7,7 @@ import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import com.prog.datenbankspiel.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +31,6 @@ public class AuthController {
     private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final ProgressRepository progressRepository;
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
@@ -49,6 +49,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Username already exists. Please choose another one.");
+        }
         if (registerRequest.getRole().equalsIgnoreCase("ADMIN")) {
             return ResponseEntity.status(403).body("Forbidden: Cannot register as ADMIN");
         }

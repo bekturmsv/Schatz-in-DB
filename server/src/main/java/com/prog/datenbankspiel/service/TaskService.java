@@ -14,6 +14,9 @@ public interface TaskService {
 
     // --- Task Access / Queries ---
     AbstractTask getTaskById(Long id);
+
+    AbstractTaskRequest getTaskQueryById(Long id);
+
     List<AbstractTask> getAllTasks();
     void deleteTask(Long id);
 
@@ -25,7 +28,7 @@ public interface TaskService {
 
     // --- DTO-based Responses ---
     List<AbstractTaskRequest> getLevelTaskQueryAndDragAndDrop(Long levelId);
-    List<CreateTaskTestRequest> getLevelTests(Long levelId);
+    List<TaskTestRequest> getLevelTests(Long levelId);
 }
 
 

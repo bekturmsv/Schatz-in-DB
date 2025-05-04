@@ -27,4 +27,5 @@ public class Topic {
     @ManyToOne
     @JoinColumn(name = "level_id")
     private Level level;
+
 }

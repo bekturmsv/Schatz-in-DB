@@ -9,7 +9,9 @@ import com.prog.datenbankspiel.repository.task.LevelRepository;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -55,7 +57,10 @@ public class LevelServiceImpl implements LevelService {
                 .toList();
         // Check if user has completed all
         if (!completed.containsAll(levelTaskIds)) {
-            throw new RuntimeException("Not all tasks for level " + levelId + " are completed.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Not All Tasks Finished"
+            );
         }
         // Try to find next level
         Optional<Level> nextLevelOpt = levelRepository.findById(levelId + 1);
@@ -72,8 +77,6 @@ public class LevelServiceImpl implements LevelService {
         return toDto(currentLevel);
     }
 
-
-
     @Override
     public LevelRequest getLevelDtoById(Long id) {
         Level level = levelRepository.findById(id)
@@ -87,6 +90,16 @@ public class LevelServiceImpl implements LevelService {
                 .orElseThrow(() -> new RuntimeException("Level not found with id: " + id));
         return level;
     }
+
+    @Override
+    public Long getLevelIdByProgress(Long userId) {
+        Progress progress = progressRepository.findByUserId(userId);
+        if (progress == null || progress.getCurrentLevelId() == null) {
+            throw new RuntimeException("No progress or level found for user ID: " + userId);
+        }
+        return progress.getCurrentLevelId();
+    }
+
 
     @Override
     public LevelRequest deleteLevel(Long id) {

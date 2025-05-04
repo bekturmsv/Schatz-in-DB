@@ -11,6 +11,7 @@ import com.prog.datenbankspiel.repository.user.PlayerRepository;
 import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -68,6 +69,18 @@ public class PlayerServiceImpl implements PlayerService {
         return correct;
     }
 
+    @Override
+    public Long getUserIdByUsername(String username) {
+        Player player = playerRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Player not found: " + username));
+        return player.getId();
+    }
+
+    @Override
+    public boolean isTaskFinished(Long userId, Long taskId) {
+        return progressRepository.existsByUser_IdAndCompletedTaskIdsContains(userId, taskId);
+    }
+
     private boolean checkQuerySolution(TaskQuery taskQuery, String playerSolution) {
         if (playerSolution == null) return false;
         return playerSolution.trim().equalsIgnoreCase(taskQuery.getRightAnswer().trim());
@@ -103,5 +116,8 @@ public class PlayerServiceImpl implements PlayerService {
         progressRepository.save(progress);
         playerRepository.save(player);
     }
+
+
+
 }
 
