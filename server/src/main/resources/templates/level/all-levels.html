@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Datenbankspiel</title>
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/Navbar-Right-Links-icons.css">
+    <link rel="stylesheet" href="/assets/css/Responsive-Full-Width-Grid-from-codedrops.css">
+</head>
+<body>
+<nav class="navbar navbar-light navbar-expand-md py-3">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/thymeleaf/">
+            <span class="bs-icon-sm bs-icon-rounded bs-icon-primary me-2 bs-icon"></span>
+            <span>Datenbankspiel</span>
+        </a>
+        <div class="collapse navbar-collapse" id="navcol-2">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/thymeleaf/user/data">PersonalData</a></li>
+            </ul>
+            <a class="btn btn-primary ms-md-2" role="button" href="/thymeleaf/user/auth">LogOut</a>
+        </div>
+    </div>
+</nav>
+
+<section class="position-relative py-4 py-xl-5">
+    <div class="container position-relative">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+                <div class="card mb-5">
+                    <div class="card-body p-sm-5">
+                        <h2 class="text-center mb-4">Levels</h2>
+                        <form method="post" id="level-list-form">
+                            <!-- Dynamically filled by JS -->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const container = document.getElementById("level-list-form");
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch("/api/level/levels", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Failed to load levels");
+            const levels = await response.json();
+
+            levels.forEach(level => {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <a class="btn btn-primary d-block w-100 mb-3" href="/thymeleaf/level?id=${level.id}">
+                        ${level.difficulty}
+                    </a>`;
+                container.appendChild(div);
+            });
+        } catch (err) {
+            console.error("Error loading levels:", err);
+            const div = document.createElement("div");
+            div.innerText = "Could not load levels.";
+            container.appendChild(div);
+        }
+    });
+</script>
+
+<script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -31,7 +31,7 @@ public class TaskInitializer {
     @PostConstruct
     public void init() {
         try {
-            importTasksFromCsv("src/main/resources/tasks.csv");
+            importTasksFromCsv("src/main/resources/tasks_random.csv");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (CsvException e) {
