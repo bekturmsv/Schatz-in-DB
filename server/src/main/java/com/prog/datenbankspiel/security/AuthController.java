@@ -1,10 +1,10 @@
 package com.prog.datenbankspiel.security;
 
+import com.prog.datenbankspiel.mappers.UserMapper;
 import com.prog.datenbankspiel.model.user.Player;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
-import com.prog.datenbankspiel.repository.user.ProgressRepository;
 import com.prog.datenbankspiel.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +31,8 @@ public class AuthController {
     private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
@@ -48,12 +50,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body("Username already exists. Please choose another one.");
         }
+
         if (registerRequest.getRole().equalsIgnoreCase("ADMIN")) {
             return ResponseEntity.status(403).body("Forbidden: Cannot register as ADMIN");
         }
@@ -82,18 +85,17 @@ public class AuthController {
             newUser = player;
         } else {
             newUser = new User();
+            newUser.setUsername(registerRequest.getUsername());
+            newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            newUser.setEmail(registerRequest.getEmail());
+            newUser.setFirstName(registerRequest.getFirstName());
+            newUser.setLastName(registerRequest.getLastName());
+            newUser.setRole(role);
         }
-        newUser.setUsername(registerRequest.getUsername());
-        newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        newUser.setEmail(registerRequest.getEmail());
-        newUser.setFirstName(registerRequest.getFirstName());
-        newUser.setLastName(registerRequest.getLastName());
-
-        newUser.setRole(Roles.valueOf(registerRequest.getRole().toUpperCase()));
 
         userRepository.save(newUser);
 
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(userMapper.toDto(newUser));
     }
 
 }
