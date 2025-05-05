@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import {setTheme} from "@/features/theme/themeSlice.js";
 
 const initialState = {
   user: null,
@@ -26,4 +27,10 @@ const authSlice = createSlice({
 });
 
 export const { setUser, setToken, logout } = authSlice.actions;
+
+export const logoutUser = () => async (dispatch) => {
+  dispatch(logout());
+  dispatch(setTheme("default"));
+}
+
 export default authSlice.reducer;

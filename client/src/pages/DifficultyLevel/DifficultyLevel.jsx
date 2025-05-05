@@ -18,7 +18,7 @@ export default function DifficultyLevel() {
     ];
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
+        <div className="min-h-screen flex flex-col items-center justify-center  font-mono">
             <h1 className="text-4xl font-bold mb-8 text-black uppercase">
                 {t('difficultyLevel')}
             </h1>

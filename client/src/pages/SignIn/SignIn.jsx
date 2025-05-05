@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { setUser, setToken } from '../../features/auth/authSlice';
 import { getUser } from '../../data/mockUser';
+import {setTheme} from "@/features/theme/themeSlice.js";
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export default function SignIn() {
     if (user.email === email && user.password === password) {
       dispatch(setUser(user));
       dispatch(setToken('mock-token'));
+      dispatch(setTheme(user.currentTheme))
       toast.success(t('loginSuccess'));
       navigate('/');
     } else {

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* —— default —— */
-@theme {
+/* —— Default Theme —— */
+:root {
   --color-primary: #60a5fa;
   --color-secondary: #10b981;
   --color-background: #ffffff;
@@ -9,19 +9,16 @@
   --bg-image: url("/assets/images/theme1/background.jpg");
 }
 
-/* —— 1 —— */
-@media (prefers-color-scheme: dark) {
-  :root,
-  [data-theme="dark"] {
-    --color-primary: #60a5fa;
-    --color-secondary: #34d399;
-    --color-background: #1f2937;
-    --font-family: "Roboto", sans-serif;
-    --bg-image: url("/assets/images/theme2/background.jpg");
-  }
+/* —— Dark Theme —— */
+[data-theme="dark"] {
+  --color-primary: #60a5fa;
+  --color-secondary: #34d399;
+  --color-background: #1f2937;
+  --font-family: "Roboto", sans-serif;
+  --bg-image: url("/assets/images/theme2/background.jpg");
 }
 
-/* —— 2 —— */
+/* —— Retro Theme —— */
 [data-theme="retro"] {
   --color-primary: #f87171;
   --color-secondary: #facc15;
@@ -30,7 +27,25 @@
   --bg-image: url("/assets/images/theme3/background.jpg");
 }
 
-/* —— global base layer —— */
+/* —— Ocean Theme —— */
+[data-theme="ocean"] {
+  --color-primary: #0288d1;
+  --color-secondary: #4caf50;
+  --color-background: #e0f7fa;
+  --font-family: "Roboto", sans-serif;
+  --bg-image: url("/assets/images/ocean-bg.jpg");
+}
+
+/* —— Forest Theme —— */
+[data-theme="forest"] {
+  --color-primary: #4caf50;
+  --color-secondary: #ff6f61;
+  --color-background: #e8f5e9;
+  --font-family: "Bungee Inline", sans-serif;
+  --bg-image: url("/assets/images/forest-bg.jpg");
+}
+
+/* —— Global Base Layer —— */
 @layer base {
   html {
     background-color: var(--color-background);
@@ -39,5 +54,30 @@
     background-image: var(--bg-image);
     background-size: cover;
     background-repeat: no-repeat;
+    background-position: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+  }
+
+  nav {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+  }
+
+  footer {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+  }
+
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
   }
 }
