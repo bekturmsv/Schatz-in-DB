@@ -35,5 +35,14 @@
   "tasksSolved": "tasks solved",
   "type": "TYPE",
   "theme": "THEME",
-  "styles": "Styles"
+  "styles": "Styles",
+  "buy": "Buy",
+  "purchased": "Purchased",
+  "notEnoughPoints": "Not enough points!",
+  "themeAlreadyPurchased": "Theme already purchased!",
+  "themePurchased": "Theme {{theme}} purchased successfully!",
+  "select": "Select",
+  "selected": "Selected",
+  "themeNotPurchased": "Theme not purchased!",
+  "themeSelected": "Theme {{theme}} selected successfully!"
 }

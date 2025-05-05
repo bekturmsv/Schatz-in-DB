@@ -16,6 +16,8 @@ import DifficultyLevel from "./pages/DifficultyLevel/DifficultyLevel";
 import Level from "./pages/Level/Level";
 import Task from "@/pages/Task/Task.jsx";
 import FinalTest from "@/pages/FinalTest/FinalTest.jsx";
+import Topics from "@/pages/Topics/Topics.jsx";
+import TopicDetail from "@/pages/TopicDetails/TopicDetails.jsx";
 
 const router = createBrowserRouter([
   {
@@ -72,7 +74,15 @@ const router = createBrowserRouter([
               <FinalTest/>
             </ProtectedRoute>
         )
+      },
+      {path: "/training",
+      element: <Topics/>
+      },
+      {
+        path: "/training/:topicId",
+        element: <TopicDetail />
       }
+
     ],
   },
 ]);
