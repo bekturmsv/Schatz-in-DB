@@ -12,7 +12,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white font-mono">
+    <div className="min-h-screen  font-mono">
       {/* Герой-секция */}
       <section className="bg-green-400 py-16 text-center text-black">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">

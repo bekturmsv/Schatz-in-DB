@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { logout } from '../../features/auth/authSlice';
+import {logout, logoutUser} from '../../features/auth/authSlice';
 import { resetUser } from '../../data/mockUser';
 import LanguageSelector from './LanguageSelector';
 import { useState } from 'react';
@@ -15,9 +15,9 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false); // Состояние для бургер-меню
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     resetUser();
-    navigate('/login');
+    // navigate('/login');
     setIsOpen(false); // Закрываем меню при выходе
   };
 

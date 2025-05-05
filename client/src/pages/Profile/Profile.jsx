@@ -2,42 +2,39 @@ import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getUser, updateUser, availableThemes } from "../../data/mockUser";
-import { setUser } from "../../features/auth/authSlice"; // Импортируем setUser
+import { setUser } from "../../features/auth/authSlice";
+import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
-import { toast } from 'sonner'; // Для уведомлений
+import { toast } from "sonner";
 
 export default function Profile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const currentTheme = useSelector((state) => state.theme.currentTheme); // Берем тему из themeSlice
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // Проверяем авторизацию
   if (!isAuthenticated || !user) {
     navigate("/login");
     return null;
   }
 
-  // Получаем данные пользователя через getUser
   const userData = getUser();
   const progressPercentage =
       (userData.progress.tasksSolved / userData.progress.totalTasks) * 100;
 
-  // Функция покупки темы
   const handlePurchaseTheme = (theme) => {
     if (user.points < theme.price) {
-      toast.error(t('notEnoughPoints'));
+      toast.error(t("notEnoughPoints"));
       return;
     }
 
-    // Проверяем, не куплена ли тема уже
     if (user.purchasedThemes.includes(theme.id)) {
-      toast.info(t('themeAlreadyPurchased'));
+      toast.info(t("themeAlreadyPurchased"));
       return;
     }
 
-    // Обновляем данные пользователя
     const updatedPoints = user.points - theme.price;
     const updatedPurchasedThemes = [...user.purchasedThemes, theme.id];
 
@@ -47,16 +44,24 @@ export default function Profile() {
     };
 
     updateUser(updatedUser);
-    dispatch(setUser({ ...user, ...updatedUser })); // Обновляем данные в Redux
-    toast.success(t('themePurchased', { theme: theme.name }));
+    dispatch(setUser({ ...user, ...updatedUser }));
+    toast.success(t("themePurchased", { theme: theme.name }));
+  };
+
+  const handleSelectTheme = (themeId) => {
+    if (!user.purchasedThemes.includes(themeId)) {
+      toast.error(t("themeNotPurchased"));
+      return;
+    }
+
+    dispatch(setTheme(themeId)); // Меняем тему через themeSlice
+    toast.success(t("themeSelected", { theme: availableThemes.find((t) => t.id === themeId).name }));
   };
 
   return (
-      <div className="min-h-screen bg-white font-mono">
+      <div className="min-h-screen font-mono">
         <section className="container mx-auto py-12 px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8">
-            {t("myAccount")}
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-8">{t("myAccount")}</h1>
           <div className="flex flex-col md:flex-row gap-8">
             {/* Левая колонка */}
             <div className="md:w-1/3 flex flex-col items-center">
@@ -146,6 +151,26 @@ export default function Profile() {
 
               {/* Темы */}
               <h3 className="text-xl font-bold mb-4">{t("styles")}</h3>
+              <div className="mb-6">
+                <label htmlFor="theme-select" className="block mb-2">
+                  {t("select")} {t("theme")}:
+                </label>
+                <select
+                    id="theme-select"
+                    value={currentTheme}
+                    onChange={(e) => handleSelectTheme(e.target.value)}
+                    className="w-full p-2 border rounded"
+                >
+                  {user.purchasedThemes.map((themeId) => {
+                    const theme = availableThemes.find((t) => t.id === themeId);
+                    return (
+                        <option key={themeId} value={themeId}>
+                          {theme.name} {currentTheme === themeId ? `(${t("selected")})` : ""}
+                        </option>
+                    );
+                  })}
+                </select>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {availableThemes.map((theme) => (
                     <div
