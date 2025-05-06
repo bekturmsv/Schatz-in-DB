@@ -5,11 +5,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
-public class TestAnswer {
+public class StudyMaterial {
     @Id
     @GeneratedValue
     private Long id;
-    private Long player_id;
-    private Long test_id;
-    private String answer;
+    private String description;
+    private String type;
+    private String file_path;
+    private String video_url;
+    private String external_link;
+    private Long teacher_id;
 }

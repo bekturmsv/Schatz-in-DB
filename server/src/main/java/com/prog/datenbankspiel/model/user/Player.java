@@ -18,7 +18,5 @@ public class Player extends User {
     @JoinColumn(name = "group_id")
     private Group groupId;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Progress progress;
 
 }

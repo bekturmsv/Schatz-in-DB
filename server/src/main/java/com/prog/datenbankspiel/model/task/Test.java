@@ -5,11 +5,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
-public class TestAnswer {
+public class Test {
     @Id
     @GeneratedValue
     private Long id;
-    private Long player_id;
-    private Long test_id;
-    private String answer;
+    private Long level_id;
+    private String title;
+    private String description;
+    private String correct_answer;
+    private Long time;
+    private Long teacher_id;
 }

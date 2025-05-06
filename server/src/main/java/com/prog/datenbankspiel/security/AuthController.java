@@ -2,7 +2,6 @@ package com.prog.datenbankspiel.security;
 
 import com.prog.datenbankspiel.mappers.UserMapper;
 import com.prog.datenbankspiel.model.user.Player;
-import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.user.UserRepository;
@@ -75,12 +74,6 @@ public class AuthController {
             player.setTotal_points(0L);
             player.setLevel_id(1L);
             player.setDesign("default");
-
-            Progress progress = new Progress();
-            progress.setUser(player);
-            progress.setCurrentLevelId(1L);
-            progress.setCompletedTaskIds(new HashSet<>());
-            player.setProgress(progress);
 
             newUser = player;
         } else {
