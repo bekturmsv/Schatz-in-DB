@@ -1,11 +1,14 @@
 package com.prog.datenbankspiel.service;
 
+import com.prog.datenbankspiel.dto.front.AllLevelTasksDto;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 
 import java.util.List;
 
 public interface TaskService {
+
+    AllLevelTasksDto getAllTasksGrouped();
 
     // --- Task Creation ---
     TaskQuery createTaskQuery(CreateTaskQueryRequest dto);

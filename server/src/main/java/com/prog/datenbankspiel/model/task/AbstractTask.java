@@ -1,12 +1,10 @@
 package com.prog.datenbankspiel.model.task;
 
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.model.task.enums.TaskPosition;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
-import com.prog.datenbankspiel.model.user.Progress;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -19,6 +17,9 @@ public abstract class AbstractTask {
 
     @Enumerated(EnumType.STRING)
     private TaskType taskType;
+
+    @Enumerated(EnumType.STRING)
+    private TaskPosition taskPosition;
 
     private String title;
 
