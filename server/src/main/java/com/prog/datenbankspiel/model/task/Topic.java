@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.model.task;
 
+import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,7 +10,6 @@ public class Topic {
     private Long id;
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "levels_id")
-    private Level level;
+    @Enumerated(EnumType.STRING)
+    private LevelDifficulty levelDifficulty;
 }
