@@ -1,8 +1,13 @@
 package com.prog.datenbankspiel.service;
 
+import com.prog.datenbankspiel.dto.front.AllLevelTasksDto;
+import com.prog.datenbankspiel.dto.front.FinalTestTaskDto;
+import com.prog.datenbankspiel.dto.front.FinalTestWrapper;
+import com.prog.datenbankspiel.dto.front.TaskGroupDto;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.model.task.enums.TaskPosition;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.repository.task.*;
@@ -12,8 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.management.Query;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -31,6 +39,62 @@ public class TaskServiceImpl implements TaskService {
     private final TopicService topicService;
     private final LevelService levelService;
     private final PlayerService playerService;
+
+    @Override
+    public AllLevelTasksDto getAllTasksGrouped() {
+        Map<String, TaskGroupDto> levelMap = new LinkedHashMap<>();
+
+        for (LevelDifficulty difficulty : LevelDifficulty.values()) {
+            // Fetch REGULAR tasks
+            List<AbstractTask> regularTasks = taskRepository
+                    .findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.REGULAR);
+
+            // Fetch TEST tasks
+            List<AbstractTask> testTasks = taskRepository
+                    .findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.TEST);
+
+            // Map REGULAR tasks
+            List<FinalTestTaskDto> regularDtos = regularTasks.stream()
+                    .map(this::mapToFinalDto)
+                    .toList();
+
+            // Map TEST tasks
+            List<FinalTestTaskDto> testDtos = testTasks.stream()
+                    .map(this::mapToFinalDto)
+                    .toList();
+
+            // Wrap in DTOs
+            TaskGroupDto group = new TaskGroupDto();
+            group.setRegularTasks(regularDtos);
+
+            if (!testDtos.isEmpty()) {
+                FinalTestWrapper finalTest = new FinalTestWrapper();
+                finalTest.setTasks(testDtos);
+                group.setFinalTest(finalTest);
+            }
+
+            levelMap.put(difficulty.name().toLowerCase(), group);
+        }
+
+        AllLevelTasksDto allTasks = new AllLevelTasksDto();
+        allTasks.setTasks(levelMap);
+        return allTasks;
+    }
+
+
+    private FinalTestTaskDto mapToFinalDto(AbstractTask task) {
+        FinalTestTaskDto dto = new FinalTestTaskDto();
+        dto.setId(task.getId());
+        dto.setName(task.getTitle());
+        dto.setTopic(task.getTopic().getName());
+        dto.setPoints(task.getPoints());
+        dto.setDescription(task.getDescription());
+        if (task.getHint() != null) dto.setHint(task.getHint().getText());
+
+        if (task instanceof TaskQuery query) dto.setCorrectAnswer(query.getRightAnswer());
+        return dto;
+    }
+
 
     // ----------- Create Tasks -----------
 
@@ -188,6 +252,7 @@ public class TaskServiceImpl implements TaskService {
         task.setDescription(dto.getDescription());
         task.setPoints(dto.getPoints());
         task.setDifficulty(dto.getDifficulty());
+        task.setTaskPosition(dto.getTaskPosition());
 
         // First ensure we have a level
         Level level;

@@ -7,6 +7,7 @@ import com.prog.datenbankspiel.dto.task.CreateTaskTestRequest;
 import com.prog.datenbankspiel.dto.task.CreateTestAnswerRequest;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.model.task.enums.TaskPosition;
 import com.prog.datenbankspiel.repository.task.LevelRepository;
 import com.prog.datenbankspiel.repository.task.TopicRepository;
 import com.prog.datenbankspiel.service.TaskService;
@@ -32,28 +33,32 @@ public class TaskInitializer {
     public void init() {
         try {
             importTasksFromCsv("src/main/resources/tasks_random.csv");
-        } catch (IOException e) {
+        } catch (IOException | CsvException e) {
             e.printStackTrace();
-        } catch (CsvException e) {
-            throw new RuntimeException(e);
         }
     }
 
     private void importTasksFromCsv(String path) throws IOException, CsvException {
         try (CSVReader reader = new CSVReader(new FileReader(path))) {
             List<String[]> rows = reader.readAll();
-            for (int i = 1; i < rows.size(); i++) { // skip header
+            for (int i = 1; i < rows.size(); i++) { // Skip header
                 String[] parts = rows.get(i);
+                if (parts.length < 8) {
+                    System.out.println("⚠️ Skipped incomplete row: " + Arrays.toString(parts));
+                    continue;
+                }
 
                 String title = parts[0].trim();
                 String description = parts[1].trim();
-                String setupQuery = parts.length > 8 ? parts[8].trim() : "";
                 String levelStr = parts[2].trim().toUpperCase();
                 String topicName = parts[3].trim();
                 String type = parts[4].trim().toUpperCase();
                 String rightAnswer = parts[5].trim();
                 String answers = parts[6].trim();
                 String correctIndices = parts[7].trim();
+                String setupQuery = parts.length > 8 ? parts[8].trim() : "";
+                String hintText = parts.length > 9 ? parts[9].trim() : null;
+                String position = parts.length > 10 ? parts[10].trim().toUpperCase() : "REGULAR";
 
                 Level level = levelRepository.findByDifficulty(LevelDifficulty.valueOf(levelStr));
                 Topic topic = topicRepository.findByName(topicName)
@@ -65,22 +70,26 @@ public class TaskInitializer {
                             return topicRepository.save(newTopic);
                         });
 
-
-                if ("QUERY".equals(type)) {
-                    TaskQuery created = createQueryTask(title, description, rightAnswer, level, topic, setupQuery);
-                    System.out.println("Created QUERY: " + created.getTitle());
-                } else if ("TEST".equals(type)) {
-                    TaskTest created = createTestTask(title, description, answers, correctIndices, level, topic);
-                    System.out.println("Created TEST: " + created.getTitle());
-                } else {
-                    System.out.println("⚠️ Skipped unknown task type at row " + (i + 1));
+                switch (type) {
+                    case "QUERY":
+                        TaskQuery createdQuery = createQueryTask(title, description, rightAnswer, level, topic, setupQuery, hintText, position);
+                        System.out.println("✅ Created QUERY: " + createdQuery.getTitle());
+                        break;
+                    case "TEST":
+                        TaskTest createdTest = createTestTask(title, description, answers, correctIndices, level, topic, hintText);
+                        System.out.println("✅ Created TEST: " + createdTest.getTitle());
+                        break;
+                    default:
+                        System.out.println("⚠️ Skipped unknown task type at row " + (i + 1));
                 }
             }
         }
     }
 
+    private TaskQuery createQueryTask(String title, String description, String rightAnswer,
+                                      Level level, Topic topic, String setupQuery,
+                                      String hintText, String taskPosition) {
 
-    private TaskQuery createQueryTask(String title, String description, String rightAnswer, Level level, Topic topic, String setupQuery) {
         Optional<AbstractTask> existing = abstractTaskRepository.findByTitle(title);
         if (existing.isPresent()) {
             System.out.println("⚠️ Skipping existing QUERY task: " + title);
@@ -96,13 +105,18 @@ public class TaskInitializer {
         dto.setDifficulty(level.getDifficulty());
         dto.setLevelId(level.getId());
         dto.setTopicId(topic.getId());
-        return taskService.createTaskQuery(dto);
+        dto.setTaskPosition(TaskPosition.valueOf(taskPosition));
+
+        TaskQuery created = taskService.createTaskQuery(dto);
+
+        addHintIfPresent(hintText, created);
+
+        return created;
     }
 
-
-
     private TaskTest createTestTask(String title, String description, String answersRaw, String correctIndicesRaw,
-                                    Level level, Topic topic) {
+                                    Level level, Topic topic, String hintText) {
+
         Optional<AbstractTask> existing = abstractTaskRepository.findByTitle(title);
         if (existing.isPresent()) {
             System.out.println("⚠️ Skipping existing TEST task: " + title);
@@ -111,7 +125,7 @@ public class TaskInitializer {
 
         List<String> answers = Arrays.stream(answersRaw.split(","))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toList();
 
         Set<Integer> correctIndices = Arrays.stream(correctIndicesRaw.split(","))
                 .filter(s -> !s.isEmpty())
@@ -138,8 +152,22 @@ public class TaskInitializer {
         dto.setTopicId(topic.getId());
         dto.setAnswers(answerDtos);
 
-        return taskService.createTaskTest(dto);
+        TaskTest created = taskService.createTaskTest(dto);
+
+        addHintIfPresent(hintText, created);
+
+        return created;
     }
-;
+
+    private void addHintIfPresent(String hintText, AbstractTask task) {
+        if (hintText != null && !hintText.isEmpty()) {
+            Hint hint = new Hint();
+            hint.setText(hintText);
+            hint.setTask(task);
+            task.setHint(hint);
+            abstractTaskRepository.save(task); // cascade saves hint
+        }
+    }
 }
+
 

@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.controller;
 
+import com.prog.datenbankspiel.dto.front.AllLevelTasksDto;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.service.PlayerService;
@@ -25,6 +26,11 @@ public class TaskController {
 
     @Autowired
     private TopicService topicService;
+
+    @GetMapping("/all-tasks")
+    public ResponseEntity<AllLevelTasksDto> getAllTasksGrouped() {
+        return ResponseEntity.ok(taskService.getAllTasksGrouped());
+    }
 
     /**
      * Create a new topic.
