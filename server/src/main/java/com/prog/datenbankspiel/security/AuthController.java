@@ -133,7 +133,6 @@ public class AuthController {
             playerMap.put("name", player.getFirstName() + " " + player.getLastName());
             playerMap.put("firstname", player.getFirstName());
             playerMap.put("lastname", player.getLastName());
-            playerMap.put("nickname", player.getUsername());
             playerMap.put("points", player.getTotal_points());
             playerMap.put("purchasedThemes", player.getPurchasedThemes());
             playerMap.put("currentTheme", player.getCurrentTheme());
