@@ -15,7 +15,7 @@ public class Hint {
 
     @OneToOne
     @JoinColumn(name = "task_id")
-    private AbstractTask task;
+    private Task task;
 
 }
 

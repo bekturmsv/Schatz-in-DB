@@ -22,7 +22,7 @@ public class Topic {
 
     @OneToMany(mappedBy = "topic")
     @JsonIgnore
-    private List<AbstractTask> tasks;
+    private List<Task> tasks;
 
     @ManyToOne
     @JoinColumn(name = "level_id")

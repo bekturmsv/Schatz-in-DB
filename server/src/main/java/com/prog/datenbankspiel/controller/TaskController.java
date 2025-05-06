@@ -33,6 +33,23 @@ public class TaskController {
     }
 
     /**
+     * Retrieve all topics.
+     *
+     * @return Topics
+     */
+    @GetMapping("/all-topics")
+    public ResponseEntity<List<TopicRequest>> getAllTopics() {
+        List<TopicRequest> topics = topicService.getAllTopics().stream().map(topic -> {
+            TopicRequest dto = new TopicRequest();
+            dto.setTopicId(topic.getId());
+            dto.setName(topic.getName());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(topics);
+    }
+
+    /**
      * Create a new topic.
      * Requires ADMIN role.
      *
@@ -75,20 +92,6 @@ public class TaskController {
     }
 
     /**
-     * Create a new TaskDragAndDrop.
-     * Requires ADMIN role.
-     *
-     * @param createTaskDragAndDropRequest DTO containing drag-and-drop task details.
-     * @return Created TaskDragAndDrop.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/create/dragdrop")
-    public ResponseEntity<TaskDragAndDrop> createTaskDragAndDrop(@RequestBody CreateTaskDragAndDropRequest createTaskDragAndDropRequest) {
-        TaskDragAndDrop task = taskService.createTaskDragAndDrop(createTaskDragAndDropRequest);
-        return ResponseEntity.ok(task);
-    }
-
-    /**
      * Submit a solution for a query task.
      *
      * @param playerId Player's ID.
@@ -100,20 +103,6 @@ public class TaskController {
             @PathVariable Long playerId,
             @RequestBody SubmitQueryRequest dto) {
         return ResponseEntity.ok(playerService.submitQuerySolution(dto, playerId));
-    }
-
-    /**
-     * Submit a solution for a drag-and-drop task.
-     *
-     * @param playerId Player's ID.
-     * @param dto Player's answer for drag-and-drop task.
-     * @return True if the answer is correct, otherwise false.
-     */
-    @PostMapping("/submit/dragdrop/{playerId}")
-    public ResponseEntity<Boolean> submitDragAndDropAnswer(
-            @PathVariable Long playerId,
-            @RequestBody SubmitDragAndDropRequest dto) {
-        return ResponseEntity.ok(playerService.submitDragAndDropSolution(dto, playerId));
     }
 
     /**
@@ -135,10 +124,10 @@ public class TaskController {
      *
      * @return List of all tasks.
      */
-    @GetMapping
-    public ResponseEntity<List<AbstractTask>> getAllTasks() {
-        return ResponseEntity.ok(taskService.getAllTasks());
-    }
+//    @GetMapping
+//    public ResponseEntity<List<AbstractTask>> getAllTasks() {
+//        return ResponseEntity.ok(taskService.getAllTasks());
+//    }
 
     /**
      * Retrieve tasks by topic ID.
@@ -146,10 +135,10 @@ public class TaskController {
      * @param topicId ID of the topic.
      * @return List of tasks related to the topic.
      */
-    @GetMapping("/topic")
-    public ResponseEntity<List<AbstractTask>> getTasksByTopic(@RequestParam Long topicId) {
-        return ResponseEntity.ok(taskService.getTasksByTopic(topicId));
-    }
+//    @GetMapping("/topic")
+//    public ResponseEntity<List<AbstractTask>> getTasksByTopic(@RequestParam Long topicId) {
+//        return ResponseEntity.ok(taskService.getTasksByTopic(topicId));
+//    }
 
     /**
      * Retrieve tasks by difficulty level.
@@ -157,10 +146,10 @@ public class TaskController {
      * @param difficulty Difficulty level (e.g., EASY, MEDIUM, HARD).
      * @return List of tasks matching the difficulty.
      */
-    @GetMapping("/difficulty")
-    public ResponseEntity<List<AbstractTask>> getTasksByDifficulty(@RequestParam String difficulty) {
-        return ResponseEntity.ok(taskService.getTasksByDifficulty(difficulty));
-    }
+//    @GetMapping("/difficulty")
+//    public ResponseEntity<List<AbstractTask>> getTasksByDifficulty(@RequestParam String difficulty) {
+//        return ResponseEntity.ok(taskService.getTasksByDifficulty(difficulty));
+//    }
 
     /**
      * Retrieve tasks by level ID.
@@ -168,10 +157,10 @@ public class TaskController {
      * @param levelId ID of the level.
      * @return List of tasks for the level.
      */
-    @GetMapping("/level")
-    public ResponseEntity<List<AbstractTask>> getTasksByLevel(@RequestParam Long levelId) {
-        return ResponseEntity.ok(taskService.getTasksByLevel(levelId));
-    }
+//    @GetMapping("/level")
+//    public ResponseEntity<List<AbstractTask>> getTasksByLevel(@RequestParam Long levelId) {
+//        return ResponseEntity.ok(taskService.getTasksByLevel(levelId));
+//    }
 
     /**
      * Retrieve finished tasks for a user.
@@ -179,10 +168,10 @@ public class TaskController {
      * @param userId User's ID.
      * @return List of finished tasks.
      */
-    @GetMapping("/finished")
-    public ResponseEntity<List<AbstractTask>> getFinishedTasks(@RequestParam Long userId) {
-        return ResponseEntity.ok(taskService.getFinishedTasks(userId));
-    }
+//    @GetMapping("/finished")
+//    public ResponseEntity<List<AbstractTask>> getFinishedTasks(@RequestParam Long userId) {
+//        return ResponseEntity.ok(taskService.getFinishedTasks(userId));
+//    }
 
     /**
      * Retrieve a query task by its ID.
@@ -202,8 +191,8 @@ public class TaskController {
      * @return Task details.
      */
     @GetMapping("/test/{id}")
-    public ResponseEntity<AbstractTask> getTaskTestById(@PathVariable Long id) {
-        return ResponseEntity.ok(taskService.getTaskById(id));
+    public ResponseEntity<AbstractTaskRequest> getTaskTestById(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getTaskTestById(id));
     }
 
     /**
@@ -212,27 +201,10 @@ public class TaskController {
      * @param id Task ID.
      * @return Task details.
      */
-    @GetMapping("/dragdrop/{id}")
-    public ResponseEntity<AbstractTask> getTaskDragAndDropById(@PathVariable Long id) {
-        return ResponseEntity.ok(taskService.getTaskById(id));
-    }
-
-    /**
-     * Retrieve all topics.
-     *
-     * @return Topics
-     */
-    @GetMapping("/all-topics")
-    public ResponseEntity<List<TopicRequest>> getAllTopics() {
-        List<TopicRequest> topics = topicService.getAllTopics().stream().map(topic -> {
-            TopicRequest dto = new TopicRequest();
-            dto.setTopicId(topic.getId());
-            dto.setName(topic.getName());
-            return dto;
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.ok(topics);
-    }
+//    @GetMapping("/dragdrop/{id}")
+//    public ResponseEntity<AbstractTask> getTaskDragAndDropById(@PathVariable Long id) {
+//        return ResponseEntity.ok(taskService.getTaskById(id));
+//    }
 
     /**
      * Delete a task by ID.

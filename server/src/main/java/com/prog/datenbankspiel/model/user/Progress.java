@@ -1,14 +1,9 @@
 package com.prog.datenbankspiel.model.user;
 
-import com.prog.datenbankspiel.model.task.AbstractTask;
-import com.prog.datenbankspiel.model.task.Hint;
-import com.prog.datenbankspiel.model.task.Level;
-import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
