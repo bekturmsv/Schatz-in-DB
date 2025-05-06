@@ -11,5 +11,6 @@ public class LoginResponse {
     private UserDto user;
     private List<Map<String, Object>> tasks;
     private Map<String, Object> progress;
+    private Map<String, Object> fullUser;
 
 }

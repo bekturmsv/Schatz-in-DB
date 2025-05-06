@@ -90,9 +90,16 @@ public class TaskServiceImpl implements TaskService {
         fillCommonFields(task, TaskType.TASK_QUERY, dto);
         task.setSetupQuery(dto.getSetupQuery());
         task.setRightAnswer(dto.getRightAnswer());
+
+        // First: save the task without hint to get its ID
+        task = taskRepository.save(task);
+
+        // Then: attach and save the hint
         addHintIfExists(task, dto.getHint());
-        return taskRepository.save(task);
+
+        return taskRepository.save(task); // final save with hint
     }
+
 
     @Override
     public TaskTest createTaskTest(CreateTaskTestRequest dto) {
@@ -271,7 +278,7 @@ public class TaskServiceImpl implements TaskService {
             Hint hint = new Hint();
             hint.setText(hintText);
             hint.setTask(task);
-            task.setHint(hint);
+            task.setHint(hint);  // bi-directional link
         }
     }
 

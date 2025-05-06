@@ -27,17 +27,20 @@ public class PlayerServiceImpl implements PlayerService {
     private PlayerRepository playerRepository;
 
     @Override
-    public boolean submitQuerySolution(SubmitQueryRequest solutionDto, Long playerId) {
-        Task task = taskRepository.findById(solutionDto.getTaskId())
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
-        if (!(task instanceof TaskQuery)) {
-            throw new RuntimeException("Task is not a TaskQuery");
-        }
-        boolean correct = checkQuerySolution((TaskQuery) task, solutionDto.getQueryAnswer());
-        if (correct) {
+    public boolean submitQuerySolution(SubmitQueryRequest dto, Long playerId) {
+        TaskQuery task = (TaskQuery) taskRepository.findById(dto.getTaskId())
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        String submitted = dto.getAnswer().replaceAll("\\s+", " ").trim().replaceAll(";$", "");
+        String correct = task.getRightAnswer().replaceAll("\\s+", " ").trim().replaceAll(";$", "");
+
+        boolean isCorrect = submitted.equalsIgnoreCase(correct);
+
+        if (isCorrect) {
             updateProgress(playerId, task);
         }
-        return correct;
+
+        return isCorrect;
     }
 
     @Override

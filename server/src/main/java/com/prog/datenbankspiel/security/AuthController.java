@@ -1,7 +1,9 @@
 package com.prog.datenbankspiel.security;
 
 import com.prog.datenbankspiel.dto.LoginResponse;
+import com.prog.datenbankspiel.dto.PlayerLoginResponse;
 import com.prog.datenbankspiel.mappers.UserMapper;
+import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.user.*;
 import com.prog.datenbankspiel.model.user.enums.Roles;
@@ -35,7 +37,7 @@ public class AuthController {
     private final TaskService taskService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getUsername(),
@@ -46,47 +48,42 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
         String jwt = jwtService.generateToken(userDetails);
 
-        User user = userRepository.findByUsername(authRequest.getUsername()).orElseThrow();
-
-        LoginResponse response = new LoginResponse();
-        response.setToken(jwt);
-        response.setUser(userMapper.toDto(user));
+        User user = userRepository.findByUsername(authRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user instanceof Player player) {
-            response.setUser(userMapper.toDto(player));
             Progress progress = player.getProgress();
+            Set<Long> completed = progress.getCompletedTaskIds();
 
-            Map<String, Object> progressMap = new HashMap<>();
+            // Basic progress info
             LevelDifficulty currentDifficulty = levelService
                     .getLevelById(progress.getCurrentLevelId())
                     .getDifficulty();
-            String currentTopic = taskService
-                    .getTaskById(progress.getCompletedTaskIds().stream().findFirst().orElse(1L)) // пример
-                    .getTopic()
-                    .getName();
 
+            String currentTopic = "Unknown";
+            if (!completed.isEmpty()) {
+                Long anyCompletedId = completed.iterator().next();
+                currentTopic = taskService.getTaskById(anyCompletedId).getTopicName();
+            }
+
+            Map<String, Object> progressMap = new HashMap<>();
             progressMap.put("difficulty", currentDifficulty);
             progressMap.put("topic", currentTopic);
-            progressMap.put("tasksSolved", progress.getCompletedTaskIds().size());
+            progressMap.put("tasksSolved", completed.size());
             progressMap.put("totalTasks", taskService.getAllTasks().size());
 
-            response.setProgress(progressMap);
-
+            // Grouped task stats
             List<Map<String, Object>> groupedTasks = new ArrayList<>();
-            var allTasks = taskService.getAllTasks();
-            var completed = progress.getCompletedTaskIds();
-
             Map<String, Map<String, Long[]>> stats = new HashMap<>();
-            for (var task : allTasks) {
+            for (Task task : taskService.getAllTasks()) {
                 String type = task.getDifficulty().name();
                 String theme = task.getTopic().getName();
 
                 stats.putIfAbsent(type, new HashMap<>());
-                stats.get(type).putIfAbsent(theme, new Long[]{0L, 0L}); // {completed, total}
-                stats.get(type).get(theme)[1]++; // total++
-
+                stats.get(type).putIfAbsent(theme, new Long[]{0L, 0L});
+                stats.get(type).get(theme)[1]++;
                 if (completed.contains(task.getId())) {
-                    stats.get(type).get(theme)[0]++; // completed++
+                    stats.get(type).get(theme)[0]++;
                 }
             }
 
@@ -106,8 +103,56 @@ public class AuthController {
                 }
             }
 
-            response.setTasks(groupedTasks);
+            // Completed tasks by difficulty
+            Map<String, List<Long>> completedTasksByDifficulty = new HashMap<>();
+            for (LevelDifficulty difficulty : LevelDifficulty.values()) {
+                completedTasksByDifficulty.put(difficulty.name().toLowerCase(), new ArrayList<>());
+            }
+
+            for (Task task : taskService.getAllTasks()) {
+                if (completed.contains(task.getId())) {
+                    String key = task.getDifficulty().name().toLowerCase();
+                    completedTasksByDifficulty.get(key).add(task.getId());
+                }
+            }
+
+            // Completed levels
+            Map<String, Boolean> completedLevels = new HashMap<>();
+            for (LevelDifficulty difficulty : LevelDifficulty.values()) {
+                List<Task> tasksOfDiff = taskService.getTasksByDifficulty(difficulty.name());
+                boolean allCompleted = !tasksOfDiff.isEmpty() &&
+                        tasksOfDiff.stream().map(Task::getId).allMatch(completed::contains);
+                completedLevels.put(difficulty.name().toLowerCase(), allCompleted);
+            }
+
+            // Final map user representation
+            Map<String, Object> playerMap = new HashMap<>();
+            playerMap.put("id", player.getId());
+            playerMap.put("email", player.getEmail());
+            playerMap.put("username", player.getUsername());
+            playerMap.put("name", player.getFirstName() + " " + player.getLastName());
+            playerMap.put("firstname", player.getFirstName());
+            playerMap.put("lastname", player.getLastName());
+            playerMap.put("nickname", player.getUsername());
+            playerMap.put("points", player.getTotal_points());
+            playerMap.put("purchasedThemes", player.getPurchasedThemes());
+            playerMap.put("currentTheme", player.getCurrentTheme());
+            playerMap.put("progress", progressMap);
+            playerMap.put("tasks", groupedTasks);
+            playerMap.put("completedTasks", completedTasksByDifficulty);
+            playerMap.put("completedLevels", completedLevels);
+
+            PlayerLoginResponse playerLoginResponse = new PlayerLoginResponse();
+            playerLoginResponse.setToken(jwt);
+            playerLoginResponse.setUser(playerMap);
+
+            return ResponseEntity.ok(playerLoginResponse);
         }
+
+        // Default login response for Teacher / Admin
+        LoginResponse response = new LoginResponse();
+        response.setToken(jwt);
+        response.setUser(userMapper.toDto(user));
         return ResponseEntity.ok(response);
     }
 

@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 public class SubmitQueryRequest {
     private Long taskId;
-    private String queryAnswer;
+    private String answer;
 }
 

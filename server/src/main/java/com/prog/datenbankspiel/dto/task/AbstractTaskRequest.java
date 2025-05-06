@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.dto.task;
 
+import ch.qos.logback.classic.model.LoggerModel;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskPosition;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
@@ -19,5 +20,7 @@ public abstract class AbstractTaskRequest {
     private Long levelId;
     private boolean finished;
     private String hint;
+
+
 }
 

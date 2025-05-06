@@ -1,20 +1,20 @@
 package com.prog.datenbankspiel.mappers;
 
 import com.prog.datenbankspiel.dto.task.TaskDto;
-import com.prog.datenbankspiel.model.task.AbstractTask;
+import com.prog.datenbankspiel.model.task.Task;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-06T13:58:06+0200",
+    date = "2025-05-06T22:36:14+0200",
     comments = "version: 1.6.1, compiler: javac, environment: Java 21.0.5 (Oracle Corporation)"
 )
 @Component
 public class TaskMapperImpl implements TaskMapper {
 
     @Override
-    public TaskDto toDto(AbstractTask task) {
+    public TaskDto toDto(Task task) {
         if ( task == null ) {
             return null;
         }
