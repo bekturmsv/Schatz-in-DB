@@ -1,5 +1,7 @@
 package com.prog.datenbankspiel.initializer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.prog.datenbankspiel.dto.task.CreateTaskQueryRequest;
@@ -14,7 +16,6 @@ import com.prog.datenbankspiel.repository.task.TopicRepository;
 import com.prog.datenbankspiel.service.TaskService;
 import jakarta.annotation.PostConstruct;
 import lombok.Generated;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.FileReader;
@@ -87,7 +88,7 @@ public class TaskInitializer {
     }
 
     private TaskQuery createQueryTask(String title, String description, String rightAnswer, Level level, Topic topic, String setupQuery, String hintText, String taskPosition) {
-        Optional<AbstractTask> existing = this.abstractTaskRepository.findByTitle(title);
+        Optional<Task> existing = this.abstractTaskRepository.findByTitle(title);
         if (existing.isPresent()) {
             System.out.println("⚠️ Skipping existing QUERY task: " + title);
             return (TaskQuery)existing.get();
@@ -109,7 +110,7 @@ public class TaskInitializer {
     }
 
     private TaskTest createTestTask(String title, String description, String answersRaw, String correctIndicesRaw, Level level, Topic topic, String hintText) {
-        Optional<AbstractTask> existing = this.abstractTaskRepository.findByTitle(title);
+        Optional<Task> existing = this.abstractTaskRepository.findByTitle(title);
         if (existing.isPresent()) {
             System.out.println("⚠️ Skipping existing TEST task: " + title);
             return (TaskTest)existing.get();
@@ -140,7 +141,7 @@ public class TaskInitializer {
         }
     }
 
-    private void addHintIfPresent(String hintText, AbstractTask task) {
+    private void addHintIfPresent(String hintText, Task task) {
         if (hintText != null && !hintText.isEmpty()) {
             Hint hint = new Hint();
             hint.setText(hintText);

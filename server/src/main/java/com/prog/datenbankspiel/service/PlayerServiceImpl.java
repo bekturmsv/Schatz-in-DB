@@ -1,6 +1,5 @@
 package com.prog.datenbankspiel.service;
 
-import com.prog.datenbankspiel.dto.task.SubmitDragAndDropRequest;
 import com.prog.datenbankspiel.dto.task.SubmitQueryRequest;
 import com.prog.datenbankspiel.dto.task.SubmitTestRequest;
 import com.prog.datenbankspiel.model.task.*;
@@ -29,7 +28,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public boolean submitQuerySolution(SubmitQueryRequest solutionDto, Long playerId) {
-        AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
+        Task task = taskRepository.findById(solutionDto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
         if (!(task instanceof TaskQuery)) {
             throw new RuntimeException("Task is not a TaskQuery");
@@ -43,26 +42,12 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public boolean submitTestSolution(SubmitTestRequest solutionDto, Long playerId) {
-        AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
+        Task task = taskRepository.findById(solutionDto.getTaskId())
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
         if (!(task instanceof TaskTest)) {
             throw new RuntimeException("Task is not a TaskTest");
         }
         boolean correct = checkTestSolution((TaskTest) task, solutionDto.getSelectedAnswersId());
-        if (correct) {
-            updateProgress(playerId, task);
-        }
-        return correct;
-    }
-
-    @Override
-    public boolean submitDragAndDropSolution(SubmitDragAndDropRequest solutionDto, Long playerId) {
-        AbstractTask task = taskRepository.findById(solutionDto.getTaskId())
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + solutionDto.getTaskId()));
-        if (!(task instanceof TaskDragAndDrop)) {
-            throw new RuntimeException("Task is not a TaskDragAndDrop");
-        }
-        boolean correct = checkDragAndDropSolution((TaskDragAndDrop) task, solutionDto.getDragAndDropAnswer());
         if (correct) {
             updateProgress(playerId, task);
         }
@@ -107,7 +92,7 @@ public class PlayerServiceImpl implements PlayerService {
         return playerSolution.trim().equalsIgnoreCase(taskDragAndDrop.getCorrectText().trim());
     }
 
-    private void updateProgress(Long playerId, AbstractTask task) {
+    private void updateProgress(Long playerId, Task task) {
         Progress progress = progressRepository.findByUserId(playerId);
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new RuntimeException("Player not found with id: " + playerId));

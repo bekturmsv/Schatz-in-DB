@@ -1,6 +1,5 @@
 package com.prog.datenbankspiel.model.task;
 
-import com.prog.datenbankspiel.model.task.enums.TaskType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class TaskTest extends AbstractTask {
+public class TaskTest extends Task {
 
     private Long timeLimit;
 

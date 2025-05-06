@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
-public abstract class AbstractTask {
+public abstract class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

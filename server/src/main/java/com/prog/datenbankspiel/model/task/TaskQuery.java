@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class TaskQuery extends AbstractTask {
+public class TaskQuery extends Task {
 
     @Column(columnDefinition = "TEXT")
     private String setupQuery;
