@@ -31,12 +31,6 @@
     </properties>
     <dependencies>
 
-        <!--   Thymeleaf just for testing     -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-
         <!-- CSV -->
         <dependency>
             <groupId>com.opencsv</groupId>
