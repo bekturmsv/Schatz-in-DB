@@ -3,6 +3,8 @@ package com.prog.datenbankspiel.model.user;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
@@ -20,5 +22,9 @@ public class Player extends User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Progress progress;
+    @ElementCollection
+    private List<String> purchasedThemes;
+
+    private String currentTheme;
 
 }

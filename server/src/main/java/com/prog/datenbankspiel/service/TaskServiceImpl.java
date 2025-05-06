@@ -43,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
     public AllLevelTasksDto getAllTasksGrouped() {
         Map<String, TaskGroupDto> levelMap = new LinkedHashMap();
 
-        for(LevelDifficulty difficulty : LevelDifficulty.values()) {
+        for (LevelDifficulty difficulty : LevelDifficulty.values()) {
             List<AbstractTask> regularTasks = this.taskRepository.findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.REGULAR);
             List<AbstractTask> testTasks = this.taskRepository.findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.TEST);
             List<FinalTestTaskDto> regularDtos = regularTasks.stream().map(this::mapToFinalDto).toList();
@@ -265,11 +265,11 @@ public class TaskServiceImpl implements TaskService {
                         newTopic.setLevel(finalLevel);
                         return topicRepository.save(newTopic);
                     });
-    } else {
-        throw new IllegalArgumentException("Either topicId or topicName must be provided");
+        } else {
+            throw new IllegalArgumentException("Either topicId or topicName must be provided");
+        }
+        task.setTopic(topic);
     }
-    task.setTopic(topic);
-}
 
 
     private void addHintIfExists(AbstractTask task, String hintText) {
@@ -299,7 +299,8 @@ public class TaskServiceImpl implements TaskService {
     private TaskQueryRequest mapToQueryDto(TaskQuery task) {
         TaskQueryRequest dto = new TaskQueryRequest();
         fillCommonDtoFields(dto, task);
-        dto.setSetupQuery(task.getSetupQuery());;
+        dto.setSetupQuery(task.getSetupQuery());
+        ;
         return dto;
     }
 
@@ -322,6 +323,4 @@ public class TaskServiceImpl implements TaskService {
         }).toList());
         return dto;
     }
-
-
 }
