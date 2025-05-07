@@ -7,9 +7,10 @@ module.exports = {
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",
         background: "var(--color-background)",
+
       },
       fontFamily: {
-        custom: ["var(--font-family)"],
+        custom: ["var(--font-family)", "sans-serif"],
         navbarBungee: ["Bungee Inline", "sans-serif"],
       },
       backgroundImage: (theme) => ({
