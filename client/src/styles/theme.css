@@ -1,10 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&display=swap');
 @import "tailwindcss";
+@tailwind base;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Bungee Inline";
+  src: url("/src/assets/fonts/BungeeInline-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* —— Default Theme —— */
 :root {
   --color-primary: #60a5fa;
   --color-secondary: #10b981;
-  --color-background: #ffffff;
+  --color-background: #90D785;
   --font-family: "Bungee Inline", sans-serif;
   --bg-image: url("/assets/images/theme1/background.jpg");
 }
@@ -48,7 +58,7 @@
 /* —— Global Base Layer —— */
 @layer base {
   html {
-    background-color: var(--color-background);
+    /*background-color: var(--color-background);*/
     color: var(--color-primary);
     font-family: var(--font-family);
     background-image: var(--bg-image);
@@ -59,20 +69,28 @@
   }
 
   body {
-    background-color: var(--color-background);
+    /*background-color: var(--color-background);*/
     color: var(--color-primary);
   }
 
   nav {
-    background-color: var(--color-background);
+    /*background-color: var(--color-background);*/
     color: var(--color-primary);
   }
 
   footer {
-    background-color: var(--color-background);
+    /*background-color: var(--color-background);*/
     color: var(--color-primary);
   }
 
+  .bg-custom-background {
+    background-color: var(--color-background) !important;
+  }
+  
+  .custom-font {
+    font-family: var(--font-family), sans-serif;
+  }
+  
   .text-primary {
     color: var(--color-primary);
   }

@@ -12,38 +12,38 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen  font-mono">
+    <div className="min-h-screen   font-mono">
       {/* Герой-секция */}
-      <section className="bg-green-400 py-16 text-center text-black">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+      <section className="bg-custom-background py-32 md:py-64 text-center text-black">
+        <h1 className="text-4xl md:text-4xl font-bold mb-4 custom-font">
           {t("heroTitle")}
         </h1>
-        <p className="text-lg md:text-xl mb-8">{t("heroSubtitle")}</p>
+        <p className="text-lg md:text-xl mb-8 custom-font">{t("heroSubtitle")}</p>
         <Button
           onClick={() => navigate("/play")}
-          className="bg-gray-300 text-white px-6 py-3 rounded-lg hover:bg-gray-400 transition"
+          className=" custom-font bg-gray-400 text-white px-12 py-6 cursor-pointer rounded-lg hover:bg-green-400 hover:text-black transition"
         >
           {t("startJourney")}
         </Button>
       </section>
 
       {/* Контент-секция */}
-      <section className="container mx-auto py-12 px-4">
+      <section className="custom-font container mx-auto py-12 px-4">
         {/* Game Progress */}
-        <div className="bg-green-400 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-2">{t("gameProgress")}</h2>
-          <p className="mb-2">{t("progressDescription")}</p>
-          <p className="text-sm">{t("progressSummary")}</p>
+        <div className="bg-custom-background rounded-lg text-center py-24 px-12 mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">{t("gameProgress")}</h2>
+          <p className="mb-2  md:text-xl">{t("progressDescription")}</p>
+          <p className=" md:text-xl">{t("progressSummary")}</p>
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-green-400 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold">{t("leaderboard")}</h2>
+        <div className="bg-custom-background rounded-lg text-center py-24 px-12 mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold">{t("leaderboard")}</h2>
         </div>
 
         {/* News and Updates */}
-        <div className="bg-green-400 rounded-lg p-6">
-          <h2 className="text-2xl font-bold">{t("newsAndUpdates")}</h2>
+        <div className="bg-custom-background rounded-lg text-center py-24 px-12">
+          <h2 className="text-2xl md:text-3xl font-bold">{t("newsAndUpdates")}</h2>
         </div>
       </section>
     </div>

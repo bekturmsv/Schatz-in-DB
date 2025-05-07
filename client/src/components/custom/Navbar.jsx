@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import {logout, logoutUser} from '../../features/auth/authSlice';
@@ -26,7 +26,7 @@ export default function Navbar() {
   };
 
   return (
-      <nav className="fixed top-0 left-0 w-full bg-gray-300 p-4 shadow-md font-mono z-50">
+      <nav className=" fixed top-0 left-0 w-full bg-gray-300 p-4 shadow-md font-mono z-50">
         <div className="container mx-auto flex justify-between items-center">
           <div className="text-black text-2xl font-bold uppercase">
             {t('appName')}
@@ -57,14 +57,14 @@ export default function Navbar() {
           <div
               className={`${
                   isOpen ? 'flex' : 'hidden'
-              } md:flex flex-col md:flex-row md:space-x-4 items-center absolute md:static top-16 left-0 w-full md:w-auto bg-gray-300 md:bg-transparent p-4 md:p-0 transition-all duration-300`}
+              } md:flex custom-font  flex-col md:flex-row md:space-x-4 items-center absolute md:static top-16 left-0 w-full md:w-auto bg-gray-300 md:bg-transparent p-4 md:p-0 transition-all duration-300`}
           >
             <button
                 onClick={() => {
                   navigate('/');
                   setIsOpen(false);
                 }}
-                className="text-black hover:text-green-500 transition py-2 md:py-0"
+                className=" cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
             >
               {t('home')}
             </button>
@@ -75,25 +75,25 @@ export default function Navbar() {
                         navigate('/play');
                         setIsOpen(false);
                       }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="text-black text-green-500 hover:text-white transition py-2 md:py-0"
                   >
                     {t('myProgress')}
                   </button>
-                  <button
-                      onClick={() => {
-                        navigate('/profile');
-                        setIsOpen(false);
-                      }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
-                  >
-                    {t('profile')}
-                  </button>
+                  {/*<button*/}
+                  {/*    onClick={() => {*/}
+                  {/*      navigate('/profile');*/}
+                  {/*      setIsOpen(false);*/}
+                  {/*    }}*/}
+                  {/*    className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"*/}
+                  {/*>*/}
+                  {/*  {t('profile')}*/}
+                  {/*</button>*/}
                   <button
                       onClick={() => {
                         navigate('/training');
                         setIsOpen(false);
                       }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
                   >
                     {t('training')}
                   </button>
@@ -102,16 +102,16 @@ export default function Navbar() {
                         navigate('/leaderboard');
                         setIsOpen(false);
                       }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
                   >
                     {t('leaderboard')}
                   </button>
                   <span className="text-black py-2 md:py-0">
-                {user.nickname} ({t('points')}: {user.points})
+                   <Link to={"/profile"} className="cursor-pointer hover:text-green-500"> {user.nickname} </Link>&nbsp;<b className="text-orange-500"> {user.points} {t('points')} </b>
               </span>
                   <button
                       onClick={handleLogout}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
                   >
                     {t('logout')}
                   </button>
@@ -124,7 +124,7 @@ export default function Navbar() {
                         navigate('/login');
                         setIsOpen(false);
                       }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
                   >
                     {t('signIn')}
                   </button>
@@ -133,7 +133,7 @@ export default function Navbar() {
                         navigate('/register');
                         setIsOpen(false);
                       }}
-                      className="text-black hover:text-green-500 transition py-2 md:py-0"
+                      className="cursor-pointer text-black hover:text-green-500 transition py-2 md:py-0"
                   >
                     {t('signUp')}
                   </button>
