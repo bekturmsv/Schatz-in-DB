@@ -3,7 +3,11 @@ package com.prog.datenbankspiel.model.task;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import jakarta.persistence.*;
+import lombok.Data;
 
+import java.util.List;
+
+@Data
 @Entity
 public class Task {
 
@@ -11,26 +15,28 @@ public class Task {
     @GeneratedValue
     private Long id;
 
-    private String title;
-    private String description;
-    private String taskAnswer;
-    private String correctAnswer;
-    private Long points;
-    private Long time;
-    private Long teacherId;
-    private Long groupId;
-
-    @Enumerated(EnumType.STRING)
-    private TaskType taskType;
-
-    @Enumerated(EnumType.STRING)
-    private LevelDifficulty levelDifficulty;
-
     @ManyToOne
     @JoinColumn(name = "topics_id")
     private Topic topic;
 
+    @Enumerated(EnumType.STRING)
+    private LevelDifficulty levelDifficulty;
+
+    @Enumerated(EnumType.STRING)
+    private TaskType taskType;
+
+    private String title;
+    private String description;
+    private String taskAnswer;
+
+    private Long points;
+
     @OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
     private Hint hint;
+
+    @OneToMany(mappedBy = "task")
+    private List<PlayerTaskAnswer> playerTaskAnswers;
+
+
 }
 

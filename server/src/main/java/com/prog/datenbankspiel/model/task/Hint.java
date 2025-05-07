@@ -7,11 +7,13 @@ public class Hint {
     @Id
     @GeneratedValue
     private Long id;
-    private String description;
 
     @OneToOne
     @JoinColumn(name = "task_id")
     private Task task;
+
+    private String description;
+
 }
 
 

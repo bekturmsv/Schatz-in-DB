@@ -3,16 +3,14 @@ package com.prog.datenbankspiel.model.task;
 import jakarta.persistence.*;
 
 @Entity
-public class TestAnswer {
+public class TestQuestions {
     @Id
     @GeneratedValue
     private Long id;
+    private String question;
+    private String answer;
 
     @ManyToOne
     @JoinColumn(name = "task_id")
-    private Task task;
-
-    private Long playerId;
-    private String answer;
-    private Long pointsEarned;
+    private Test test;
 }
