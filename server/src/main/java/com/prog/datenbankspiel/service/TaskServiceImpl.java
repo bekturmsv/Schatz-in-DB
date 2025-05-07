@@ -1,8 +1,13 @@
 package com.prog.datenbankspiel.service;
 
+import com.prog.datenbankspiel.dto.front.AllLevelTasksDto;
+import com.prog.datenbankspiel.dto.front.FinalTestTaskDto;
+import com.prog.datenbankspiel.dto.front.FinalTestWrapper;
+import com.prog.datenbankspiel.dto.front.TaskGroupDto;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
+import com.prog.datenbankspiel.model.task.enums.TaskPosition;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import com.prog.datenbankspiel.model.user.Progress;
 import com.prog.datenbankspiel.repository.task.*;
@@ -13,7 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -32,6 +39,49 @@ public class TaskServiceImpl implements TaskService {
     private final LevelService levelService;
     private final PlayerService playerService;
 
+    @Override
+    public AllLevelTasksDto getAllTasksGrouped() {
+        Map<String, TaskGroupDto> levelMap = new LinkedHashMap();
+
+        for(LevelDifficulty difficulty : LevelDifficulty.values()) {
+            List<Task> regularTasks = this.taskRepository.findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.REGULAR);
+            List<Task> testTasks = this.taskRepository.findByDifficultyAndTaskTypeAndTaskPosition(difficulty, TaskType.TASK_QUERY, TaskPosition.TEST);
+            List<FinalTestTaskDto> regularDtos = regularTasks.stream().map(this::mapToFinalDto).toList();
+            List<FinalTestTaskDto> testDtos = testTasks.stream().map(this::mapToFinalDto).toList();
+            TaskGroupDto group = new TaskGroupDto();
+            group.setRegularTasks(regularDtos);
+            if (!testDtos.isEmpty()) {
+                FinalTestWrapper finalTest = new FinalTestWrapper();
+                finalTest.setTasks(testDtos);
+                group.setFinalTest(finalTest);
+            }
+
+            levelMap.put(difficulty.name().toLowerCase(), group);
+        }
+
+        AllLevelTasksDto allTasks = new AllLevelTasksDto();
+        allTasks.setTasks(levelMap);
+        return allTasks;
+    }
+
+    private FinalTestTaskDto mapToFinalDto(Task task) {
+        FinalTestTaskDto dto = new FinalTestTaskDto();
+        dto.setId(task.getId());
+        dto.setName(task.getTitle());
+        dto.setTopic(task.getTopic().getName());
+        dto.setPoints(task.getPoints());
+        dto.setDescription(task.getDescription());
+        if (task.getHint() != null) {
+            dto.setHint(task.getHint().getText());
+        }
+
+        if (task instanceof TaskQuery query) {
+            dto.setCorrectAnswer(query.getRightAnswer());
+        }
+
+        return dto;
+    }
+
     // ----------- Create Tasks -----------
 
     @Override
@@ -40,9 +90,16 @@ public class TaskServiceImpl implements TaskService {
         fillCommonFields(task, TaskType.TASK_QUERY, dto);
         task.setSetupQuery(dto.getSetupQuery());
         task.setRightAnswer(dto.getRightAnswer());
+
+        // First: save the task without hint to get its ID
+        task = taskRepository.save(task);
+
+        // Then: attach and save the hint
         addHintIfExists(task, dto.getHint());
-        return taskRepository.save(task);
+
+        return taskRepository.save(task); // final save with hint
     }
+
 
     @Override
     public TaskTest createTaskTest(CreateTaskTestRequest dto) {
@@ -62,17 +119,6 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.save(task);
     }
 
-    @Override
-    public TaskDragAndDrop createTaskDragAndDrop(CreateTaskDragAndDropRequest dto) {
-        TaskDragAndDrop task = new TaskDragAndDrop();
-        fillCommonFields(task, TaskType.DRAG_AND_DROP, dto);
-        task.setSetupText(dto.getSetupText());
-        task.setCorrectText(dto.getCorrectText());
-        task.setWords(dto.getWords());
-        addHintIfExists(task, dto.getHint());
-        return taskRepository.save(task);
-    }
-
     // ----------- Queries -----------
 
     @Override
@@ -81,14 +127,20 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public AbstractTask getTaskById(Long id) {
-        return taskRepository.findById(id)
+    public AbstractTaskRequest getTaskById(Long id) {
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        if (task instanceof TaskQuery query) {
+            return mapToQueryDto(query);
+        } else if (task instanceof TaskTest test) {
+            return mapToTaskTestDto(test);
+        }
+        throw new IllegalArgumentException("Unknown task type for task with id: " + id);
     }
 
     @Override
     public TaskQueryRequest getTaskQueryById(Long id) {
-        AbstractTask task = taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
         if (!(task instanceof TaskQuery query)) {
             throw new IllegalArgumentException("Task with id " + id + " is not a TaskQuery.");
@@ -98,19 +150,30 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<AbstractTask> getAllTasks() {
+    public TaskTestRequest getTaskTestById(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        if (!(task instanceof TaskTest test)) {
+            throw new IllegalArgumentException("Task with id " + id + " is not a TaskTest.");
+        }
+        TaskTestRequest dto = mapToTaskTestDto(test);
+        return dto;
+    }
+
+    @Override
+    public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
 
     @Override
-    public List<AbstractTask> getTasksByTopic(Long topicId) {
+    public List<Task> getTasksByTopic(Long topicId) {
         return taskRepository.findAll().stream()
                 .filter(task -> task.getTopic() != null && task.getTopic().getId().equals(topicId))
                 .toList();
     }
 
     @Override
-    public List<AbstractTask> getTasksByDifficulty(String difficulty) {
+    public List<Task> getTasksByDifficulty(String difficulty) {
         LevelDifficulty diff = LevelDifficulty.valueOf(difficulty.toUpperCase());
         return taskRepository.findAll().stream()
                 .filter(task -> task.getDifficulty() == diff)
@@ -118,14 +181,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<AbstractTask> getTasksByLevel(Long levelId) {
+    public List<Task> getTasksByLevel(Long levelId) {
         return taskRepository.findAll().stream()
                 .filter(task -> task.getLevel() != null && task.getLevel().getId().equals(levelId))
                 .toList();
     }
 
     @Override
-    public List<AbstractTask> getFinishedTasks(Long userId) {
+    public List<Task> getFinishedTasks(Long userId) {
         Progress progress = progressRepository.findByUserId(userId);
         return taskRepository.findAll().stream()
                 .filter(task -> progress.getCompletedTaskIds().contains(task.getId()))
@@ -135,7 +198,7 @@ public class TaskServiceImpl implements TaskService {
     // ----------- DTO Responses -----------
 
     @Override
-    public List<AbstractTaskRequest> getLevelTaskQueryAndDragAndDrop(Long levelId) {
+    public List<AbstractTaskRequest> getLevelTaskQuery(Long levelId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = playerService.getUserIdByUsername(username);
 
@@ -151,28 +214,18 @@ public class TaskServiceImpl implements TaskService {
                         }).toList()
         );
 
-        dtos.addAll(
-                taskDragAndDropRepository.findByLevel_Id(levelId).stream()
-                        .map(task -> {
-                            AbstractTaskRequest dto = mapToDragDto(task);
-                            boolean isDone = playerService.isTaskFinished(userId, task.getId());
-                            dto.setFinished(isDone);
-                            return dto;
-                        }).toList()
-        );
-
         return dtos;
     }
 
 
     @Override
-    public List<TaskTestRequest> getLevelTests(Long levelId) {
+    public List<AbstractTaskRequest> getLevelTests(Long levelId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Long userId = playerService.getUserIdByUsername(username);
 
         return taskTestRepository.findByLevel_Id(levelId).stream()
                 .map(task -> {
-                    TaskTestRequest dto = mapToTaskTestDto(task);
+                    AbstractTaskRequest dto = mapToTaskTestDto(task);
                     boolean isDone = playerService.isTaskFinished(userId, task.getId());
                     dto.setFinished(isDone);
                     return dto;
@@ -182,14 +235,14 @@ public class TaskServiceImpl implements TaskService {
 
     // ----------- Dto/Mappers -----------
 
-    private void fillCommonFields(AbstractTask task, TaskType type, AbstractTaskRequest dto) {
+    private void fillCommonFields(Task task, TaskType type, AbstractTaskRequest dto) {
         task.setTaskType(type);
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setPoints(dto.getPoints());
         task.setDifficulty(dto.getDifficulty());
+        task.setTaskPosition(dto.getTaskPosition());
 
-        // First ensure we have a level
         Level level;
         if (dto.getLevelId() != null) {
             level = levelService.getLevelById(dto.getLevelId());
@@ -200,7 +253,6 @@ public class TaskServiceImpl implements TaskService {
         }
         task.setLevel(level);
 
-        // Then handle topic, which depends on level
         Topic topic;
         if (dto.getTopicId() != null) {
             topic = topicService.getTopicById(dto.getTopicId());
@@ -214,30 +266,31 @@ public class TaskServiceImpl implements TaskService {
                         newTopic.setLevel(finalLevel);
                         return topicRepository.save(newTopic);
                     });
-    } else {
-        throw new IllegalArgumentException("Either topicId or topicName must be provided");
+        } else {
+            throw new IllegalArgumentException("Either topicId or topicName must be provided");
+        }
+        task.setTopic(topic);
     }
-    task.setTopic(topic);
-}
 
 
-    private void addHintIfExists(AbstractTask task, String hintText) {
+    private void addHintIfExists(Task task, String hintText) {
         if (hintText != null && !hintText.isBlank()) {
             Hint hint = new Hint();
             hint.setText(hintText);
             hint.setTask(task);
-            task.setHint(hint);
+            task.setHint(hint);  // bi-directional link
         }
     }
 
 
-    private void fillCommonDtoFields(AbstractTaskRequest dto, AbstractTask task) {
+    private void fillCommonDtoFields(AbstractTaskRequest dto, Task task) {
         dto.setId(task.getId());
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
         dto.setPoints(task.getPoints());
         dto.setDifficulty(task.getDifficulty());
         dto.setTaskType(task.getTaskType());
+        dto.setTaskPosition(task.getTaskPosition());
         dto.setTopicId(task.getTopic().getId());
         dto.setTopicName(task.getTopic().getName());
         if (task.getLevel() != null) dto.setLevelId(task.getLevel().getId());
@@ -247,15 +300,8 @@ public class TaskServiceImpl implements TaskService {
     private TaskQueryRequest mapToQueryDto(TaskQuery task) {
         TaskQueryRequest dto = new TaskQueryRequest();
         fillCommonDtoFields(dto, task);
-        dto.setSetupQuery(task.getSetupQuery());;
-        return dto;
-    }
-
-    private TaskDragAndDropRequest mapToDragDto(TaskDragAndDrop task) {
-        TaskDragAndDropRequest dto = new TaskDragAndDropRequest();
-        fillCommonDtoFields(dto, task);
-        dto.setSetupText(task.getSetupText());
-        dto.setWords(task.getWords());
+        dto.setSetupQuery(task.getSetupQuery());
+        ;
         return dto;
     }
 
@@ -270,6 +316,4 @@ public class TaskServiceImpl implements TaskService {
         }).toList());
         return dto;
     }
-
-
 }

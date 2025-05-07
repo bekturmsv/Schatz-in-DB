@@ -53,7 +53,7 @@ public class LevelServiceImpl implements LevelService {
         // Get all tasks for the level
         List<Long> levelTaskIds = abstractTaskRepository.findByLevel_Id(levelId)
                 .stream()
-                .map(task -> ((AbstractTask) task).getId())
+                .map(task -> ((Task) task).getId())
                 .toList();
         // Check if user has completed all
         if (!completed.containsAll(levelTaskIds)) {

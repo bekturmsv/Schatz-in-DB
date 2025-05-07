@@ -1,13 +1,11 @@
 package com.prog.datenbankspiel.controller;
 
 import com.prog.datenbankspiel.dto.task.AbstractTaskRequest;
-import com.prog.datenbankspiel.dto.task.CreateTaskTestRequest;
 import com.prog.datenbankspiel.dto.task.LevelRequest;
 import com.prog.datenbankspiel.dto.task.TaskTestRequest;
 import com.prog.datenbankspiel.service.LevelService;
 import com.prog.datenbankspiel.service.PlayerService;
 import com.prog.datenbankspiel.service.TaskService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +43,11 @@ public class LevelController {
 
     @GetMapping("/{id}/tasks")
     public ResponseEntity<List<AbstractTaskRequest>> getLevelTaskQueryAndDragAndDrop(@PathVariable Long id) {
-        return ResponseEntity.ok(taskService.getLevelTaskQueryAndDragAndDrop(id));
+        return ResponseEntity.ok(taskService.getLevelTaskQuery(id));
     }
 
     @GetMapping("/{id}/tests")
-    public ResponseEntity<List<TaskTestRequest>> getLevelTests(@PathVariable Long id) {
+    public ResponseEntity<List<AbstractTaskRequest>> getLevelTests(@PathVariable Long id) {
         return ResponseEntity.ok(taskService.getLevelTests(id));
     }
 
