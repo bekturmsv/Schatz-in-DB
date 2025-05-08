@@ -37,6 +37,14 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<PlayerTaskAnswer> playerTaskAnswers;
 
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL,
+            orphanRemoval = true, optional = true)
+    private TaskSampleData sampleData;
 
+    // A handy setter so that the service doesn't have to manually link both parties
+    public void setSampleData(TaskSampleData sampleData) {
+        if (sampleData != null) sampleData.setTask(this);
+        this.sampleData = sampleData;
+    }
 }
 
