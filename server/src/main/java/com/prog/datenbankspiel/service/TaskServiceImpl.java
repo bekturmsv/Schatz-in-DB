@@ -5,6 +5,7 @@ import com.prog.datenbankspiel.mappers.TaskMapper;
 import com.prog.datenbankspiel.model.task.Hint;
 import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.Topic;
+import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.repository.task.TaskRepository;
 import com.prog.datenbankspiel.repository.task.TopicRepository;
 import jakarta.transaction.Transactional;
@@ -61,6 +62,24 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
+    }
+
+    @Override
+    public Task getTaskById(Long id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+    }
+
+    @Override
+    public List<Task> getTasksByDifficulty(String difficulty) {
+        LevelDifficulty diff;
+        try {
+            diff = LevelDifficulty.valueOf(difficulty.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid difficulty: " + difficulty);
+        }
+
+        return taskRepository.findByLevelDifficulty(diff);
     }
 
     private Topic resolveTopic(TaskDto dto) {

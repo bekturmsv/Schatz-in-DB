@@ -3,6 +3,8 @@ package com.prog.datenbankspiel.model.user;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -18,5 +20,8 @@ public class Player extends User {
     @JoinColumn(name = "group_id")
     private Group groupId;
 
-
+    @ElementCollection
+    @CollectionTable(name = "player_themes", joinColumns = @JoinColumn(name = "player_id"))
+    @Column(name = "theme")
+    private List<String> purchasedThemes;
 }

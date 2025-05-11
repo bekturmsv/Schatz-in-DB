@@ -10,4 +10,6 @@ public interface TaskService {
     Task updateTask(Long id, TaskDto dto);
     void deleteTask(Long id);
     List<Task> getAllTasks();
+    Task getTaskById(Long id);
+    List<Task> getTasksByDifficulty(String difficulty);
 }
