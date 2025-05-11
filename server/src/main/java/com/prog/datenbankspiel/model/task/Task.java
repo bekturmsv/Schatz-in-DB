@@ -1,9 +1,12 @@
 package com.prog.datenbankspiel.model.task;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 
@@ -28,7 +31,6 @@ public class Task {
     private String title;
     private String description;
     private String taskAnswer;
-
     private Long points;
 
     @OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
@@ -37,14 +39,9 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<PlayerTaskAnswer> playerTaskAnswers;
 
-    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL,
-            orphanRemoval = true, optional = true)
-    private TaskSampleData sampleData;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private JsonNode sampleData;
 
-    // A handy setter so that the service doesn't have to manually link both parties
-    public void setSampleData(TaskSampleData sampleData) {
-        if (sampleData != null) sampleData.setTask(this);
-        this.sampleData = sampleData;
-    }
 }
 
