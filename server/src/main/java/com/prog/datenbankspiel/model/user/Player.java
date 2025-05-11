@@ -3,8 +3,8 @@ package com.prog.datenbankspiel.model.user;
 import jakarta.persistence.*;
 import lombok.*;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "player")
 public class Player extends User {
