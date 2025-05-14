@@ -18,6 +18,8 @@ import Task from "@/pages/Task/Task.jsx";
 import FinalTest from "@/pages/FinalTest/FinalTest.jsx";
 import Topics from "@/pages/Topics/Topics.jsx";
 import TopicDetail from "@/pages/TopicDetails/TopicDetails.jsx";
+import RequireAdmin from "@/hoc/RequireAdmin.jsx";
+import CreateTask from "@/pages/Admin/Tasks/CreateTask.jsx";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +83,12 @@ const router = createBrowserRouter([
       {
         path: "/training/:topicId",
         element: <TopicDetail />
+      },
+      {
+        path: "admin/tasks/create",
+        element: <RequireAdmin>
+          <CreateTask />
+        </RequireAdmin>
       }
 
     ],
