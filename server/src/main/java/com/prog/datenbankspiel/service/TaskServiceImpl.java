@@ -79,7 +79,7 @@ public class TaskServiceImpl implements TaskService {
             throw new RuntimeException("Invalid difficulty: " + difficulty);
         }
 
-        return taskRepository.findByLevelDifficulty(diff);
+        return taskRepository.findAllByLevelDifficulty(diff);
     }
 
     private Topic resolveTopic(TaskDto dto) {

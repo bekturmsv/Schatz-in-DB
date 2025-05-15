@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
     boolean existsByTitle(String title);
-    List<Task> findByLevelDifficulty(LevelDifficulty levelDifficulty);
+    List<Task> findAllByLevelDifficulty(LevelDifficulty levelDifficulty);
 }

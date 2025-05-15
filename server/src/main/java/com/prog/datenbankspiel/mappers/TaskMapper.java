@@ -1,6 +1,10 @@
 package com.prog.datenbankspiel.mappers;
 
+import com.prog.datenbankspiel.dto.task.PlayerTaskAnswerDto;
+import com.prog.datenbankspiel.dto.task.PlayerTestAnswerDto;
 import com.prog.datenbankspiel.dto.task.TaskDto;
+import com.prog.datenbankspiel.model.task.PlayerTaskAnswer;
+import com.prog.datenbankspiel.model.task.PlayerTestAnswer;
 import com.prog.datenbankspiel.model.task.Task;
 import org.mapstruct.*;
 
