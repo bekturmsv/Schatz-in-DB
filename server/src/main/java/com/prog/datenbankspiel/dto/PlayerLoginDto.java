@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.dto;
 
+import com.prog.datenbankspiel.model.user.enums.Roles;
 import lombok.Data;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class PlayerLoginDto {
     private String nickname;
     private String name;
     private Long points;
+    private Roles roles;
     private String currentTheme;
     private List<String> purchasedThemes;
 
