@@ -144,6 +144,7 @@ public class AuthController {
             playerDto.setLastname(player.getLastName());
             playerDto.setName(player.getFirstName());
             playerDto.setNickname(player.getUsername());
+            playerDto.setRoles(player.getRole());
             playerDto.setPoints(player.getTotal_points());
             playerDto.setCurrentTheme(player.getDesign());
             playerDto.setPurchasedThemes(player.getPurchasedThemes());
