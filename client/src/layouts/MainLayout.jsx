@@ -1,21 +1,19 @@
-import Footer from "@/components/custom/Footer";
-import Navbar from "@/components/custom/Navbar";
-import React from "react";
 import { Outlet } from "react-router-dom";
-import { Toaster } from "sonner";
+import { useSelector } from "react-redux";
+import Navbar from "../components/custom/Navbar.jsx";
+import Footer from "../components/custom/Footer.jsx";
+import "../styles/theme.css";
 
-const MainLayout = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+export default function MainLayout() {
 
-      <main className="flex‑1">
-        <Outlet />
-      </main>
-      <Footer />
-      <Toaster />
-    </div>
-  );
-};
 
-export default MainLayout;
+    return (
+        <div className="flex flex-col min-h-screen" >
+            <Navbar />
+            <main className="flex-grow bg-transparent pt-16">
+                <Outlet />
+            </main>
+            <Footer />
+        </div>
+    );
+}

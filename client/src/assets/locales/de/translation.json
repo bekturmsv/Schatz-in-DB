@@ -1,7 +1,7 @@
 {
   "welcome": "Willkommen zur SQL-Lernplattform",
   "profile": "Dein Profil",
-  "points": "Punkte: {{count}}",
+  "points": "Punkte",
   "email": "E-Mail",
   "password": "Passwort",
   "signIn": "Anmelden",
@@ -35,5 +35,13 @@
   "tasksSolved": "Aufgaben gelöst",
   "type": "TYP",
   "theme": "THEMA",
-  "styles": "Stile"
+  "styles": "Stile",
+  "purchased": "Gekauft",
+  "notEnoughPoints": "Nicht genug Punkte!",
+  "themeAlreadyPurchased": "Thema bereits gekauft!",
+  "themePurchased": "Thema {{theme}} erfolgreich gekauft!",
+  "select": "Auswählen",
+  "selected": "Ausgewählt",
+  "themeNotPurchased": "Thema nicht gekauft!",
+  "themeSelected": "Thema {{theme}} erfolgreich ausgewählt!"
 }

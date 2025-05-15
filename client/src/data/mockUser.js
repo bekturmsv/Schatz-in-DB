@@ -8,6 +8,7 @@ let mockUser = {
   nickname: "Thomas13",
   points: 1500,
   purchasedThemes: ["default", "dark"],
+  currentTheme: "default",
   progress: {
     difficulty: "EASY",
     topic: "SELECT",
@@ -32,8 +33,9 @@ let mockUser = {
 
 // Список доступных тем для покупки
 export const availableThemes = [
-  { id: "default", name: "Default", price: 0, image: "default-bg.jpg" },
-  { id: "dark", name: "Dark", price: 0, image: "dark-bg.jpg" },
+  { id: "default", name: "Default", price: 0, image: "theme1/background.jpg" },
+  { id: "dark", name: "Dark", price: 0, image: "theme2/background.jpg" },
+  { id: "retro", name: "Retro", price: 500, image: "theme3/background.jpg" },
   { id: "ocean", name: "Ocean", price: 500, image: "ocean-bg.jpg" },
   { id: "forest", name: "Forest", price: 1000, image: "forest-bg.jpg" },
 ];
@@ -60,6 +62,7 @@ export const resetUser = () => {
     nickname: "Thomas13",
     points: 1500,
     purchasedThemes: ["default", "dark"],
+    currentTheme: "default",
     progress: {
       difficulty: "EASY",
       topic: "SELECT",
