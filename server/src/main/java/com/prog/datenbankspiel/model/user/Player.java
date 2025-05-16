@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.model.user;
 
+import com.prog.datenbankspiel.model.user.enums.SpecialistGroup;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,9 +14,9 @@ public class Player extends User {
     private Long total_points;
     private Long level_id;
     private String design;
-    private String specialist_group;
+    @Enumerated(EnumType.STRING)
+    private SpecialistGroup specialist_group;
     private int matriculation_number;
-
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group groupId;

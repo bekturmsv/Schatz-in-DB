@@ -1,15 +1,12 @@
 package com.prog.datenbankspiel.security;
 
-import com.prog.datenbankspiel.dto.LoginResponse;
-import com.prog.datenbankspiel.dto.PlayerLoginDto;
-import com.prog.datenbankspiel.dto.PlayerLoginResponse;
+import com.prog.datenbankspiel.dto.*;
 import com.prog.datenbankspiel.mappers.UserMapper;
 import com.prog.datenbankspiel.model.task.PlayerTaskAnswer;
 import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.Topic;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.user.Player;
-import com.prog.datenbankspiel.model.user.Teacher;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.task.PlayerTaskAnswerRepository;
@@ -149,6 +146,16 @@ public class AuthController {
             playerDto.setCurrentTheme(player.getDesign());
             playerDto.setPurchasedThemes(player.getPurchasedThemes());
 
+            if (player.getGroupId() != null) {
+                GroupShortDto groupDto = new GroupShortDto();
+                groupDto.setId(player.getGroupId().getId());
+                groupDto.setName(player.getGroupId().getName());
+                groupDto.setCode(player.getGroupId().getCode());
+                playerDto.setGroup(groupDto);
+            }
+
+            playerDto.setSpecialistGroup(player.getSpecialist_group());
+            playerDto.setMatriculationNumber(player.getMatriculation_number());
             playerDto.setProgress(progressMap);
             playerDto.setTasks(groupedTasks);
             playerDto.setCompletedTasks(completedTasksByDifficulty);
@@ -177,45 +184,33 @@ public class AuthController {
                     .body("Username already exists");
         }
 
-        if (request.getRole().equalsIgnoreCase("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Cannot register as ADMIN");
-        }
+        Player player = new Player();
+        player.setUsername(request.getUsername());
+        player.setPassword(passwordEncoder.encode(request.getPassword()));
+        player.setEmail(request.getEmail());
+        player.setFirstName(request.getFirstName());
+        player.setLastName(request.getLastName());
+        player.setRole(Roles.PLAYER);
+        player.setTotal_points(0L);
+        player.setLevel_id(1L);
+        player.setDesign("default");
+        player.setPurchasedThemes(List.of("default"));
 
-        Roles role = Roles.valueOf(request.getRole().toUpperCase());
+        player.setMatriculation_number(request.getMatriculationNumber());
+        player.setSpecialist_group(request.getSpecialistGroup());
 
-        if (role == Roles.PLAYER) {
-            Player player = new Player();
-            player.setUsername(request.getUsername());
-            player.setPassword(passwordEncoder.encode(request.getPassword()));
-            player.setEmail(request.getEmail());
-            player.setFirstName(request.getFirstName());
-            player.setLastName(request.getLastName());
-            player.setRole(Roles.PLAYER);
-            player.setTotal_points(0L);
-            player.setLevel_id(1L);
-            player.setDesign("default");
-            player.setPurchasedThemes(List.of("default"));
+        userRepository.save(player);
 
-            userRepository.save(player);
-            return ResponseEntity.ok(userMapper.toPlayerLoginDto(player));
+        PlayerRegisterDto dto = new PlayerRegisterDto();
+        dto.setId(player.getId());
+        dto.setUsername(player.getUsername());
+        dto.setEmail(player.getEmail());
+        dto.setFirstName(player.getFirstName());
+        dto.setLastName(player.getLastName());
+        dto.setNickname(player.getUsername());
+        dto.setRole(player.getRole().name());
 
-        } else if (role == Roles.TEACHER) {
-            Teacher teacher = new Teacher();
-            teacher.setUsername(request.getUsername());
-            teacher.setPassword(passwordEncoder.encode(request.getPassword()));
-            teacher.setEmail(request.getEmail());
-            teacher.setFirstName(request.getFirstName());
-            teacher.setLastName(request.getLastName());
-            teacher.setRole(Roles.TEACHER);
-            teacher.setSubject(null);
-
-            userRepository.save(teacher);
-            return ResponseEntity.ok(userMapper.toDto(teacher));
-        }
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role");
+        return ResponseEntity.ok(dto);
     }
-
 }
 

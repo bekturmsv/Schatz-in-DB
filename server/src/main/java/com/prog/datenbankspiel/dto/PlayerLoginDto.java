@@ -1,6 +1,7 @@
 package com.prog.datenbankspiel.dto;
 
 import com.prog.datenbankspiel.model.user.enums.Roles;
+import com.prog.datenbankspiel.model.user.enums.SpecialistGroup;
 import lombok.Data;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class PlayerLoginDto {
     private Long points;
     private Roles roles;
     private String currentTheme;
+    private GroupShortDto group;
+    private SpecialistGroup specialistGroup;
+    private Integer matriculationNumber;
     private List<String> purchasedThemes;
 
     private Map<String, Object> progress;

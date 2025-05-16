@@ -4,8 +4,12 @@ import com.prog.datenbankspiel.dto.CreateGroupRequest;
 import com.prog.datenbankspiel.dto.GroupDto;
 import com.prog.datenbankspiel.mappers.GroupMapper;
 import com.prog.datenbankspiel.model.user.Group;
+import com.prog.datenbankspiel.model.user.Teacher;
+import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.repository.user.GroupRepository;
+import com.prog.datenbankspiel.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +26,23 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
+    private final UserRepository userRepository;
 
 
 
     @Transactional
-    public GroupDto createGroup(CreateGroupRequest request) {
+    public GroupDto createGroup(CreateGroupRequest request, Authentication auth) {
         Group group = groupMapper.fromCreateRequest(request);
+
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!(user instanceof Teacher teacher)) {
+            throw new RuntimeException("Only teachers can create groups");
+        }
+
+        group.setTeacher(teacher);
 
         for (int attempt = 0; attempt < 10_000; attempt++) {          // ~26⁶ вариантов
             String code = randomCode();
