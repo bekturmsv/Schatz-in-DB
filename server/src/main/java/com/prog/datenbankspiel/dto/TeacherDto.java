@@ -17,5 +17,5 @@ public class TeacherDto {
 
     private String lastName;
 
-    private Long subject;
+    private String subject;
 }

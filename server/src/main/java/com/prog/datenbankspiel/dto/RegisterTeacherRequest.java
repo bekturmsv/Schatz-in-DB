@@ -9,5 +9,5 @@ public class RegisterTeacherRequest {
     private String password;
     private String firstName;
     private String lastName;
-    private Long subject;
+    private String subject;
 }

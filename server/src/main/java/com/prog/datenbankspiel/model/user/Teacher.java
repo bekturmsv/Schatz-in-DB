@@ -10,5 +10,5 @@ import lombok.*;
 @Table(name = "teacher")
 public class Teacher extends User {
 
-    private Long subject;
+    private String subject;
 }
