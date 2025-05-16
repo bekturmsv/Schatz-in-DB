@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface PlayerTestAnswerRepository extends JpaRepository<PlayerTestAnswer, Long> {
-    boolean existsByPlayerId(Long playerId);
     List<PlayerTestAnswer> findAllByPlayerId(Long playerId);
+
+    boolean existsByTest_LevelDifficultyAndPlayerId(LevelDifficulty testLevelDifficulty, Long playerId);
 }

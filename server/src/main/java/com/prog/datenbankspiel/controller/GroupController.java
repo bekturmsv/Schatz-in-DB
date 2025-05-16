@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/groups")
@@ -28,9 +30,9 @@ public class GroupController {
             @RequestBody CreateGroupRequest request,
             UriComponentsBuilder uriBuilder) {
 
-        var groupDto = groupService.createGroup(request);
+        GroupDto groupDto = groupService.createGroup(request);
 
-        var uri = uriBuilder.path("/teachers/{id}").buildAndExpand(groupDto.getId()).toUri();
+        URI uri = uriBuilder.path("/groups/{id}").buildAndExpand(groupDto.getId()).toUri();
         return ResponseEntity.created(uri).body(groupDto);
     }
 

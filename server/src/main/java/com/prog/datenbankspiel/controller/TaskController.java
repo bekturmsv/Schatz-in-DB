@@ -3,6 +3,7 @@ package com.prog.datenbankspiel.controller;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.mappers.PlayerAnwerMapper;
 import com.prog.datenbankspiel.mappers.TaskMapper;
+import com.prog.datenbankspiel.mappers.TopicMapper;
 import com.prog.datenbankspiel.model.task.*;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.user.Player;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/task")
@@ -37,8 +38,7 @@ public class TaskController {
     private final PlayerTestAnswerRepository playerTestAnswerRepository;
     private final PlayerTaskAnswerRepository playerTaskAnswerRepository;
     private final PlayerAnwerMapper playerAnwerMapper;
-    private final TestRepository testRepository;
-    private final TestQuestionsRepository testQuestionsRepository;
+    private final TopicMapper topicMapper;
 
     //  PLAYER ENDPOINTS
 
@@ -85,11 +85,10 @@ public class TaskController {
         return ResponseEntity.ok(new PlayerProgressDto(player.getUsername(), player.getTotal_points()));
     }
 
-    // ADMIN ENDPOINTS
-
-//    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/all/{difficulty}")
-    public ResponseEntity<?> getAllTasksEasy(@PathVariable String difficulty) {
+    @GetMapping("/{difficulty}/{topicName}/tasks/{@id}")
+    public ResponseEntity<?> getTaskById(@PathVariable String difficulty,
+                                         @PathVariable String topicName,
+                                         @PathVariable String id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Player player = (Player) userRepository.findByUsername(
                 SecurityContextHolder.getContext().getAuthentication().getName()
@@ -97,10 +96,65 @@ public class TaskController {
         LevelDifficulty level = LevelDifficulty.valueOf(difficulty.toUpperCase());
         if (!hasAccess(player.getId(), level)) {
             return ResponseEntity.status(403)
-                    .body("You don't have access to this task!");
+                    .body("You don't have access to this level!");
+        }
+        Task task = taskRepository.findById(Long.valueOf(id)).orElse(null);
+        if (task == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(taskMapper.toDto(task));
+    }
+    
+    @GetMapping("/{difficulty}/topics")
+    public ResponseEntity<?> getTopics(@PathVariable String difficulty){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Player player = (Player) userRepository.findByUsername(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        ).orElseThrow();
+        LevelDifficulty level = LevelDifficulty.valueOf(difficulty.toUpperCase());
+        if (!hasAccess(player.getId(), level)) {
+            return ResponseEntity.status(403)
+                    .body("You don't have access to this level!");
         }
 
-        List<TaskDto> tasks = taskRepository.findAllByLevelDifficulty(level)
+        List<TopicDto> topics = topicRepository.findAllByLevelDifficulty(level)
+                .stream()
+                .map(topicMapper::toDto)
+                .toList();
+        List<PlayerTaskAnswerDto> taskAnswers = playerTaskAnswerRepository
+                .findAllByPlayerId(player.getId())
+                .stream()
+                .map(playerAnwerMapper::taskToDto)
+                .toList();
+
+        List<PlayerTestAnswerDto> testAnswers = playerTestAnswerRepository
+                .findAllByPlayerId(player.getId())
+                .stream()
+                .map(playerAnwerMapper::testToDto)
+                .toList();
+        return ResponseEntity.ok(Map.of(
+                "tasks",        topics,
+                "taskAnswers",  taskAnswers,
+                "testAnswers",  testAnswers
+        ));
+
+    }
+
+    @GetMapping("/{difficulty}/{topicName}/tasks")
+    public ResponseEntity<?> getAllTasks(@PathVariable String difficulty,
+                                         @PathVariable String topicName) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Player player = (Player) userRepository.findByUsername(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        ).orElseThrow();
+        LevelDifficulty level = LevelDifficulty.valueOf(difficulty.toUpperCase());
+        if (!hasAccess(player.getId(), level)) {
+            return ResponseEntity.status(403)
+                    .body("You don't have access to this level!");
+        }
+        Topic topic = topicRepository.findByName(topicName.toLowerCase().trim()).orElseThrow();
+
+        List<TaskDto> tasks = taskRepository.findByLevelDifficultyAndTopic(level, topic)
                 .stream()
                 .map(taskMapper::toDto)
                 .toList();
@@ -167,10 +221,10 @@ public class TaskController {
             case EASY -> true;
             case MEDIUM ->
                     playerTestAnswerRepository
-                            .existsByPlayerId(playerId);
+                            .existsByTest_LevelDifficultyAndPlayerId(requested, playerId);
             case HARD   ->
                     playerTestAnswerRepository
-                            .existsByPlayerId(playerId);
+                            .existsByTest_LevelDifficultyAndPlayerId(requested, playerId);
         };
     }
 }
