@@ -36,7 +36,7 @@ public class Task {
     @OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
     private Hint hint;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", fetch = FetchType.EAGER)
     private List<PlayerTaskAnswer> playerTaskAnswers;
 
     @JdbcTypeCode(SqlTypes.JSON)
