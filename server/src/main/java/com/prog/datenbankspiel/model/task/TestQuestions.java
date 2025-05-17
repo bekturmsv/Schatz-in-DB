@@ -11,6 +11,6 @@ public class TestQuestions {
     private String answer;
 
     @ManyToOne
-    @JoinColumn(name = "task_id")
+    @JoinColumn(name = "test_id")
     private Test test;
 }

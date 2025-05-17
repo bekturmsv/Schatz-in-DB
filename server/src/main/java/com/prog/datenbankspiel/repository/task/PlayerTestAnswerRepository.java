@@ -13,4 +13,6 @@ public interface PlayerTestAnswerRepository extends JpaRepository<PlayerTestAnsw
     List<PlayerTestAnswer> findAllByPlayerId(Long playerId);
 
     boolean existsByTest_LevelDifficultyAndPlayerId(LevelDifficulty testLevelDifficulty, Long playerId);
+
+    List<PlayerTestAnswer> findAllByTest_LevelDifficulty(LevelDifficulty levelDifficulty);
 }

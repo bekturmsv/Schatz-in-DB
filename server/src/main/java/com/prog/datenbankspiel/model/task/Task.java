@@ -43,5 +43,8 @@ public class Task {
     @Column(columnDefinition = "jsonb")
     private JsonNode sampleData;
 
+    @ManyToOne
+    @JoinColumn(name = "test_id")
+    private Test test;
 }
 
