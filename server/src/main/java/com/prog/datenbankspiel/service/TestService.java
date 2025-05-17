@@ -1,8 +1,10 @@
 package com.prog.datenbankspiel.service;
 
+import com.prog.datenbankspiel.dto.task.TaskDto;
 import com.prog.datenbankspiel.dto.test.TestAnswer;
 import com.prog.datenbankspiel.dto.test.TestDto;
 import com.prog.datenbankspiel.dto.test.TestRatingDto;
+import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.Test;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import org.springframework.security.core.Authentication;
@@ -22,4 +24,6 @@ public interface TestService {
     Test createTest(TestDto dto);
 
     void deleteTestByDifficulty(LevelDifficulty difficulty);
+
+    Task addTaskToTest(TaskDto dto);
 }

@@ -1,5 +1,6 @@
 package com.prog.datenbankspiel.controller;
 
+import com.prog.datenbankspiel.dto.task.TaskDto;
 import com.prog.datenbankspiel.dto.test.TestAnswer;
 import com.prog.datenbankspiel.dto.test.TestDto;
 import com.prog.datenbankspiel.mappers.TestMapper;
@@ -52,7 +53,6 @@ public class TestController {
         return ResponseEntity.ok(testMapper.toDto(test));
     }
 
-
     //  ADMIN ENDPOINTS
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -60,6 +60,16 @@ public class TestController {
     public ResponseEntity<TestDto> createTestWithTasks(@RequestBody TestDto dto) {
         Test test = testService.createTest(dto);
         return ResponseEntity.ok(testMapper.toDto(test));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{difficulty}/task/add")
+    public ResponseEntity<TestDto> addTaskToTest(
+            @PathVariable String difficulty,
+            @RequestBody TaskDto dto) {
+        dto.setLevelDifficulty(LevelDifficulty.valueOf(difficulty.toUpperCase()));
+        Task task = testService.addTaskToTest(dto);
+        return ResponseEntity.ok(testMapper.toDto(task.getTest()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

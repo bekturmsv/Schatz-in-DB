@@ -129,6 +129,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
+    @Transactional
     public Test createTest(TestDto dto) {
 
         boolean exists = testRepository.existsByLevelDifficulty(dto.getLevelDifficulty());
@@ -136,37 +137,87 @@ public class TestServiceImpl implements TestService {
             throw new IllegalArgumentException("A test with difficulty " + dto.getLevelDifficulty() + " already exists.");
         }
 
-        Test test = testMapper.fromDto(dto);
+        Test test = new Test();
+        test.setLevelDifficulty(dto.getLevelDifficulty());
+        test.setPointsEarned(dto.getPointsEarned());
 
-        List<Task> tasks = test.getTestTaskList();
-        if (tasks != null && !tasks.isEmpty()) {
-            for (Task task : tasks) {
+        List<Task> createdTasks = new ArrayList<>();
+        if (dto.getTestTaskList() != null && !dto.getTestTaskList().isEmpty()) {
+            for (TaskDto taskDto : dto.getTestTaskList()) {
+                Task task = new Task();
+                task.setTitle(taskDto.getTitle());
+                task.setDescription(taskDto.getDescription());
+                task.setTaskAnswer(taskDto.getTaskAnswer());
+                task.setPoints(taskDto.getPoints());
+                task.setTaskType(taskDto.getTaskType());
+                task.setLevelDifficulty(dto.getLevelDifficulty());
+                task.setSampleData(taskDto.getSampleData());
                 task.setTest(test);
 
-                TaskDto taskDto = findTaskDtoById(dto, task.getId());
-
-                if (taskDto != null) {
-                    if (taskDto.getTopicId() != null) {
-                        Topic topic = topicRepository.findById(taskDto.getTopicId())
-                                .orElseThrow(() -> new IllegalArgumentException("Topic ID not found"));
-                        task.setTopic(topic);
-                    } else if (taskDto.getTopicName() != null) {
-                        Topic topic = topicRepository.findByName(taskDto.getTopicName())
-                                .orElseGet(() -> {
-                                    Topic newTopic = new Topic();
-                                    newTopic.setName(taskDto.getTopicName());
-                                    newTopic.setLevelDifficulty(task.getLevelDifficulty());
-                                    return topicRepository.save(newTopic);
-                                });
-                        task.setTopic(topic);
-                    }
+                if (taskDto.getTopicId() != null) {
+                    Topic topic = topicRepository.findById(taskDto.getTopicId())
+                            .orElseThrow(() -> new IllegalArgumentException("Topic ID not found"));
+                    task.setTopic(topic);
+                } else if (taskDto.getTopicName() != null) {
+                    Topic topic = topicRepository.findByName(taskDto.getTopicName())
+                            .orElseGet(() -> {
+                                Topic newTopic = new Topic();
+                                newTopic.setName(taskDto.getTopicName());
+                                newTopic.setLevelDifficulty(dto.getLevelDifficulty());
+                                return topicRepository.save(newTopic);
+                            });
+                    task.setTopic(topic);
                 }
+
+                createdTasks.add(task);
             }
         }
 
-        test.setTestTaskList(tasks);
+        test.setTestTaskList(createdTasks);
         return testRepository.save(test);
     }
+
+
+    @Override
+    @Transactional
+    public Task addTaskToTest(TaskDto dto) {
+        if (dto.getLevelDifficulty() == null) {
+            throw new IllegalArgumentException("LevelDifficulty must not be null");
+        }
+
+        Test test = testRepository.findByLevelDifficulty(dto.getLevelDifficulty());
+        if (test == null) {
+            throw new EntityNotFoundException("No test found for difficulty: " + dto.getLevelDifficulty());
+        }
+
+        Task task = new Task();
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setTaskAnswer(dto.getTaskAnswer());
+        task.setPoints(dto.getPoints());
+        task.setTaskType(dto.getTaskType());
+        task.setLevelDifficulty(dto.getLevelDifficulty());
+        task.setSampleData(dto.getSampleData());
+        task.setTest(test);
+
+        if (dto.getTopicId() != null) {
+            Topic topic = topicRepository.findById(dto.getTopicId())
+                    .orElseThrow(() -> new IllegalArgumentException("Topic ID not found"));
+            task.setTopic(topic);
+        } else if (dto.getTopicName() != null) {
+            Topic topic = topicRepository.findByName(dto.getTopicName())
+                    .orElseGet(() -> {
+                        Topic newTopic = new Topic();
+                        newTopic.setName(dto.getTopicName());
+                        newTopic.setLevelDifficulty(dto.getLevelDifficulty());
+                        return topicRepository.save(newTopic);
+                    });
+            task.setTopic(topic);
+        }
+
+        return taskRepository.save(task);
+    }
+
 
     @Override
     public void deleteTestByDifficulty(LevelDifficulty difficulty) {
