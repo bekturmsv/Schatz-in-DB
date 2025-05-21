@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -139,22 +141,25 @@ public class TaskController {
                 .map(taskMapper::toDto)
                 .toList();
 
-        List<PlayerTaskAnswerDto> taskAnswers = playerTaskAnswerRepository
-                .findAllByPlayerId(player.getId())
+        Set<Long> solvedTaskIds = playerTaskAnswerRepository
+                .findAllByPlayerId(player.getId())          // ⟵ table PlayerTaskAnswer
                 .stream()
-                .map(playerAnwerMapper::taskToDto)
+                .map(ans -> ans.getTask().getId())
+                .collect(Collectors.toSet());
+
+        List<TaskDto> tasksCompleted = tasks.stream()
+                .filter(t -> solvedTaskIds.contains(t.getId()))
                 .toList();
 
-        List<PlayerTestAnswerDto> testAnswers = playerTestAnswerRepository
-                .findAllByPlayerId(player.getId())
-                .stream()
-                .map(playerAnwerMapper::testToDto)
+        List<TaskDto> tasksNotCompleted = tasks.stream()
+                .filter(t -> !solvedTaskIds.contains(t.getId()))
                 .toList();
+
+
         return ResponseEntity.ok(
                 hideTaskAnswer(Map.of(
-                "tasks",        tasks,
-                "taskAnswers",  taskAnswers,
-                "testAnswers",  testAnswers
+                        "tasksCompleted",    tasksCompleted,
+                        "tasksNotCompleted", tasksNotCompleted
         )));
     }
 
