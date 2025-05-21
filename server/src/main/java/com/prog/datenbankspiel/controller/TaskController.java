@@ -118,19 +118,18 @@ public class TaskController {
         ));
     }
 
-    @GetMapping("/{difficulty}/{topicName}/tasks")
-    public ResponseEntity<?> getAllTasks(@PathVariable String difficulty,
+    @GetMapping("/{level}/{topicName}/tasks")
+    public ResponseEntity<?> getAllTasks(@PathVariable LevelDifficulty  level,
                                          @PathVariable String topicName) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.  getContext().getAuthentication();
         Player player = (Player) userRepository.findByUsername(
                 SecurityContextHolder.getContext().getAuthentication().getName()
         ).orElseThrow();
-        LevelDifficulty level = LevelDifficulty.valueOf(difficulty.toUpperCase());
         if (!hasAccess(player.getId(), level)) {
             return ResponseEntity.status(403)
                     .body("You don't have access to this level!");
         }
-        Topic topic = topicRepository.findByName(topicName.trim()).orElseThrow();
+        Topic topic = topicRepository.findByName(topicName.toUpperCase().trim()).orElseThrow();
 
         List<TaskDto> tasks = taskRepository.findByLevelDifficultyAndTopic(level, topic)
                 .stream()
