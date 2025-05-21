@@ -25,24 +25,22 @@ export const initializeAuth = createAsyncThunk(
     "auth/initialize",
     async (_, { dispatch, getState }) => {
       const token = getState().auth.token;
-      if (token) {
-        try {
-          // ВАЖНО! Просто результат, не деструктурировать { data }
-          const result = await dispatch(authApi.endpoints.getMe.initiate()).unwrap();
-          // result = { token, user }
-          console.log("getMe result", result);
-          if (result.token) dispatch(setToken(result.token));
-          if (result.user) dispatch(setUser(result.user));
-          return result.user;
-        } catch (error) {
-          if (error && error.status === 401) {
-            dispatch(logout());
-            localStorage.removeItem("authToken");
-          }
-          return null;
-        }
+      if (!token) {
+        // Нет токена — не надо грузить, сразу сбрасываем loading
+        return null;
       }
-      return null;
+      try {
+        const result = await dispatch(authApi.endpoints.getMe.initiate()).unwrap();
+        if (result.token) dispatch(setToken(result.token));
+        if (result.user) dispatch(setUser(result.user));
+        return result.user;
+      } catch (error) {
+        if (error && error.status === 401) {
+          dispatch(logout());
+          localStorage.removeItem("authToken");
+        }
+        return null;
+      }
     }
 );
 
@@ -79,10 +77,10 @@ const authSlice = createSlice({
         })
         .addCase(initializeAuth.fulfilled, (state, action) => {
           state.status = "succeeded";
+          state.isAuthLoading = false;
           if (action.payload) {
             state.user = action.payload;
             state.isAuthenticated = true;
-            state.isAuthLoading = false;
             state.role = action.payload.role || "player";
           } else {
             state.user = null;
