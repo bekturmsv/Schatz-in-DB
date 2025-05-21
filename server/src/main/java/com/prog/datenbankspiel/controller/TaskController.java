@@ -1,5 +1,7 @@
 package com.prog.datenbankspiel.controller;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.mappers.PlayerAnwerMapper;
 import com.prog.datenbankspiel.mappers.TaskMapper;
@@ -13,6 +15,7 @@ import com.prog.datenbankspiel.repository.user.UserRepository;
 import com.prog.datenbankspiel.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -147,11 +150,12 @@ public class TaskController {
                 .stream()
                 .map(playerAnwerMapper::testToDto)
                 .toList();
-        return ResponseEntity.ok(Map.of(
+        return ResponseEntity.ok(
+                hideTaskAnswer(Map.of(
                 "tasks",        tasks,
                 "taskAnswers",  taskAnswers,
                 "testAnswers",  testAnswers
-        ));
+        )));
     }
 
 
@@ -172,7 +176,7 @@ public class TaskController {
         if (task == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(taskMapper.toDto(task));
+        return ResponseEntity.ok(hideTaskAnswer(taskMapper.toDto(task)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -223,5 +227,13 @@ public class TaskController {
                     playerTestAnswerRepository
                             .existsByTest_LevelDifficultyAndPlayerId(requested, playerId);
         };
+    }
+
+    private MappingJacksonValue hideTaskAnswer(Object body) {
+        MappingJacksonValue value = new MappingJacksonValue(body);
+        value.setFilters(new SimpleFilterProvider().addFilter(
+                TaskDto.TASK_DTO_FILTER,
+                SimpleBeanPropertyFilter.serializeAllExcept("taskAnswer")));
+        return value;
     }
 }
