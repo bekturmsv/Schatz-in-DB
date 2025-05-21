@@ -6,18 +6,40 @@ import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.task.enums.TaskType;
 import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.Topic;
+import com.prog.datenbankspiel.model.user.Theme;
 import com.prog.datenbankspiel.repository.task.TaskRepository;
 import com.prog.datenbankspiel.repository.task.TopicRepository;
+import com.prog.datenbankspiel.repository.user.ThemeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
 
 @Configuration
 public class MvpInitializer {
 
     @Bean
-    public CommandLineRunner init(TaskRepository taskRepo, TopicRepository topicRepo) {
+    public CommandLineRunner init(TaskRepository taskRepo, TopicRepository topicRepo, ThemeRepository themeRepo) {
         return args -> {
+            // THEMES
+            Map<String, Long> themesWithCost = Map.of(
+                    "default", 0L,
+                    "dark", 100L,
+                    "neon", 200L,
+                    "vintage", 150L
+            );
+
+            for (var entry : themesWithCost.entrySet()) {
+                String name = entry.getKey();
+                Long cost = entry.getValue();
+                if (!themeRepo.existsByName(name)) {
+                    Theme t = new Theme();
+                    t.setName(name);
+                    t.setCost(cost);
+                    themeRepo.save(t);
+                }
+            }
 
             // === WHERE ===
             Topic where = saveTopicIfNotExists(topicRepo, "WHERE", LevelDifficulty.EASY);
