@@ -22,7 +22,7 @@ public class PlayerLoginDto {
     private GroupShortDto group;
     private SpecialistGroup specialistGroup;
     private Integer matriculationNumber;
-    private List<String> purchasedThemes;
+    private List<ThemeDto> purchasedThemes;
 
     private Map<String, Object> progress;
     private List<Map<String, Object>> tasks;

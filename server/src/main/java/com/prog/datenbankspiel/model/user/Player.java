@@ -4,7 +4,7 @@ import com.prog.datenbankspiel.model.user.enums.SpecialistGroup;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -21,8 +21,11 @@ public class Player extends User {
     @JoinColumn(name = "group_id")
     private Group groupId;
 
-    @ElementCollection
-    @CollectionTable(name = "player_themes", joinColumns = @JoinColumn(name = "player_id"))
-    @Column(name = "theme")
-    private List<String> purchasedThemes;
+    @ManyToMany
+    @JoinTable(
+            name = "player_themes",
+            joinColumns = @JoinColumn(name = "player_id"),
+            inverseJoinColumns = @JoinColumn(name = "theme_id")
+    )
+    private Set<Theme> purchasedThemes;
 }

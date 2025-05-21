@@ -7,10 +7,12 @@ import com.prog.datenbankspiel.model.task.Task;
 import com.prog.datenbankspiel.model.task.Topic;
 import com.prog.datenbankspiel.model.task.enums.LevelDifficulty;
 import com.prog.datenbankspiel.model.user.Player;
+import com.prog.datenbankspiel.model.user.Theme;
 import com.prog.datenbankspiel.model.user.User;
 import com.prog.datenbankspiel.model.user.enums.Roles;
 import com.prog.datenbankspiel.repository.task.PlayerTaskAnswerRepository;
 import com.prog.datenbankspiel.repository.task.TopicRepository;
+import com.prog.datenbankspiel.repository.user.ThemeRepository;
 import com.prog.datenbankspiel.repository.user.UserRepository;
 import com.prog.datenbankspiel.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -41,6 +43,7 @@ public class AuthController {
     private final PlayerTaskAnswerRepository playerTaskAnswerRepository;
     private final TaskService taskService;
     private final TopicRepository topicRepository;
+    private final ThemeRepository themeRepository;
 
 
     @PostMapping("/login")
@@ -142,7 +145,15 @@ public class AuthController {
             playerDto.setRoles(player.getRole());
             playerDto.setPoints(player.getTotal_points());
             playerDto.setCurrentTheme(player.getDesign());
-            playerDto.setPurchasedThemes(player.getPurchasedThemes());
+
+            List<ThemeDto> themeDtos = player.getPurchasedThemes().stream().map(theme -> {
+                ThemeDto dto = new ThemeDto();
+                dto.setName(theme.getName());
+                dto.setCost(theme.getCost());
+                return dto;
+            }).toList();
+
+            playerDto.setPurchasedThemes(themeDtos);
 
             if (player.getGroupId() != null) {
                 GroupShortDto groupDto = new GroupShortDto();
@@ -174,7 +185,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-
+    @Transactional
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -192,7 +203,9 @@ public class AuthController {
         player.setTotal_points(0L);
         player.setLevel_id(1L);
         player.setDesign("default");
-        player.setPurchasedThemes(List.of("default"));
+        Theme defaultTheme = themeRepository.findByName("default")
+                .orElseThrow(() -> new RuntimeException("Default theme not found"));
+        player.setPurchasedThemes(Set.of(defaultTheme));
 
         player.setMatriculation_number(request.getMatriculationNumber());
         player.setSpecialist_group(request.getSpecialistGroup());
@@ -306,7 +319,15 @@ public class AuthController {
                 playerDto.setRoles(player.getRole());
                 playerDto.setPoints(player.getTotal_points());
                 playerDto.setCurrentTheme(player.getDesign());
-                playerDto.setPurchasedThemes(player.getPurchasedThemes());
+
+                List<ThemeDto> themeDtos = player.getPurchasedThemes().stream().map(theme -> {
+                    ThemeDto dto = new ThemeDto();
+                    dto.setName(theme.getName());
+                    dto.setCost(theme.getCost());
+                    return dto;
+                }).toList();
+
+                playerDto.setPurchasedThemes(themeDtos);
 
                 if (player.getGroupId() != null) {
                     GroupShortDto groupDto = new GroupShortDto();
