@@ -1,5 +1,8 @@
 package com.prog.datenbankspiel.controller;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.prog.datenbankspiel.dto.task.TaskDto;
 import com.prog.datenbankspiel.dto.test.TestAnswer;
 import com.prog.datenbankspiel.dto.test.TestDto;
@@ -11,6 +14,7 @@ import com.prog.datenbankspiel.repository.user.UserRepository;
 import com.prog.datenbankspiel.service.TestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,20 +51,38 @@ public class TestController {
 
     @Transactional
     @GetMapping("/{difficulty}")
-    public ResponseEntity<TestDto> getTestByDifficulty(@PathVariable String difficulty) {
+    public MappingJacksonValue getTest(@PathVariable String difficulty) {
         LevelDifficulty level = LevelDifficulty.valueOf(difficulty.toUpperCase());
-        Test test = testService.getTestByDifficulty(level);
-        return ResponseEntity.ok(testMapper.toDto(test));
+        TestDto testDto = testMapper.toDto(testService.getTestByDifficulty(level));
+
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter
+                .serializeAllExcept("taskAnswer"); // <== HIDE THIS FIELD
+
+        FilterProvider filters = new SimpleFilterProvider()
+                .addFilter("taskDtoFilter", filter);
+
+        MappingJacksonValue mapping = new MappingJacksonValue(testDto);
+        mapping.setFilters(filters);
+        return mapping;
     }
+
 
     //  ADMIN ENDPOINTS
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity<TestDto> createTestWithTasks(@RequestBody TestDto dto) {
+    public MappingJacksonValue createTestWithTasks(@RequestBody TestDto dto) {
         Test test = testService.createTest(dto);
-        return ResponseEntity.ok(testMapper.toDto(test));
+        TestDto result = testMapper.toDto(test);
+
+        // Apply filter to hide 'taskAnswer' in response
+        SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAllExcept("taskAnswer");
+        FilterProvider filters = new SimpleFilterProvider().addFilter("taskDtoFilter", filter);
+        MappingJacksonValue mapping = new MappingJacksonValue(result);
+        mapping.setFilters(filters);
+        return mapping;
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{difficulty}/task/add")
