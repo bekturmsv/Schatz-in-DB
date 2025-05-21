@@ -130,7 +130,7 @@ public class TaskController {
             return ResponseEntity.status(403)
                     .body("You don't have access to this level!");
         }
-        Topic topic = topicRepository.findByName(topicName.toLowerCase().trim()).orElseThrow();
+        Topic topic = topicRepository.findByName(topicName.trim()).orElseThrow();
 
         List<TaskDto> tasks = taskRepository.findByLevelDifficultyAndTopic(level, topic)
                 .stream()
