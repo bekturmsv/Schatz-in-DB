@@ -8,8 +8,8 @@ import { store } from "./store/store";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home/Home";
-import SignIn from "./pages/SignIn/SignIn";
-import SignUp from "./pages/SignUp/SignUp";
+import Login from "@/pages/Login/Login.jsx";
+import SignUp from "@/pages/Register/Register.jsx";
 import Profile from "./pages/Profile/Profile";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
 import DifficultyLevel from "./pages/DifficultyLevel/DifficultyLevel";
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/login",
-        element: <SignIn />,
+        element: <Login />,
       },
       {
         path: "/register",

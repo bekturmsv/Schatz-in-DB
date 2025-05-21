@@ -1,18 +1,27 @@
 import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../components/custom/Navbar.jsx";
 import Footer from "../components/custom/Footer.jsx";
 import "../styles/theme.css";
+import { useEffect } from "react";
+import { initializeAuth } from "@/features/auth/authSlice.js";
+import Loading from "@/components/custom/Loading.jsx";
 
 export default function MainLayout() {
+    const dispatch = useDispatch();
+    const isAuthLoading = useSelector((state) => state.auth.isAuthLoading);
 
+    useEffect(() => {
+        dispatch(initializeAuth());
+    }, [dispatch]);
 
     return (
-        <div className="flex flex-col min-h-screen" >
+        <div className="flex flex-col min-h-screen relative">
             <Navbar />
-            <main className="flex-grow bg-transparent pt-16">
+            <main className="flex-grow">
                 <Outlet />
             </main>
+            {isAuthLoading && <Loading />}
             <Footer />
         </div>
     );
