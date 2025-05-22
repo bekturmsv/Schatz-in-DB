@@ -1,8 +1,9 @@
+// src/features/level/Level.jsx
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import mockTasks from '../../data/mockTasks';
-import { getUser } from '../../data/mockUser.js';
+import { useGetTopicsQuery } from '../../features/task/taskApi.js';
+import Loading from "@/components/custom/Loading.jsx";
 
 export default function Level() {
     const { difficulty } = useParams();
@@ -10,87 +11,54 @@ export default function Level() {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-    // Проверяем авторизацию
+    const {
+        data: topics = [],
+        isLoading,
+        isError,
+    } = useGetTopicsQuery(difficulty, { skip: !difficulty });
+
+    // Редирект на логин, если не в системе
     if (!isAuthenticated) {
         navigate('/login');
         return null;
     }
 
-    // Получаем данные пользователя
-    const user = getUser();
-    const completedTasks = user.completedTasks[difficulty.toLowerCase()] || [];
-    const isLevelCompleted = user.completedLevels[difficulty.toLowerCase()];
-    const userTasks = user.tasks.filter((task) => task.type.toLowerCase() === difficulty.toLowerCase());
+    // Запрашиваем темы по уровню
 
-    // Получаем данные уровня
-    const level = mockTasks[difficulty.toLowerCase()];
-    if (!level) {
+
+    // Логируем то, что пришло от API
+    console.log('Level.jsx — topics response:', topics);
+
+    if (isLoading) {
+        return <Loading/>;
+    }
+
+    if (isError) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">
-                    {t('levelNotFound')}
-                </h1>
-            </div>
+            <p className="p-4 text-red-600">
+                {t('errorLoadingTopics')}
+            </p>
         );
     }
 
-    // Проверяем, все ли обычные задачи завершены
-    const allRegularTasksCompleted = level.regularTasks.every((task) =>
-        completedTasks.includes(task.id)
-    );
-
-    const handleTaskClick = (taskId) => {
-        navigate(`/level/${difficulty}/task/${taskId}`);
-    };
-
-    const handleFinalTestClick = () => {
-        if (allRegularTasksCompleted) {
-            navigate(`/level/${difficulty}/final-test`);
-        }
-    };
-
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-green-200 font-mono">
-            <h1 className="text-4xl font-bold text-black uppercase mb-4">
-                {t(`${difficulty.toLowerCase()}Level`)}
+        <div className="min-h-screen font-mono bg-green-200 flex flex-col items-center justify-center">
+            <h1 className="text-4xl font-bold text-black uppercase mb-6">
+                {t(`${difficulty}Level`)}
             </h1>
-            <p className="text-lg text-gray-700 mb-6">
-                {t(`${difficulty.toLowerCase()}Description`)}
-            </p>
-            <div className="w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4">{t('tasks')}</h2>
-                <ul className="space-y-2">
-                    {level.regularTasks.map((task) => (
-                        <li
-                            key={task.id}
-                            className="bg-gray-300 p-4 rounded-lg text-black flex justify-between items-center cursor-pointer hover:bg-gray-400 transition"
-                            onClick={() => handleTaskClick(task.id)}
-                        >
-                            <span>{task.name}</span>
-                            <span>{completedTasks.includes(task.id) || isLevelCompleted ? '✅' : '⬜'}</span>
-                        </li>
-                    ))}
-                </ul>
-                <div className="mt-4">
-                    <h3 className="text-xl font-bold">{t('progress')}</h3>
-                    {userTasks.map((task, index) => (
-                        <p key={index} className="text-gray-700">
-                            {task.theme}: {task.completed}/{task.total} {t('tasksCompleted')}
-                        </p>
-                    ))}
-                </div>
-                <button
-                    onClick={handleFinalTestClick}
-                    className={`mt-4 flex items-center justify-center space-x-2 py-2 px-4 rounded-lg transition ${
-                        allRegularTasksCompleted && !isLevelCompleted
-                            ? 'bg-yellow-500 text-black hover:bg-yellow-600'
-                            : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    }`}
-                    disabled={!allRegularTasksCompleted || isLevelCompleted}
-                >
-                    <span>{t('finalTest')}</span>
-                    {!allRegularTasksCompleted && <span>🔒</span>}
-                </button>
+            <div className="w-full max-w-md space-y-4">
+                {topics.map((topic) => (
+                    <div
+                        key={topic.id}
+                        className="cursor-pointer hover:bg-gray-300 bg-white p-4 rounded-lg shadow"
+                        onClick={() => navigate(`/level/${difficulty}/topic/${topic.id}`)}
+                    >
+                        <h2 className="text-2xl font-semibold">{topic.title}</h2>
+                        {topic.description && (
+                            <p className="text-gray-700 mt-1">{topic.description}</p>
+                        )}
+                    </div>
+                ))}
             </div>
         </div>
     );

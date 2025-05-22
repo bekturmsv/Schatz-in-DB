@@ -16,13 +16,17 @@ api.interceptors.request.use(
         }
 
         const token = store.getState().auth.token;
+        console.log(token, "TOKEN")
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log("HEADERS", config.headers.Authorization)
+
         return config;
     },
     (error) => Promise.reject(error)
 );
+
 
 api.interceptors.response.use(
     (response) => response,

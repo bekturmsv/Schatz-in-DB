@@ -1,33 +1,59 @@
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { topics } from "../../data/mockTopics";
+// src/features/topic/Topic.jsx
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { useGetTopicsQuery } from '../../features/task/taskApi.js';
 
-export default function Topics() {
+export default function Topic() {
+    const { difficulty } = useParams();
+    const level = difficulty?.toUpperCase();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const isAuthenticated = true; // Замените на useSelector для реальной проверки
+    const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
+    // Запрашиваем данные по level
+    const {
+        data: response = {},
+        isLoading,
+        isError,
+    } = useGetTopicsQuery(level, { skip: !difficulty });
+
+    // Если не авторизован — редирект на логин
     if (!isAuthenticated) {
-        navigate("/login");
+        navigate('/login');
         return null;
     }
 
+    // Выбираем список тем из поля `tasks`
+    const topics = response.tasks ?? [];
+
+    console.log('Topic.jsx — topics response:', response);
+
+    if (isLoading) {
+        return <p className="p-4">{t('loadingTopics')}</p>;
+    }
+    if (isError) {
+        return <p className="p-4 text-red-600">{t('errorLoadingTopics')}</p>;
+    }
+
     return (
-        <div className="min-h-screen font-mono">
-            <section className="container mx-auto py-12 px-4">
-                <h1 className="text-4xl font-bold text-blue-600 mb-8">TOPICS</h1>
-                <div className="flex flex-col space-y-4">
-                    {topics.map((topic) => (
-                        <div
-                            key={topic.id}
-                            className="cursor-pointer hover:bg-gray-200 p-4 rounded"
-                            onClick={() => navigate(`/training/${topic.id}`)}
-                        >
-                            <h2 className="text-xl font-semibold">{topic.title}</h2>
-                        </div>
-                    ))}
-                </div>
-            </section>
+        <div className="min-h-screen font-mono bg-green-100 flex flex-col items-center justify-center">
+            <h1 className="text-4xl font-bold text-black uppercase mb-6">
+                {t('selectTopic')} ({t(`${difficulty.toLowerCase()}Level`)})
+            </h1>
+            <ul className="w-full max-w-md space-y-2">
+                {topics.map((topic) => (
+                    <li
+                        key={topic.name}
+                        className="bg-white p-4 rounded-lg shadow cursor-pointer hover:bg-gray-50"
+                        onClick={() =>
+                            navigate(`/level/${level}/topic/${encodeURIComponent(topic.name)}`)
+                        }
+                    >
+                        <h2 className="text-xl font-medium">{topic.name}</h2>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
