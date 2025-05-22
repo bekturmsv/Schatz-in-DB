@@ -17,9 +17,10 @@ import Level from "./pages/Level/Level";
 import Task from "@/pages/Task/Task.jsx";
 import FinalTest from "@/pages/FinalTest/FinalTest.jsx";
 import Topics from "@/pages/Topics/Topics.jsx";
-import TopicDetail from "@/pages/TopicDetails/TopicDetails.jsx";
 import RequireAdmin from "@/hoc/RequireAdmin.jsx";
 import CreateTask from "@/pages/Admin/Tasks/CreateTask.jsx";
+import Topic from "@/pages/Topics/Topics.jsx";
+import TasksList from "@/pages/TasksList/TasksList.jsx";
 
 const router = createBrowserRouter([
   {
@@ -56,13 +57,13 @@ const router = createBrowserRouter([
       {
         path: "/level/:difficulty",
         element: (
-          <ProtectedRoute>
-            <Level />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Topic />
+            </ProtectedRoute>
         ),
       },
       {
-        path: "/level/:difficulty/task/:taskId",
+        path: "/level/:difficulty/topic/:topicName/task/:taskId",
         element: (
             <ProtectedRoute>
               <Task/>
@@ -70,7 +71,7 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "level/:difficulty/final-test",
+        path: "/level/:difficulty/final-test",
         element: (
             <ProtectedRoute>
               <FinalTest/>
@@ -81,11 +82,15 @@ const router = createBrowserRouter([
       element: <Topics/>
       },
       {
-        path: "/training/:topicId",
-        element: <TopicDetail />
+        path: "/level/:difficulty/topic/:topicName", // New route for TasksList
+        element: (
+            <ProtectedRoute>
+              <TasksList />
+            </ProtectedRoute>
+        ),
       },
       {
-        path: "admin/tasks/create",
+        path: "/admin/tasks/create",
         element: <RequireAdmin>
           <CreateTask />
         </RequireAdmin>

@@ -7,18 +7,22 @@ export default function DifficultyLevel() {
     const navigate = useNavigate();
     const user = getUser();
 
-    const handleDifficultySelect = (difficulty) => {
-        navigate(`/level/${difficulty.toLowerCase()}`);
+    // Динамический массив уровней из user.completedLevels
+    const difficulties = Object.keys(user.completedLevels).map(key => ({
+        key,
+        label: t(key),
+        name: key.charAt(0).toUpperCase() + key.slice(1),
+        isCompleted: user.completedLevels[key],
+    }));
+
+    const handleDifficultySelect = (difficulty, isLocked) => {
+        if (!isLocked) {
+            navigate(`/level/${difficulty.toLowerCase()}`);
+        }
     };
 
-    const difficulties = [
-        { name: 'Easy', label: t('easy'), key: 'easy' },
-        { name: 'Medium', label: t('medium'), key: 'medium' },
-        { name: 'Hard', label: t('hard'), key: 'hard' },
-    ];
-
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center  font-mono">
+        <div className="min-h-screen flex flex-col items-center justify-center font-mono">
             <h1 className="text-4xl font-bold mb-8 text-black uppercase">
                 {t('difficultyLevel')}
             </h1>
@@ -29,22 +33,38 @@ export default function DifficultyLevel() {
                 </p>
             </div>
             <div className="flex flex-col space-y-4">
-                {difficulties.map((diff) => (
-                    <button
-                        key={diff.key}
-                        onClick={() => handleDifficultySelect(diff.name)}
-                        className={`relative bg-gray-300 text-black py-4 px-8 rounded-lg text-xl uppercase hover:bg-gray-400 transition ${
-                            user.completedLevels[diff.key] ? 'bg-green-400 hover:bg-green-500' : ''
-                        }`}
-                    >
-                        {diff.label}
-                        {user.completedLevels[diff.key] && (
-                            <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                ✅
-              </span>
-                        )}
-                    </button>
-                ))}
+                {difficulties.map((diff, idx) => {
+                    let isLocked = false;
+                    if (idx > 0) {
+                        // блокируем, если предыдущий уровень не завершён
+                        const prevLevel = difficulties[idx - 1];
+                        isLocked = !prevLevel.isCompleted;
+                    }
+
+                    return (
+                        <button
+                            key={diff.key}
+                            onClick={() => handleDifficultySelect(diff.name, isLocked)}
+                            disabled={isLocked}
+                            className={`
+                                relative py-4 px-8 rounded-lg text-xl uppercase font-bold transition 
+                                flex items-center justify-center
+                                border-2
+                                ${diff.isCompleted ? 'bg-green-500 border-green-700 text-white' : ''}
+                                ${!diff.isCompleted && !isLocked ? 'bg-gray-300 border-gray-400 text-black hover:bg-green-100' : ''}
+                                ${isLocked ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed' : ''}
+                            `}
+                        >
+                            {diff.label}
+                            {isLocked && (
+                                <span className="ml-2 text-2xl" title={t('completePreviousLevelFirst')}>🔒</span>
+                            )}
+                            {diff.isCompleted && (
+                                <span className="ml-2 text-2xl" title={t('completed')}>✅</span>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

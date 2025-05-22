@@ -23,11 +23,27 @@ export default function Navbar() {
 
   const isLogged = Boolean(token);
 
+  console.log(user)
+
   return (
       <nav className="fixed top-0 left-0 w-full bg-gray-300 p-4 shadow-md font-mono z-50">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-black text-2xl font-bold uppercase">
-            {t('appName')}
+          <div className="flex items-center text-black text-2xl font-bold uppercase space-x-2">
+            {/* SVG детектива с лупой */}
+            <span className="w-9 h-9 inline-block">
+            <svg viewBox="0 0 40 40" fill="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="10" stroke="#1f2937" strokeWidth="2"/>
+              <ellipse cx="18" cy="14" rx="4" ry="2" fill="#e5e7eb" stroke="#1f2937" strokeWidth="1"/>
+              <path d="M13 25c1.5-3 8.5-3 11 0" stroke="#1f2937" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M28 28l6 6" stroke="#1f2937" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="28" cy="28" r="4" fill="#fbbf24" stroke="#1f2937" strokeWidth="2"/>
+              <ellipse cx="16.5" cy="16.5" rx="1.2" ry="1.3" fill="#1f2937"/>
+              <ellipse cx="21.5" cy="16.5" rx="1.2" ry="1.3" fill="#1f2937"/>
+              <path d="M17 10c.2-2.5 5.8-2.5 6 0" stroke="#1f2937" strokeWidth="1"/>
+              <rect x="14" y="7" width="8" height="3" rx="1.5" fill="#fbbf24" stroke="#1f2937" strokeWidth="1"/>
+            </svg>
+          </span>
+            <span>Query Crime</span>
           </div>
           <button
               className="md:hidden text-black focus:outline-none"
