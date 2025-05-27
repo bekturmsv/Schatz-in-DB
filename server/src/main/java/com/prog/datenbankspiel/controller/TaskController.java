@@ -2,6 +2,7 @@ package com.prog.datenbankspiel.controller;
 
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.prog.datenbankspiel.dto.GroupDto;
 import com.prog.datenbankspiel.dto.task.*;
 import com.prog.datenbankspiel.mappers.PlayerAnwerMapper;
 import com.prog.datenbankspiel.mappers.TaskMapper;
@@ -205,6 +206,18 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
+
+    // topics crud
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all/topics")
+    public Iterable<TopicDto> getAllTopics() {
+        return topicRepository.findAll()
+                .stream()
+                .map(topicMapper::toDto)
+                .toList();
+    }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create/topic")
     public ResponseEntity<?> createTopic(@RequestBody CreateTopicRequest request) {
@@ -220,7 +233,34 @@ public class TaskController {
         return ResponseEntity.ok(request);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/update/topic")
+    public ResponseEntity<?> updateTopic(@RequestBody CreateTopicRequest request) {
+        Topic topic = topicRepository.findByName(request.getName()).orElse(null);
+        if (topic == null) {
+            return ResponseEntity.badRequest().body("Topic with name "+request.getName()+" not found");
+        }
 
+        topic.setName(request.getName());
+        topic.setLevelDifficulty(request.getDifficulty());
+
+        topicRepository.save(topic);
+        return ResponseEntity.ok(request);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete/topic/{id}")
+    public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+        if (!topicRepository.existsById(id)) {
+            throw new RuntimeException("Topic not found with id: " + id);
+        }
+        topicRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+    //whether the previous level was completed or not
     private boolean hasAccess(Long playerId, LevelDifficulty requested) {
 
         return switch (requested) {
@@ -234,6 +274,7 @@ public class TaskController {
         };
     }
 
+    // task content should not contain the answer
     private MappingJacksonValue hideTaskAnswer(Object body) {
         MappingJacksonValue value = new MappingJacksonValue(body);
         value.setFilters(new SimpleFilterProvider().addFilter(
