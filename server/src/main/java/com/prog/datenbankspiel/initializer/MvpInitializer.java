@@ -48,20 +48,20 @@ public class MvpInitializer {
             JsonNode sampleData1 = mapper.readTree("""
                 {
                   "verdaechtiger": [
-                    { "id": 1, "name": "Markus Müller", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 44, "alter": 34, "wohnort": "Zwickau" },
-                    { "id": 2, "name": "Thomas Becker", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 42, "alter": 47, "wohnort": "Leipzig" },
-                    { "id": 3, "name": "Sabine Keller", "haarfarbe": "schwarz", "geschlecht": "w", "schuhgroesse": 39, "alter": 29, "wohnort": "Dresden" },
-                    { "id": 4, "name": "Maria Weber", "haarfarbe": "blond", "geschlecht": "w", "schuhgroesse": 37, "alter": 65, "wohnort": "Zwickau" },
-                    { "id": 5, "name": "Peter Schneider", "haarfarbe": "schwarz", "geschlecht": "m", "schuhgroesse": 44, "alter": 72, "wohnort": "Chemnitz" },
-                    { "id": 6, "name": "Uwe Richter", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 45, "alter": 70, "wohnort": "Zwickau" }
+                    { "id": 1, "name": "Markus Müller", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 44, "alter": 34, "wohnort": "Zwickau", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden"},
+                    { "id": 2, "name": "Thomas Becker", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 42, "alter": 47, "wohnort": "Leipzig", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden" },
+                    { "id": 3, "name": "Sabine Keller", "haarfarbe": "schwarz", "geschlecht": "w", "schuhgroesse": 39, "alter": 29, "wohnort": "Dresden", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden" },
+                    { "id": 4, "name": "Maria Weber", "haarfarbe": "blond", "geschlecht": "w", "schuhgroesse": 37, "alter": 65, "wohnort": "Zwickau", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden" },
+                    { "id": 5, "name": "Peter Schneider", "haarfarbe": "schwarz", "geschlecht": "m", "schuhgroesse": 44, "alter": 72, "wohnort": "Chemnitz", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden" },
+                    { "id": 6, "name": "Uwe Richter", "haarfarbe": "braun", "geschlecht": "m", "schuhgroesse": 45, "alter": 70, "wohnort": "Zwickau", "groesse": 180, "vorstrafen":1, "alibi":"vorhanden" }
                   ]
                 }
             """);
             JsonNode sampleData2 = mapper.readTree("""
                 {
                   "fall": [
-                    { "fall_id": 101, "anzahl_gegenstaende": 2, "schaden": 4500 },
-                    { "fall_id": 102, "anzahl_gegenstaende": 4, "schaden": 9200 }
+                    { "id": 101, "tatort":"Zwickau Rathaus", "anzahl_gegenstaende": 2, "schaden": 4500, "ermittler":"Steven Holmes" },
+                    { "id": 102, "tatort":"Zwickau Arcaden", "anzahl_gegenstaende": 4, "schaden": 9200, "ermittler":"Brain Wattson"}
                   ]
                 }
             """);
