@@ -200,6 +200,13 @@ public class TaskController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/update/{id}/hint")
+    public ResponseEntity<TaskDto> updateHint(@PathVariable Long id, @RequestBody String hint) {
+        Task updated = taskService.updateHint(id, hint); // handle inside service
+        return ResponseEntity.ok(taskMapper.toDto(updated));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);

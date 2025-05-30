@@ -52,6 +52,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Task updateHint(Long id, String hint) {
+        Task existing = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+        existing.getHint().setDescription(hint);
+        return taskRepository.save(existing);
+    }
+
+    @Override
     public void deleteTask(Long id) {
         if (!taskRepository.existsById(id)) {
             throw new RuntimeException("Task not found with id: " + id);
