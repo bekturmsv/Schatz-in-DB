@@ -5,8 +5,9 @@ import { availableThemes } from "../../data/mockUser";
 import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useState, useRef } from "react";
+import {useState, useRef, useEffect} from "react";
 import { setUser } from "@/features/auth/authSlice.js";
+import {useGetThemesQuery, usePurchaseThemeMutation} from "@/features/theme/themeApi.js";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -15,49 +16,56 @@ export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const currentTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const {data: allThemes = [], isLoading: isThemesLoading, isError:isThemesError} = useGetThemesQuery()
+  const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
 
   const [carouselPosition, setCarouselPosition] = useState(0);
   const carouselRef = useRef(null);
 
   console.log("User from Redux:", user);
 
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, user, navigate])
+
   if (!isAuthenticated || !user) {
-    navigate("/login");
-    return null;
+    return null; // можно <Loader />
   }
+
+  const purchasedThemeNames = Array.isArray(user.purchasedThemes)
+      ? user.purchasedThemes.map(t => t.name)
+      : [];
+  const purchasedThemeOptions = allThemes.filter(t => purchasedThemeNames.includes(t.name));
+
+
 
   const progressPercentage =
       (user.progress.tasksSolved / user.progress.totalTasks) * 100;
 
   const handlePurchaseTheme = (theme) => {
-    if (user.points < theme.price) {
+    if (user.points < theme.cost) {
       toast.error(t("notEnoughPoints"));
       return;
     }
-
-    if (user.purchasedThemes.includes(theme.id)) {
+    if (user.purchasedThemes.some(t => t.name === theme.name)) {
       toast.info(t("themeAlreadyPurchased"));
       return;
     }
-
-    const updatedPoints = user.points - theme.price;
-    const updatedPurchasedThemes = [...user.purchasedThemes, theme.id];
-    const updatedUser = {
-      points: updatedPoints,
-      purchasedThemes: updatedPurchasedThemes,
-    };
-    dispatch(setUser({ ...user, ...updatedUser }));
+    const updatedPoints = user.points - theme.cost;
+    const updatedPurchasedThemes = [...user.purchasedThemes, { name: theme.name, cost: theme.cost }];
+    dispatch(setUser({ ...user, points: updatedPoints, purchasedThemes: updatedPurchasedThemes }));
     toast.success(t("themePurchased", { theme: theme.name }));
   };
 
-  const handleSelectTheme = (themeId) => {
-    if (!user.purchasedThemes.includes(themeId)) {
+  const handleSelectTheme = (themeName) => {
+    if (!purchasedThemeNames.includes(themeName)) {
       toast.error(t("themeNotPurchased"));
       return;
     }
-
-    dispatch(setTheme(themeId));
-    toast.success(t("themeSelected", { theme: availableThemes.find((t) => t.id === themeId).name }));
+    dispatch(setTheme(themeName));
+    toast.success(t("themeSelected", { theme: themeName }));
   };
 
   const scrollLeft = (e) => {
@@ -82,6 +90,10 @@ export default function Profile() {
   const latestCompletedTasks = completedTasks.length > 0
       ? completedTasks.sort((a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0)).slice(0, 3)
       : [];
+
+
+
+
 
   return (
       <div className="min-h-screen font-mono">
@@ -270,26 +282,23 @@ export default function Profile() {
                     onChange={(e) => handleSelectTheme(e.target.value)}
                     className="w-full p-2 border rounded"
                 >
-                  {user.purchasedThemes.map((themeId) => {
-                    const theme = availableThemes.find((t) => t.id === themeId);
-                    return (
-                        <option key={themeId} value={themeId}>
-                          {theme.name} {currentTheme === themeId ? `(${t("selected")})` : ""}
-                        </option>
-                    );
-                  })}
+                  {purchasedThemeOptions.map((theme) => (
+                      <option key={theme.name} value={theme.name}>
+                        {theme.name} ({theme.cost} {t("points")}) {currentTheme === theme.name ? `(${t("selected")})` : ""}
+                      </option>
+                  ))}
                 </select>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {availableThemes.map((theme) => (
+                {allThemes.map((theme) => (
                     <div
-                        key={theme.id}
+                        key={theme.name}
                         className="relative h-24 rounded-lg bg-gray-200 flex items-center justify-center"
                     >
                       <div className="text-center">
                         <p className="font-bold">{theme.name}</p>
-                        <p>{theme.price} {t("points")}</p>
-                        {user.purchasedThemes.includes(theme.id) ? (
+                        <p>{theme.cost} {t("points")}</p>
+                        {purchasedThemeNames.includes(theme.name) ? (
                             <span className="text-green-500">{t("purchased")}</span>
                         ) : (
                             <button

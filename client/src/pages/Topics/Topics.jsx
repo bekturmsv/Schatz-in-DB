@@ -27,7 +27,6 @@ export default function Topic() {
     // Выбираем список тем из поля `tasks`
     const topics = response.tasks ?? [];
 
-    console.log('Topic.jsx — topics response:', response);
 
     if (isLoading) {
         return <p className="p-4">{t('loadingTopics')}</p>;

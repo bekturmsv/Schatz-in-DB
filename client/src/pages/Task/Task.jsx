@@ -112,6 +112,8 @@ export default function Task() {
     };
 
     const handleSubmit = async () => {
+        toast.success("Gut")
+
         try {
             // Выполняем SQL-запрос на фронте
             const result = await executeSqlQuery(answer, currentTask.sampleData);
@@ -176,6 +178,7 @@ export default function Task() {
                 toast.error(t("submissionError"));
             }
         }
+
     };
 
     const handleReset = () => {

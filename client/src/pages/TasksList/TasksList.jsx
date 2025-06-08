@@ -25,7 +25,9 @@ export default function TasksList() {
         return null;
     }
 
-    const tasks = response.tasks ?? [];
+
+
+    const tasks = response.tasksNotCompleted ?? [];
 
     console.log('TasksList.jsx — tasks response:', response);
 
