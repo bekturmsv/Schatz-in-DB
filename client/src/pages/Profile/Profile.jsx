@@ -1,13 +1,13 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { availableThemes } from "../../data/mockUser";
 import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {useState, useRef, useEffect} from "react";
+import { useState, useRef, useEffect } from "react";
 import { setUser } from "@/features/auth/authSlice.js";
-import {useGetThemesQuery, usePurchaseThemeMutation} from "@/features/theme/themeApi.js";
+import { useGetThemesQuery, usePurchaseThemeMutation } from "@/features/theme/themeApi.js";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -16,30 +16,26 @@ export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const currentTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const {data: allThemes = [], isLoading: isThemesLoading, isError:isThemesError} = useGetThemesQuery()
+  const { data: allThemes = [], isLoading: isThemesLoading } = useGetThemesQuery();
   const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
 
   const [carouselPosition, setCarouselPosition] = useState(0);
   const carouselRef = useRef(null);
 
-  console.log("User from Redux:", user);
-
   useEffect(() => {
     if (!isAuthenticated || !user) {
       navigate("/login");
     }
-  }, [isAuthenticated, user, navigate])
+  }, [isAuthenticated, user, navigate]);
 
-  if (!isAuthenticated || !user) {
-    return null; // можно <Loader />
-  }
+  if (!isAuthenticated || !user) return null; // можно <Loader />
 
   const purchasedThemeNames = Array.isArray(user.purchasedThemes)
-      ? user.purchasedThemes.map(t => t.name)
+      ? user.purchasedThemes.map((t) => t.name)
       : [];
-  const purchasedThemeOptions = allThemes.filter(t => purchasedThemeNames.includes(t.name));
-
-
+  const purchasedThemeOptions = allThemes.filter((t) =>
+      purchasedThemeNames.includes(t.name)
+  );
 
   const progressPercentage =
       (user.progress.tasksSolved / user.progress.totalTasks) * 100;
@@ -49,13 +45,22 @@ export default function Profile() {
       toast.error(t("notEnoughPoints"));
       return;
     }
-    if (user.purchasedThemes.some(t => t.name === theme.name)) {
+    if (user.purchasedThemes.some((t) => t.name === theme.name)) {
       toast.info(t("themeAlreadyPurchased"));
       return;
     }
     const updatedPoints = user.points - theme.cost;
-    const updatedPurchasedThemes = [...user.purchasedThemes, { name: theme.name, cost: theme.cost }];
-    dispatch(setUser({ ...user, points: updatedPoints, purchasedThemes: updatedPurchasedThemes }));
+    const updatedPurchasedThemes = [
+      ...user.purchasedThemes,
+      { name: theme.name, cost: theme.cost },
+    ];
+    dispatch(
+        setUser({
+          ...user,
+          points: updatedPoints,
+          purchasedThemes: updatedPurchasedThemes,
+        })
+    );
     toast.success(t("themePurchased", { theme: theme.name }));
   };
 
@@ -71,44 +76,71 @@ export default function Profile() {
   const scrollLeft = (e) => {
     e.preventDefault();
     const carousel = carouselRef.current;
-    carousel.scrollLeft -= 300;
+    carousel.scrollLeft -= 320;
     setCarouselPosition(Math.max(carouselPosition - 1, 0));
   };
 
   const scrollRight = (e) => {
     e.preventDefault();
     const carousel = carouselRef.current;
-    carousel.scrollLeft += 300;
+    carousel.scrollLeft += 320;
     setCarouselPosition(Math.min(carouselPosition + 1, user.tasks.length - 3));
   };
 
-  const completedTasks = user.tasks.filter((task) => {
-    console.log("Task:", task);
-    return task.completed > 0;
-  });
-  console.log("Completed Tasks:", completedTasks);
-  const latestCompletedTasks = completedTasks.length > 0
-      ? completedTasks.sort((a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0)).slice(0, 3)
-      : [];
+  const completedTasks = user.tasks.filter((task) => task.completed > 0);
+  const latestCompletedTasks =
+      completedTasks.length > 0
+          ? completedTasks
+              .sort(
+                  (a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0)
+              )
+              .slice(0, 3)
+          : [];
 
-
-
-
+  // Card and section fade variants
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.15, duration: 0.7, ease: "easeOut" },
+    }),
+  };
 
   return (
-      <div className="min-h-screen font-mono">
-        <section className="container mx-auto py-12 px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8">{t("myAccount")}</h1>
+      <div className="min-h-screen font-mono bg-gradient-to-br from-[#f8fafc] to-[#cbe7fa] pt-4">
+        <motion.section
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            className="container mx-auto py-12 px-4"
+        >
+          <motion.h1
+              initial={{ opacity: 0, y: -24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12, duration: 0.8 }}
+              className="text-3xl md:text-4xl font-extrabold mb-8 bg-gradient-to-r from-green-500 via-blue-400 to-cyan-400 bg-clip-text text-transparent"
+          >
+            {t("myAccount")}
+          </motion.h1>
           <div className="flex flex-col md:flex-row gap-8">
             {/* Левая колонка */}
-            <div className="md:w-1/3 flex flex-col items-center">
-              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+            <motion.div
+                variants={fadeUp}
+                custom={1}
+                className="md:w-1/3 flex flex-col items-center"
+            >
+              <motion.div
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, type: "spring" }}
+                  className="w-28 h-28 bg-gradient-to-tr from-gray-200 via-gray-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-lg"
+              >
                 <svg
-                    className="w-12 h-12 text-gray-500"
+                    className="w-14 h-14 text-gray-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                       strokeLinecap="round"
@@ -117,84 +149,107 @@ export default function Profile() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-              </div>
-              <h2 className="text-xl font-bold">
-                {user.firstname} {user.lastname}
-              </h2>
-
-              <p className="text-gray-600 mb-4">{user.nickname}</p>
-              <p className="text-gray-600 mb-2">Group: {user.specialistGroup || "Not specified"}</p>
-              <p className="text-gray-600 mb-4">Matrikelnummer: {user.matriculationNumber || "Not specified"}</p>
-              <Button className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition">
+              </motion.div>
+              <h2 className="text-xl font-bold">{user.firstname} {user.lastname}</h2>
+              <p className="text-gray-600 mb-4">@{user.nickname}</p>
+              <p className="text-gray-600 mb-2">
+                {t("group")}: {user.specialistGroup || t("notSpecified")}
+              </p>
+              <p className="text-gray-600 mb-4">
+                {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
+              </p>
+              <Button className="bg-gradient-to-r from-orange-500 to-yellow-400 text-white px-7 py-2 text-base rounded-xl shadow-md hover:scale-105 transition">
                 {t("editProfile")}
               </Button>
-            </div>
+            </motion.div>
 
             {/* Правая колонка */}
-            <div className="md:w-2/3">
+            <motion.div
+                variants={fadeUp}
+                custom={2}
+                className="md:w-2/3 flex flex-col gap-8"
+            >
               {/* Очки */}
-              <div className="flex items-center mb-6">
+              <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.18, duration: 0.7 }}
+                  className="flex items-center mb-2"
+              >
                 <svg
-                    className="w-8 h-8 text-orange-500 mr-2"
+                    className="w-9 h-9 text-orange-400 mr-3 drop-shadow"
                     fill="currentColor"
                     viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+                  <circle cx="10" cy="10" r="8" />
+                  <circle cx="10" cy="10" r="5" fill="#fff" />
                 </svg>
-                <span className="text-2xl font-bold text-orange-500">
+                <span className="text-3xl font-extrabold text-orange-500">
                 {user.points} {t("points")}
               </span>
-              </div>
+              </motion.div>
 
               {/* Прогресс */}
-              <div className="bg-gray-300 p-6 rounded-lg mb-6">
-                <p className="mb-2">
-                  {t("difficulty")}: {user.progress.difficulty}
-                </p>
-                <p className="mb-2">
-                  {t("currentTopic")}: {user.progress.topic}
-                </p>
-                <p className="mb-2">
-                  {progressPercentage.toFixed(0)}% {t("outOf")}{" "}
-                  {user.progress.totalTasks} {t("tasksSolved")}
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div
-                      className="bg-green-400 h-4 rounded-full"
-                      style={{ width: `${progressPercentage}%` }}
-                  />
+              <motion.div
+                  variants={fadeUp}
+                  custom={3}
+                  className="bg-white/80 backdrop-blur-lg p-7 rounded-xl mb-1 shadow-xl"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-semibold">{t("difficulty")}: <span className="font-bold">{user.progress.difficulty}</span></span>
+                  <span className="font-semibold">{t("currentTopic")}: <span className="font-bold">{user.progress.topic}</span></span>
                 </div>
-              </div>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="font-semibold">{progressPercentage.toFixed(0)}%</span>
+                  <span className="text-gray-500">{t("outOf")}</span>
+                  <span className="font-bold">{user.progress.totalTasks}</span>
+                  <span className="text-gray-500">{t("tasksSolved")}</span>
+                </div>
+                {/* Анимированная прогресс-бар */}
+                <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercentage}%` }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    className="bg-gradient-to-r from-green-400 to-blue-400 h-4 rounded-full"
+                    style={{ maxWidth: "100%" }}
+                />
+                <div className="w-full bg-gray-200 rounded-full h-4 mt-[-16px] z-0"></div>
+              </motion.div>
 
               {/* Карусель задач */}
-              <div className="relative mb-6">
-                <h3 className="text-xl font-bold mb-4">{t("tasks")}</h3>
-                <button
-                    onClick={scrollLeft}
-                    disabled={carouselPosition === 0}
-                    className={`absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-300 p-2 rounded-full z-10 hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed`}
-                >
-                  ←
-                </button>
-                <button
-                    onClick={scrollRight}
-                    disabled={carouselPosition >= user.tasks.length - 3}
-                    className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-300 p-2 rounded-full z-10 hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed`}
-                >
-                  →
-                </button>
+              <motion.div
+                  variants={fadeUp}
+                  custom={4}
+                  className="relative mb-2"
+              >
+                <div className="flex items-center mb-3">
+                  <h3 className="text-xl font-bold flex-1">{t("tasks")}</h3>
+                  <Button
+                      onClick={scrollLeft}
+                      disabled={carouselPosition === 0}
+                      className="mr-2 rounded-full bg-gray-200 hover:bg-green-200 text-xl px-2 py-1 transition disabled:opacity-60"
+                  >
+                    &#8592;
+                  </Button>
+                  <Button
+                      onClick={scrollRight}
+                      disabled={carouselPosition >= user.tasks.length - 3}
+                      className="rounded-full bg-gray-200 hover:bg-green-200 text-xl px-2 py-1 transition disabled:opacity-60"
+                  >
+                    &#8594;
+                  </Button>
+                </div>
                 <div
                     id="taskCarousel"
                     ref={carouselRef}
-                    className="flex overflow-x-auto space-x-4 snap-x snap-mandatory touch-pan-x"
+                    className="flex overflow-x-auto space-x-4 snap-x snap-mandatory touch-pan-x scrollbar-hide"
                     style={{
                       scrollBehavior: "smooth",
-                      scrollbarWidth: "none", /* Firefox */
-                      msOverflowStyle: "none", /* IE and Edge */
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
                     }}
                 >
-                  {/* Скрываем скроллбар для Webkit (Chrome, Safari) */}
+                  {/* Hide scrollbar for Webkit (Chrome, Safari) */}
                   <style>
                     {`
                     #taskCarousel::-webkit-scrollbar {
@@ -203,84 +258,40 @@ export default function Profile() {
                   `}
                   </style>
                   {user.tasks.map((task, index) => (
-                      <div
+                      <motion.div
                           key={index}
-                          className="min-w-[300px] h-40 rounded-lg bg-gray-200 flex-shrink-0 snap-start p-4"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.06 }}
+                          className="min-w-[300px] h-40 rounded-xl bg-gradient-to-tr from-gray-100 to-blue-100 shadow flex-shrink-0 snap-start p-4 flex flex-col justify-between"
                       >
-                        <div className="text-green-400">
-                          <p className="truncate">
-                            {t("type")}: {task.type}
-                          </p>
-                          <p className="truncate">
-                            {t("theme")}: {task.theme}
-                          </p>
-                          <p className="truncate">
-                            {task.completed || 0}/{task.total || 0}
-                          </p>
+                        <div className="text-green-400 font-bold text-lg truncate">
+                          {t("type")}: {task.type}
                         </div>
-                      </div>
+                        <div className="truncate">
+                          {t("theme")}: <span className="font-semibold">{task.theme}</span>
+                        </div>
+                        <div className="truncate text-gray-700">
+                          {task.completed || 0}/{task.total || 0}
+                        </div>
+                      </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Последние решенные задачи */}
-              <div className="bg-gray-300 p-6 rounded-lg">
-                <h3 className="text-xl font-bold mb-4">{t("latestCompletedTasks")}</h3>
-                {latestCompletedTasks.length > 0 ? (
-                    <div className="flex flex-col space-y-4">
-                      {latestCompletedTasks.map((task, index) => (
-                          <div key={index} className="p-4 bg-white rounded-lg shadow">
-                            <p className="truncate">
-                              {t("type")}: {task.type}
-                            </p>
-                            <p className="truncate">
-                              {t("theme")}: {task.theme}
-                            </p>
-                            <p className="truncate">
-                              {t("completed")}: {task.completed}/{task.total}
-                            </p>
-                            <p className="truncate">
-                              {t("lastCompleted")}:{" "}
-                              {task.lastCompleted
-                                  ? new Date(task.lastCompleted).toLocaleDateString("ru-RU", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  }) +
-                                  " " +
-                                  new Date(task.lastCompleted).toLocaleTimeString("ru-RU", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                  : "N/A"}
-                            </p>
-                          </div>
-                      ))}
-                    </div>
-                ) : (
-                    <div className="text-gray-600">
-                      <p>{t("noCompletedTasks")}</p>
-                      <button
-                          onClick={() => navigate("/play")}
-                          className="mt-2 text-green-500 hover:underline"
-                      >
-                        {t("solveFirstTask")}
-                      </button>
-                    </div>
-                )}
-              </div>
 
-              {/* Темы */}
-              <h3 className="text-xl font-bold mb-4 mt-6">{t("styles")}</h3>
+
+              {/* Темы/стили */}
+              <h3 className="text-xl font-bold mb-2 mt-3">{t("styles")}</h3>
               <div className="mb-6">
-                <label htmlFor="theme-select" className="block mb-2">
+                <label htmlFor="theme-select" className="block mb-2 font-semibold">
                   {t("select")} {t("theme")}:
                 </label>
                 <select
-                    id="taskCarousel"
+                    id="theme-select"
                     value={currentTheme}
                     onChange={(e) => handleSelectTheme(e.target.value)}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border-2 border-blue-200 rounded-xl bg-white/80 shadow focus:outline-green-300"
                 >
                   {purchasedThemeOptions.map((theme) => (
                       <option key={theme.name} value={theme.name}>
@@ -291,30 +302,36 @@ export default function Profile() {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {allThemes.map((theme) => (
-                    <div
+                    <motion.div
                         key={theme.name}
-                        className="relative h-24 rounded-lg bg-gray-200 flex items-center justify-center"
+                        whileHover={{ scale: 1.07, boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)" }}
+                        className={`relative h-24 rounded-xl bg-gradient-to-br ${
+                            purchasedThemeNames.includes(theme.name)
+                                ? "from-green-100 to-blue-100"
+                                : "from-gray-100 to-gray-200"
+                        } flex items-center justify-center shadow-lg transition-all`}
                     >
-                      <div className="text-center">
-                        <p className="font-bold">{theme.name}</p>
-                        <p>{theme.cost} {t("points")}</p>
+                      <div className="text-center w-full">
+                        <p className="font-bold text-lg">{theme.name}</p>
+                        <p className="mb-1">{theme.cost} {t("points")}</p>
                         {purchasedThemeNames.includes(theme.name) ? (
-                            <span className="text-green-500">{t("purchased")}</span>
+                            <span className="text-green-600 font-semibold">{t("purchased")}</span>
                         ) : (
-                            <button
+                            <Button
                                 onClick={() => handlePurchaseTheme(theme)}
-                                className="mt-2 bg-orange-500 text-white px-4 py-1 rounded-lg hover:bg-orange-600 transition"
+                                disabled={isPurchasing}
+                                className="mt-1 bg-gradient-to-r from-orange-400 to-orange-600 text-white px-3 py-1 rounded-lg hover:scale-105 transition"
                             >
                               {t("buy")}
-                            </button>
+                            </Button>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
       </div>
   );
 }
