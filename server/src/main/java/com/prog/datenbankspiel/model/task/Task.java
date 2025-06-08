@@ -46,5 +46,11 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "test_id")
     private Test test;
+
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
+    private WrongField wrongField;
+
+    @OneToOne(mappedBy = "task", cascade = CascadeType.ALL)
+    private DragAndDropField dragAndDropField;
 }
 

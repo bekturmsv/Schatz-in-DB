@@ -26,4 +26,8 @@ public class TaskDto {
     private LevelDifficulty levelDifficulty;
     private TaskType taskType;
     private JsonNode sampleData;
+
+    private WrongFieldDto wrongField;
+    private DragAndDropFieldDto dragAndDropField;
+
 }
