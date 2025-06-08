@@ -8,7 +8,6 @@ export default function DifficultyLevel() {
     const navigate = useNavigate();
     const user = getUser();
 
-    // Динамический массив уровней из user.completedLevels
     const difficulties = Object.keys(user.completedLevels).map((key) => ({
         key,
         label: t(key),
@@ -22,56 +21,67 @@ export default function DifficultyLevel() {
         }
     };
 
-    // Прогресс для прогресс-бара
     const progress = user.progress.tasksSolved;
     const total = user.progress.totalTasks;
     const percent = Math.round((progress / total) * 100);
 
-    // Framer motion для stagger анимации
     const container = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+            transition: { staggerChildren: 0.11, delayChildren: 0.13 },
         },
     };
     const item = {
-        hidden: { opacity: 0, y: 32, scale: 0.97 },
-        visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
+        hidden: { opacity: 0, y: 32, scale: 0.98 },
+        visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" } },
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center font-mono relative bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 overflow-x-hidden">
-            {/* Блюр декоративный овал */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[55vw] h-[30vh] bg-gradient-to-tr from-green-200 via-blue-200 to-green-100 opacity-40 blur-2xl rounded-full pointer-events-none z-0"></div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font relative overflow-x-hidden">
             <motion.div
                 initial={{ opacity: 0, y: -20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8 }}
                 className="relative z-10 flex flex-col items-center w-full"
             >
-                <h1 className="text-4xl md:text-5xl font-extrabold mb-10 text-transparent bg-gradient-to-r from-green-500 via-blue-600 to-cyan-400 bg-clip-text uppercase tracking-wide drop-shadow">
+                <h1
+                    className="text-4xl md:text-5xl font-extrabold mb-10 uppercase tracking-wide drop-shadow custom-font"
+                    style={{
+                        color: "var(--color-primary)",
+                    }}
+                >
                     {t("difficultyLevel")}
                 </h1>
                 <div className="w-full max-w-md mb-10">
-                    <h2 className="text-2xl font-bold mb-3">{t("progress")}</h2>
-                    <div className="mb-2 flex items-center justify-between text-lg text-gray-700">
-            <span>
-              {t("totalTasksSolved")}: <span className="font-bold">{progress}</span>/{total}
-            </span>
-                        <span className="font-mono font-bold text-green-600">{percent}%</span>
+                    <h2
+                        className="text-2xl font-semibold mb-3 custom-font"
+                        style={{ color: "var(--color-primary)" }}
+                    >
+                        {t("progress")}
+                    </h2>
+                    <div className="mb-2 flex items-center justify-between text-lg">
+                        <span className="custom-body" style={{ color: "var(--color-secondary)" }}>
+                            {t("totalTasksSolved")}: <span className="font-bold">{progress}</span>/{total}
+                        </span>
+                        <span className="font-mono font-semibold" style={{ color: "var(--color-secondary)" }}>
+                            {percent}%
+                        </span>
                     </div>
-                    {/* Прогресс-бар с анимацией */}
-                    <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                    <div className="w-full h-4 bg-gray-200 dark:bg-[#23272d] rounded-full overflow-hidden shadow-inner">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${percent}%` }}
-                            transition={{ duration: 1.2, ease: "easeInOut" }}
-                            className="h-4 bg-gradient-to-r from-green-400 via-blue-400 to-cyan-400 rounded-full"
+                            transition={{ duration: 1.1, ease: "easeInOut" }}
+                            className="h-4 rounded-full"
+                            style={{
+                                background:
+                                    "linear-gradient(90deg, var(--color-secondary) 10%, var(--color-primary) 95%)",
+                                minWidth: 8,
+                            }}
                         />
                     </div>
                 </div>
-                {/* Список уровней */}
                 <motion.div
                     variants={container}
                     initial="hidden"
@@ -90,31 +100,37 @@ export default function DifficultyLevel() {
                                 variants={item}
                                 onClick={() => handleDifficultySelect(diff.name, isLocked)}
                                 disabled={isLocked}
-                                whileHover={!isLocked ? { scale: 1.04, boxShadow: "0 6px 32px 0 rgba(34,197,94,0.10)" } : {}}
-                                whileTap={!isLocked ? { scale: 0.97 } : {}}
+                                whileHover={
+                                    !isLocked
+                                        ? { scale: 1.025 }
+                                        : {}
+                                }
+                                whileTap={!isLocked ? { scale: 0.98 } : {}}
                                 className={`
-                  relative py-5 px-8 rounded-xl text-2xl md:text-2xl uppercase font-bold transition
-                  flex items-center justify-center border-2 shadow-lg
-                  ${diff.isCompleted
-                                    ? "bg-gradient-to-r from-green-400 to-cyan-400 border-green-500 text-white"
-                                    : ""}
-                  ${!diff.isCompleted && !isLocked
-                                    ? "bg-white/90 border-blue-200 text-black hover:bg-green-50"
-                                    : ""}
-                  ${isLocked
-                                    ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
-                                    : ""}
-                `}
-                                style={{ minHeight: 72 }}
+                                    relative py-4 px-8 rounded-xl text-2xl md:text-2xl uppercase font-semibold transition
+                                    flex items-center justify-center border-2 shadow-md custom-font
+                                    focus:outline-none
+                                    ${diff.isCompleted
+                                    ? "bg-[var(--color-secondary)]/90 border-[var(--color-secondary)] text-white"
+                                    : !isLocked
+                                        ? "bg-[var(--color-card-bg,rgba(30,36,43,0.87))] dark:bg-[var(--color-card-bg,#23272d)] border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-card-hover,#323843)] dark:hover:bg-[#262b32]"
+                                        : "bg-gray-200 dark:bg-[#18181b] border-gray-300 text-gray-400 cursor-not-allowed"
+                                }
+                                `}
+                                style={{
+                                    minHeight: 64,
+                                    letterSpacing: "0.045em",
+                                    // Светлее на ховере (через :hover или tailwind hover:),
+                                    // можно добавить еще в css: .card-hover
+                                }}
                             >
                                 <span>{diff.label}</span>
                                 <span className="ml-3 flex items-center">
-                  {/* Анимация для замка и галочки */}
                                     {isLocked && (
                                         <motion.span
                                             initial={{ scale: 0, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.2 }}
+                                            transition={{ delay: 0.15 }}
                                             className="text-2xl"
                                             title={t("completePreviousLevelFirst")}
                                         >
@@ -127,7 +143,7 @@ export default function DifficultyLevel() {
                                         <motion.span
                                             initial={{ scale: 0, opacity: 0 }}
                                             animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.18 }}
+                                            transition={{ delay: 0.13 }}
                                             className="text-2xl"
                                             title={t("completed")}
                                         >
@@ -136,7 +152,7 @@ export default function DifficultyLevel() {
                                             </svg>
                                         </motion.span>
                                     )}
-                </span>
+                                </span>
                             </motion.button>
                         );
                     })}

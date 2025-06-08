@@ -11,7 +11,6 @@ export default function TasksList() {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
-    // Fetch tasks for the specific difficulty and topic
     const {
         data: response = {},
         isLoading,
@@ -28,41 +27,44 @@ export default function TasksList() {
 
     const tasks = response.tasksNotCompleted ?? [];
 
-    // Анимация для карточек
     const cardVariants = {
         hidden: { opacity: 0, y: 24, scale: 0.97 },
         visible: (i = 1) => ({
             opacity: 1,
             y: 0,
             scale: 1,
-            transition: { delay: i * 0.09, duration: 0.5, ease: "easeOut" },
+            transition: { delay: i * 0.09, duration: 0.45, ease: "easeOut" },
         }),
     };
 
     return (
-        <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 relative">
-            {/* Декоративная блюр-волна */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[48vw] h-[26vh] bg-gradient-to-tr from-green-200 via-blue-200 to-green-100 opacity-40 blur-2xl rounded-full pointer-events-none z-0"></div>
-
+        <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
             <motion.h1
                 initial={{ opacity: 0, y: -22 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
-                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 text-transparent bg-gradient-to-r from-green-500 via-blue-600 to-cyan-400 bg-clip-text uppercase tracking-wide drop-shadow z-10 text-center"
+                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10 text-center"
+                style={{
+                    color: "var(--color-primary)",
+                }}
             >
                 {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
-                <span className="text-2xl text-black/50 font-normal ml-2">
-          ({t(`${difficulty.toLowerCase()}Level`)})
-        </span>
+                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                    ({t(`${difficulty.toLowerCase()}Level`)})
+                </span>
             </motion.h1>
 
-            {/* Лоадер / Ошибка */}
             <AnimatePresence>
                 {isLoading && (
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-lg text-gray-600 bg-white/80 py-4 px-8 rounded-xl shadow z-10"
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "var(--color-primary)",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid var(--color-primary)",
+                        }}
                     >
                         {t("loadingTasks")}
                     </motion.p>
@@ -71,21 +73,25 @@ export default function TasksList() {
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-lg text-red-600 bg-white/80 py-4 px-8 rounded-xl shadow z-10"
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "#f87171",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid #f87171",
+                        }}
                     >
                         {t("errorLoadingTasks")}
                     </motion.p>
                 )}
             </AnimatePresence>
 
-            {/* Список задач */}
             {!isLoading && !isError && (
                 <motion.ul
                     initial="hidden"
                     animate="visible"
                     variants={{
                         visible: {
-                            transition: { staggerChildren: 0.12, delayChildren: 0.13 },
+                            transition: { staggerChildren: 0.11, delayChildren: 0.14 },
                         },
                     }}
                     className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-7 z-10"
@@ -98,7 +104,8 @@ export default function TasksList() {
                                 custom={idx + 1}
                                 whileHover={{
                                     scale: 1.045,
-                                    boxShadow: "0 6px 28px 0 rgba(34,197,94,0.10)",
+                                    boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
+                                    background: "var(--color-card-hover, #eef3fa)",
                                 }}
                                 whileTap={{ scale: 0.97 }}
                                 onClick={() =>
@@ -106,12 +113,35 @@ export default function TasksList() {
                                         `/level/${level}/topic/${encodeURIComponent(topicName)}/task/${task.id}`
                                     )
                                 }
-                                className="cursor-pointer bg-white/80 p-7 rounded-2xl shadow-lg border border-blue-100 hover:bg-gradient-to-r hover:from-green-100 hover:to-cyan-100 transition-all flex flex-col min-h-[110px]"
+                                className="cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg"
+                                style={{
+                                    background: "var(--color-card-bg, #f8fafc)",
+                                    borderColor: "var(--color-primary)",
+                                    color: "var(--color-primary)",
+                                    padding: "2rem 1.6rem",
+                                    fontFamily: "var(--font-family)",
+                                    boxShadow: "0 3px 18px 0 rgba(30,36,43,0.03)",
+                                }}
                             >
-                                <h2 className="text-xl font-bold mb-1 bg-gradient-to-r from-green-500 to-blue-400 bg-clip-text text-transparent">
+                                <h2
+                                    className="text-xl font-bold mb-1 custom-font"
+                                    style={{
+                                        background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
+                                        backgroundClip: "text",
+                                        color: "transparent",
+                                        WebkitBackgroundClip: "text",
+                                        WebkitTextFillColor: "transparent",
+                                    }}
+                                >
                                     {task.title}
                                 </h2>
-                                <div className="text-gray-500 text-base line-clamp-3">
+                                <div
+                                    className="text-base custom-body line-clamp-3"
+                                    style={{
+                                        color: "var(--color-secondary)",
+                                        opacity: 0.88,
+                                    }}
+                                >
                                     {task.description}
                                 </div>
                             </motion.li>
@@ -120,7 +150,13 @@ export default function TasksList() {
                         <motion.div
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-gray-600 w-full col-span-2 text-center py-8"
+                            className="w-full col-span-2 text-center py-8 custom-font"
+                            style={{
+                                color: "var(--color-secondary)",
+                                opacity: 0.8,
+                                background: "var(--color-card-bg, #f8fafc)",
+                                borderRadius: "1rem",
+                            }}
                         >
                             {t("noTasksAvailable")}
                         </motion.div>

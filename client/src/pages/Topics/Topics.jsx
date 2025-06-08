@@ -11,23 +11,19 @@ export default function Topic() {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
-    // Запрашиваем данные по level
     const {
         data: response = {},
         isLoading,
         isError,
     } = useGetTopicsQuery(level, { skip: !difficulty });
 
-    // Если не авторизован — редирект на логин
     if (!isAuthenticated) {
         navigate("/login");
         return null;
     }
 
-    // Выбираем список тем из поля `tasks`
     const topics = response.tasks ?? [];
 
-    // Анимации
     const cardVariants = {
         hidden: { opacity: 0, y: 24, scale: 0.97 },
         visible: (i = 1) => ({
@@ -39,29 +35,34 @@ export default function Topic() {
     };
 
     return (
-        <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 relative">
-            {/* Декоративная блюр-волна */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[50vw] h-[30vh] bg-gradient-to-tr from-green-200 via-blue-200 to-green-100 opacity-40 blur-2xl rounded-full pointer-events-none z-0"></div>
-
+        <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
             <motion.h1
                 initial={{ opacity: 0, y: -24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
-                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 text-transparent bg-gradient-to-r from-green-500 via-blue-600 to-cyan-400 bg-clip-text uppercase tracking-wide drop-shadow z-10"
+                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10"
+                style={{
+                    color: "var(--color-primary)",
+                    textShadow: "0 2px 16px rgba(0,0,0,0.07)",
+                }}
             >
                 {t("selectTopic")}{" "}
-                <span className="text-2xl text-black/50 font-normal ml-2">
-          ({t(`${difficulty.toLowerCase()}Level`)})
-        </span>
+                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                    ({t(`${difficulty.toLowerCase()}Level`)})
+                </span>
             </motion.h1>
 
-            {/* Лоадер / Ошибка */}
             <AnimatePresence>
                 {isLoading && (
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-lg text-gray-600 bg-white/70 py-4 px-8 rounded-xl shadow z-10"
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "var(--color-primary)",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid var(--color-primary)",
+                        }}
                     >
                         {t("loadingTopics")}
                     </motion.p>
@@ -70,14 +71,18 @@ export default function Topic() {
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-lg text-red-600 bg-white/70 py-4 px-8 rounded-xl shadow z-10"
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "#f87171",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid #f87171",
+                        }}
                     >
                         {t("errorLoadingTopics")}
                     </motion.p>
                 )}
             </AnimatePresence>
 
-            {/* Темы */}
             {!isLoading && !isError && (
                 <motion.ul
                     initial="hidden"
@@ -95,8 +100,8 @@ export default function Topic() {
                             variants={cardVariants}
                             custom={idx + 1}
                             whileHover={{
-                                scale: 1.045,
-                                boxShadow: "0 6px 28px 0 rgba(34,197,94,0.09)",
+                                scale: 1.04,
+                                boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
                             }}
                             whileTap={{ scale: 0.97 }}
                             onClick={() =>
@@ -104,12 +109,35 @@ export default function Topic() {
                                     `/level/${level}/topic/${encodeURIComponent(topic.name)}`
                                 )
                             }
-                            className="cursor-pointer bg-white/80 p-7 rounded-2xl shadow-lg border border-blue-100 hover:bg-gradient-to-r hover:from-green-100 hover:to-cyan-100 transition-all flex flex-col items-start min-h-[110px]"
+                            className="cursor-pointer rounded-2xl border transition-all flex flex-col items-start min-h-[110px] shadow-lg"
+                            style={{
+                                background: "var(--color-card-bg, #f8fafc)",
+                                borderColor: "var(--color-primary)",
+                                color: "var(--color-primary)",
+                                padding: "2rem 1.6rem",
+                                fontFamily: "var(--font-family)",
+                                boxShadow: "0 3px 18px 0 rgba(30,36,43,0.03)",
+                            }}
                         >
-                            <h2 className="text-xl font-bold mb-1 bg-gradient-to-r from-green-500 to-blue-400 bg-clip-text text-transparent">
+                            <h2
+                                className="text-xl font-bold mb-1 custom-font"
+                                style={{
+                                    background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
+                                    backgroundClip: "text",
+                                    color: "transparent",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                }}
+                            >
                                 {topic.name}
                             </h2>
-                            <div className="text-gray-500 text-base">
+                            <div
+                                className="text-base custom-body"
+                                style={{
+                                    color: "var(--color-secondary)",
+                                    opacity: 0.88,
+                                }}
+                            >
                                 {topic.description || ""}
                             </div>
                         </motion.li>

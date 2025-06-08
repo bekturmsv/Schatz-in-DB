@@ -13,7 +13,6 @@ import SignUp from "@/pages/Register/Register.jsx";
 import Profile from "./pages/Profile/Profile";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
 import DifficultyLevel from "./pages/DifficultyLevel/DifficultyLevel";
-import Level from "./pages/Level/Level";
 import Task from "@/pages/Task/Task.jsx";
 import FinalTest from "@/pages/FinalTest/FinalTest.jsx";
 import Topics from "@/pages/Topics/Topics.jsx";

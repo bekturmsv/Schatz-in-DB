@@ -45,25 +45,25 @@ export default function Task() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("loading")}</h1>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("loading")}</h1>
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("error")}</h1>
-                <p className="text-lg text-gray-700 mt-2">{t("failedToLoadTask")}</p>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("error")}</h1>
+                <p className="text-lg text-gray-400 mt-2">{t("failedToLoadTask")}</p>
             </div>
         );
     }
 
     if (!currentTask) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("taskNotFound")}</h1>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("taskNotFound")}</h1>
             </div>
         );
     }
@@ -84,14 +84,14 @@ export default function Task() {
                         const columns = table.length > 0 ? Object.keys(table[0]) : [];
                         const rows = table.map((item) => columns.map((col) => item[col] || ""));
                         return (
-                            <div key={index} className="mb-6">
-                                <h3 className="text-lg font-bold mb-2">{tableName}</h3>
+                            <div key={index} className="mb-4">
+                                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{tableName}</h3>
                                 <div className="overflow-auto rounded-lg shadow">
-                                    <table className="border-collapse border border-gray-300 min-w-[280px]">
+                                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[180px] text-xs">
                                         <thead>
                                         <tr>
                                             {columns.map((col, colIndex) => (
-                                                <th key={colIndex} className="border p-2 bg-blue-100 text-sm font-semibold">
+                                                <th key={colIndex} className="border px-2 py-1 bg-[var(--color-background)] font-medium custom-font text-[var(--color-primary)]">
                                                     {col}
                                                 </th>
                                             ))}
@@ -101,7 +101,7 @@ export default function Task() {
                                         {rows.map((row, rowIndex) => (
                                             <tr key={rowIndex}>
                                                 {row.map((cell, cellIndex) => (
-                                                    <td key={cellIndex} className="border p-2 text-sm">
+                                                    <td key={cellIndex} className="border px-2 py-1 custom-font text-[var(--color-secondary)]">
                                                         {cell !== undefined ? cell : ""}
                                                     </td>
                                                 ))}
@@ -188,10 +188,7 @@ export default function Task() {
     const handleCloseHint = () => setShowHint(false);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-100 to-cyan-100 font-mono flex flex-col relative">
-            {/* Декоративный блюр */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[56vw] h-[30vh] bg-gradient-to-tr from-green-200 via-blue-200 to-green-100 opacity-30 blur-2xl rounded-full pointer-events-none z-0"></div>
-
+        <div className="min-h-screen bg-custom-background custom-font flex flex-col relative">
             {/* Модалка подсказки */}
             <AnimatePresence>
                 {showHint && (
@@ -207,97 +204,109 @@ export default function Task() {
                             animate={{ scale: 1, y: 0, opacity: 1 }}
                             exit={{ scale: 0.95, y: 16, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                            className="bg-white/90 p-8 rounded-2xl shadow-2xl w-full max-w-md relative"
+                            className="bg-[var(--color-card-bg)] p-8 rounded-2xl shadow-2xl w-full max-w-md relative"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
                                 onClick={handleCloseHint}
-                                className="absolute top-3 right-4 text-2xl text-gray-500 hover:text-gray-700"
+                                className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-700"
                                 title={t("close")}
                             >
                                 ✕
                             </button>
-                            <h3 className="text-2xl font-bold mb-4 text-green-700">{t("hint")}</h3>
-                            <p className="text-gray-700">{currentTask.description}</p>
+                            <h3 className="text-2xl font-bold mb-4 text-[var(--color-primary)]">{t("hint")}</h3>
+                            <p className="text-[var(--color-secondary)]">{currentTask.description}</p>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
-
             {/* Основной контент */}
-            <div className="flex-grow flex flex-col items-center justify-center p-4 relative z-10">
+            <div className="flex-grow flex items-center justify-center p-4 md:p-8 relative z-10">
                 <motion.div
                     initial="hidden"
                     animate="visible"
                     variants={fadeUp}
                     custom={1}
-                    className="flex flex-col md:flex-row w-full max-w-5xl gap-8"
+                    className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-12 justify-center items-stretch"
                 >
-                    {/* Описание задачи и таблицы */}
+                    {/* Левая колонка */}
                     <motion.div
                         variants={fadeUp}
                         custom={2}
-                        className="flex-1 bg-white/90 p-8 rounded-2xl shadow-xl mb-8 md:mb-0"
+                        className="flex-1 md:max-w-[700px] bg-[var(--color-card-bg)] rounded-2xl shadow-xl p-7 mb-8 md:mb-0"
+                        style={{
+                            minWidth: 0,
+                            color: "var(--color-primary)"
+                        }}
                     >
-                        <h2 className="text-2xl font-bold mb-4 text-green-800 flex items-center">
+                        <h2 className="text-2xl font-extrabold mb-4 flex items-center custom-font" style={{ color: "var(--color-primary)" }}>
                             <span className="mr-2">📝</span> {t("taskDescription")}
                         </h2>
-                        <p className="mb-3 text-lg text-gray-800">{currentTask.description}</p>
+                        <p className="mb-3 text-base md:text-lg custom-font text-[var(--color-secondary)]">{currentTask.description}</p>
                         <div className="overflow-x-auto">{jsonToTables(currentTask)}</div>
                     </motion.div>
 
-                    {/* Правая колонка: инфо и ввод */}
-                    <div className="flex-1 flex flex-col gap-6">
+                    {/* Правая колонка */}
+                    <div className="flex flex-col gap-6 md:w-[350px] min-w-[320px] flex-shrink-0">
+                        {/* Информация о задаче + кнопки */}
                         <motion.div
                             variants={fadeUp}
                             custom={3}
-                            className="bg-white/90 p-6 rounded-2xl shadow-lg"
+                            className="rounded-2xl shadow-lg custom-card p-6"
+                            style={{
+                                background: "var(--color-card-bg-alt, #e7f3ee)",
+                                color: "var(--color-secondary)"
+                            }}
                         >
-                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-lg text-gray-700 mb-3">
-                <span>
-                  <b>{t("name")}:</b> {currentTask.title}
-                </span>
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-base md:text-lg custom-font mb-3">
                                 <span>
-                  <b>{t("point")}:</b> {currentTask.points}
-                </span>
+                                    <b>{t("name")}:</b> {currentTask.title}
+                                </span>
                                 <span>
-                  <b>{t("topic")}:</b> {currentTask.topicName}
-                </span>
+                                    <b>{t("point")}:</b> {currentTask.points}
+                                </span>
+                                <span>
+                                    <b>{t("topic")}:</b> {currentTask.topicName}
+                                </span>
                             </div>
                             <div className="flex gap-3 mt-3">
                                 <button
                                     onClick={handleReset}
-                                    className="bg-gray-200 text-black py-2 px-5 rounded-xl hover:bg-gray-300 transition font-semibold"
+                                    className="bg-gray-300 dark:bg-gray-700 text-black dark:text-gray-100 py-2 px-5 rounded-xl hover:bg-gray-400 dark:hover:bg-gray-600 transition font-semibold custom-font"
                                     disabled={isCompleted}
                                 >
                                     {t("reset")}
                                 </button>
                                 <button
                                     onClick={handleShowHint}
-                                    className="bg-gradient-to-r from-green-400 to-cyan-400 text-white py-2 px-5 rounded-xl hover:from-green-500 hover:to-green-600 font-semibold shadow transition flex items-center gap-2"
+                                    className="bg-gradient-to-r from-green-400 to-cyan-400 text-white py-2 px-5 rounded-xl hover:from-green-500 hover:to-green-600 font-semibold shadow transition flex items-center gap-2 custom-font"
                                     disabled={isCompleted}
                                 >
                                     <span>💡</span> {t("hint")}
                                 </button>
                             </div>
                         </motion.div>
-
+                        {/* Ответ */}
                         <motion.div
                             variants={fadeUp}
                             custom={4}
-                            className="bg-white/90 p-6 rounded-2xl shadow-lg flex-1 flex flex-col"
+                            className="rounded-2xl shadow-lg flex-1 flex flex-col custom-card p-6"
+                            style={{
+                                background: "var(--color-card-bg)",
+                                color: "var(--color-primary)"
+                            }}
                         >
-                            <h2 className="text-xl font-bold mb-3 text-green-700">{t("answerBox")}</h2>
+                            <h2 className="text-xl font-bold mb-3 custom-font" style={{ color: "var(--color-primary)" }}>{t("answerBox")}</h2>
                             <textarea
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
-                                className="w-full h-36 p-3 border-2 border-blue-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition"
+                                className="w-full h-36 p-3 border-2 border-blue-100 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition bg-[var(--color-background)] text-[var(--color-primary)]"
                                 placeholder={t("typeYourSqlQueryHere")}
                                 disabled={isCompleted}
                             />
                             <button
                                 onClick={handleSubmit}
-                                className={`mt-4 w-full bg-gradient-to-r from-green-500 to-cyan-400 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-green-400 hover:to-green-600 transition ${
+                                className={`mt-4 w-full bg-gradient-to-r from-green-500 to-cyan-400 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-green-400 hover:to-green-600 transition custom-font ${
                                     isCompleted ? "opacity-60 cursor-not-allowed" : ""
                                 }`}
                                 disabled={isCompleted}
@@ -305,7 +314,7 @@ export default function Task() {
                                 {t("submit")}
                             </button>
                             {isCompleted && (
-                                <div className="mt-4 text-center text-green-600 text-lg font-semibold">
+                                <div className="mt-4 text-center text-green-600 text-lg font-semibold custom-font">
                                     {t("correctAnswer")}
                                 </div>
                             )}

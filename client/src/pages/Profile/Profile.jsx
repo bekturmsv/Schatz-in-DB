@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { setUser } from "@/features/auth/authSlice.js";
 import { useGetThemesQuery, usePurchaseThemeMutation } from "@/features/theme/themeApi.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const currentTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const { data: allThemes = [], isLoading: isThemesLoading } = useGetThemesQuery();
+  const { data: allThemes = [] } = useGetThemesQuery();
   const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
 
   const [carouselPosition, setCarouselPosition] = useState(0);
@@ -28,7 +28,7 @@ export default function Profile() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  if (!isAuthenticated || !user) return null; // можно <Loader />
+  if (!isAuthenticated || !user) return null;
 
   const purchasedThemeNames = Array.isArray(user.purchasedThemes)
       ? user.purchasedThemes.map((t) => t.name)
@@ -91,9 +91,7 @@ export default function Profile() {
   const latestCompletedTasks =
       completedTasks.length > 0
           ? completedTasks
-              .sort(
-                  (a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0)
-              )
+              .sort((a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0))
               .slice(0, 3)
           : [];
 
@@ -108,7 +106,14 @@ export default function Profile() {
   };
 
   return (
-      <div className="min-h-screen font-mono bg-gradient-to-br from-[#f8fafc] to-[#cbe7fa] pt-4">
+      <div
+          className="min-h-screen font-mono pt-4"
+          style={{
+            background: "var(--background-gradient, var(--color-background))",
+            backgroundColor: "var(--color-background)",
+            fontFamily: "var(--font-ui)",
+          }}
+      >
         <motion.section
             initial="hidden"
             animate="visible"
@@ -119,7 +124,7 @@ export default function Profile() {
               initial={{ opacity: 0, y: -24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.8 }}
-              className="text-3xl md:text-4xl font-extrabold mb-8 bg-gradient-to-r from-green-500 via-blue-400 to-cyan-400 bg-clip-text text-transparent"
+              className="custom-title mb-8"
           >
             {t("myAccount")}
           </motion.h1>
@@ -134,13 +139,14 @@ export default function Profile() {
                   initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.6, type: "spring" }}
-                  className="w-28 h-28 bg-gradient-to-tr from-gray-200 via-gray-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-lg"
+                  className="w-28 h-28 flex items-center justify-center mb-4 custom-card"
               >
                 <svg
-                    className="w-14 h-14 text-gray-500"
+                    className="w-14 h-14"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    style={{ color: "var(--color-secondary, #b8b8b8)" }}
                 >
                   <path
                       strokeLinecap="round"
@@ -150,15 +156,19 @@ export default function Profile() {
                   />
                 </svg>
               </motion.div>
-              <h2 className="text-xl font-bold">{user.firstname} {user.lastname}</h2>
-              <p className="text-gray-600 mb-4">@{user.nickname}</p>
-              <p className="text-gray-600 mb-2">
+              <h2 className="text-xl font-bold custom-font" style={{ color: "var(--color-primary)" }}>
+                {user.firstname} {user.lastname}
+              </h2>
+              <p className="mb-4 custom-font" style={{ color: "var(--color-secondary)" }}>
+                @{user.nickname}
+              </p>
+              <p className="mb-2 custom-body" style={{ color: "var(--color-primary)" }}>
                 {t("group")}: {user.specialistGroup || t("notSpecified")}
               </p>
-              <p className="text-gray-600 mb-4">
+              <p className="mb-4 custom-body" style={{ color: "var(--color-primary)" }}>
                 {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
               </p>
-              <Button className="bg-gradient-to-r from-orange-500 to-yellow-400 text-white px-7 py-2 text-base rounded-xl shadow-md hover:scale-105 transition">
+              <Button className="custom-btn px-7 py-2 text-base">
                 {t("editProfile")}
               </Button>
             </motion.div>
@@ -177,14 +187,15 @@ export default function Profile() {
                   className="flex items-center mb-2"
               >
                 <svg
-                    className="w-9 h-9 text-orange-400 mr-3 drop-shadow"
+                    className="w-9 h-9 mr-3 drop-shadow"
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    style={{ color: "var(--color-secondary)" }}
                 >
                   <circle cx="10" cy="10" r="8" />
                   <circle cx="10" cy="10" r="5" fill="#fff" />
                 </svg>
-                <span className="text-3xl font-extrabold text-orange-500">
+                <span className="text-3xl font-extrabold custom-font" style={{ color: "var(--color-secondary)" }}>
                 {user.points} {t("points")}
               </span>
               </motion.div>
@@ -193,27 +204,34 @@ export default function Profile() {
               <motion.div
                   variants={fadeUp}
                   custom={3}
-                  className="bg-white/80 backdrop-blur-lg p-7 rounded-xl mb-1 shadow-xl"
+                  className="custom-card p-7 mb-1"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold">{t("difficulty")}: <span className="font-bold">{user.progress.difficulty}</span></span>
-                  <span className="font-semibold">{t("currentTopic")}: <span className="font-bold">{user.progress.topic}</span></span>
+                <div className="flex items-center justify-between mb-3 custom-font">
+                <span>
+                  {t("difficulty")}: <span style={{ color: "var(--color-secondary)" }}>{user.progress.difficulty}</span>
+                </span>
+                  <span>
+                  {t("currentTopic")}: <span style={{ color: "var(--color-secondary)" }}>{user.progress.topic}</span>
+                </span>
                 </div>
-                <div className="mb-2 flex items-center gap-2">
+                <div className="mb-2 flex items-center gap-2 custom-body">
                   <span className="font-semibold">{progressPercentage.toFixed(0)}%</span>
-                  <span className="text-gray-500">{t("outOf")}</span>
+                  <span style={{ color: "var(--color-secondary)", opacity: 0.75 }}>{t("outOf")}</span>
                   <span className="font-bold">{user.progress.totalTasks}</span>
-                  <span className="text-gray-500">{t("tasksSolved")}</span>
+                  <span style={{ color: "var(--color-secondary)", opacity: 0.75 }}>{t("tasksSolved")}</span>
                 </div>
-                {/* Анимированная прогресс-бар */}
+                {/* Анимированный прогресс-бар */}
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercentage}%` }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className="bg-gradient-to-r from-green-400 to-blue-400 h-4 rounded-full"
-                    style={{ maxWidth: "100%" }}
+                    className="h-4 rounded-full"
+                    style={{
+                      background: "var(--progress-gradient, linear-gradient(90deg, var(--color-secondary), var(--color-primary)))",
+                      maxWidth: "100%",
+                    }}
                 />
-                <div className="w-full bg-gray-200 rounded-full h-4 mt-[-16px] z-0"></div>
+                <div className="w-full bg-[var(--color-card-bg, #ececec)] rounded-full h-4 mt-[-16px] z-0"></div>
               </motion.div>
 
               {/* Карусель задач */}
@@ -223,18 +241,18 @@ export default function Profile() {
                   className="relative mb-2"
               >
                 <div className="flex items-center mb-3">
-                  <h3 className="text-xl font-bold flex-1">{t("tasks")}</h3>
+                  <h3 className="text-xl font-bold flex-1 custom-font" style={{ color: "var(--color-primary)" }}>{t("tasks")}</h3>
                   <Button
                       onClick={scrollLeft}
                       disabled={carouselPosition === 0}
-                      className="mr-2 rounded-full bg-gray-200 hover:bg-green-200 text-xl px-2 py-1 transition disabled:opacity-60"
+                      className="mr-2 rounded-full custom-btn text-xl px-2 py-1"
                   >
                     &#8592;
                   </Button>
                   <Button
                       onClick={scrollRight}
                       disabled={carouselPosition >= user.tasks.length - 3}
-                      className="rounded-full bg-gray-200 hover:bg-green-200 text-xl px-2 py-1 transition disabled:opacity-60"
+                      className="rounded-full custom-btn text-xl px-2 py-1"
                   >
                     &#8594;
                   </Button>
@@ -252,10 +270,10 @@ export default function Profile() {
                   {/* Hide scrollbar for Webkit (Chrome, Safari) */}
                   <style>
                     {`
-                    #taskCarousel::-webkit-scrollbar {
-                      display: none;
-                    }
-                  `}
+                  #taskCarousel::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}
                   </style>
                   {user.tasks.map((task, index) => (
                       <motion.div
@@ -263,15 +281,15 @@ export default function Profile() {
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: index * 0.06 }}
-                          className="min-w-[300px] h-40 rounded-xl bg-gradient-to-tr from-gray-100 to-blue-100 shadow flex-shrink-0 snap-start p-4 flex flex-col justify-between"
+                          className="min-w-[300px] h-40 custom-card flex-shrink-0 snap-start p-4 flex flex-col justify-between"
                       >
-                        <div className="text-green-400 font-bold text-lg truncate">
+                        <div className="custom-font text-lg truncate" style={{ color: "var(--color-secondary)" }}>
                           {t("type")}: {task.type}
                         </div>
-                        <div className="truncate">
+                        <div className="truncate custom-body">
                           {t("theme")}: <span className="font-semibold">{task.theme}</span>
                         </div>
-                        <div className="truncate text-gray-700">
+                        <div className="truncate custom-body">
                           {task.completed || 0}/{task.total || 0}
                         </div>
                       </motion.div>
@@ -279,19 +297,19 @@ export default function Profile() {
                 </div>
               </motion.div>
 
-
-
               {/* Темы/стили */}
-              <h3 className="text-xl font-bold mb-2 mt-3">{t("styles")}</h3>
+              <h3 className="text-xl font-bold mb-2 mt-3 custom-font" style={{ color: "var(--color-primary)" }}>
+                {t("styles")}
+              </h3>
               <div className="mb-6">
-                <label htmlFor="theme-select" className="block mb-2 font-semibold">
+                <label htmlFor="theme-select" className="block mb-2 font-semibold custom-font" style={{ color: "var(--color-primary)" }}>
                   {t("select")} {t("theme")}:
                 </label>
                 <select
                     id="theme-select"
                     value={currentTheme}
                     onChange={(e) => handleSelectTheme(e.target.value)}
-                    className="w-full p-2 border-2 border-blue-200 rounded-xl bg-white/80 shadow focus:outline-green-300"
+                    className="w-full p-2 custom-input"
                 >
                   {purchasedThemeOptions.map((theme) => (
                       <option key={theme.name} value={theme.name}>
@@ -305,22 +323,23 @@ export default function Profile() {
                     <motion.div
                         key={theme.name}
                         whileHover={{ scale: 1.07, boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)" }}
-                        className={`relative h-24 rounded-xl bg-gradient-to-br ${
-                            purchasedThemeNames.includes(theme.name)
-                                ? "from-green-100 to-blue-100"
-                                : "from-gray-100 to-gray-200"
-                        } flex items-center justify-center shadow-lg transition-all`}
+                        className={`relative h-24 custom-card flex items-center justify-center shadow-lg transition-all`}
+                        style={{
+                          background: purchasedThemeNames.includes(theme.name)
+                              ? "var(--color-card-bg)"
+                              : "var(--color-card-bg-alt, #ececec)",
+                        }}
                     >
-                      <div className="text-center w-full">
-                        <p className="font-bold text-lg">{theme.name}</p>
-                        <p className="mb-1">{theme.cost} {t("points")}</p>
+                      <div className="text-center w-full custom-card p-2">
+                        <p className="custom-font text-lg" style={{ color: "var(--color-primary)" }}>{theme.name}</p>
+                        <p className="mb-1 custom-body" style={{ color: "var(--color-secondary)" }}>{theme.cost} {t("points")}</p>
                         {purchasedThemeNames.includes(theme.name) ? (
-                            <span className="text-green-600 font-semibold">{t("purchased")}</span>
+                            <span className="custom-font" style={{ color: "var(--color-secondary)" }}>{t("purchased")}</span>
                         ) : (
                             <Button
                                 onClick={() => handlePurchaseTheme(theme)}
                                 disabled={isPurchasing}
-                                className="mt-1 bg-gradient-to-r from-orange-400 to-orange-600 text-white px-3 py-1 rounded-lg hover:scale-105 transition"
+                                className="mt-1 custom-btn px-3 py-1"
                             >
                               {t("buy")}
                             </Button>
