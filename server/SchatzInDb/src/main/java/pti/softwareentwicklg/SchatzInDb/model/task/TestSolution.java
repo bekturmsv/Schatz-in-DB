@@ -19,8 +19,6 @@ public class TestSolution {
     @Enumerated(EnumType.STRING)
     private Schwierigkeit schwierigkeitsgrad;
 
-    List<Task> tasksInTest;
-
     @Column(name = "submitted_at")
     private LocalDateTime spentTime = LocalDateTime.now();
 
