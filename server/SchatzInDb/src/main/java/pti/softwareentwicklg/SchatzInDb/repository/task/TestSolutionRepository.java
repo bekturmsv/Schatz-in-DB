@@ -6,5 +6,5 @@ import pti.softwareentwicklg.SchatzInDb.model.task.TestSolution;
 import java.util.List;
 
 public interface TestSolutionRepository extends JpaRepository<TestSolution, Long> {
-    List<TestSolution> findByFinishedTrue();
+    List<TestSolution> findByCorrectTrue();
 }

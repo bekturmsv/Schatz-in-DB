@@ -102,7 +102,7 @@ public class TestService {
     }
 
     public RatingRequest getRating() {
-        List<TestSolution> testSolutions = testSolutionRepository.findByFinishedTrue();
+        List<TestSolution> testSolutions = testSolutionRepository.findByCorrectTrue();
 
         List<RatingRequest.Rating> easy = new ArrayList<>();
         List<RatingRequest.Rating> medium = new ArrayList<>();

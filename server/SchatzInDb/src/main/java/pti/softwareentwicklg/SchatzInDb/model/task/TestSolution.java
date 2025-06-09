@@ -19,7 +19,7 @@ public class TestSolution {
     @Enumerated(EnumType.STRING)
     private Schwierigkeit schwierigkeitsgrad;
 
-    @Column(name = "submitted_at")
+    @Column(name = "spent_time")
     private LocalDateTime spentTime = LocalDateTime.now();
 
     @Column(name = "submitted_at")
