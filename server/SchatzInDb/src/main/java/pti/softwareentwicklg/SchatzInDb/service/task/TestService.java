@@ -1,16 +1,21 @@
 package pti.softwareentwicklg.SchatzInDb.service.task;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pti.softwareentwicklg.SchatzInDb.dto.TaskWithSolvedDto;
+import pti.softwareentwicklg.SchatzInDb.dto.response.RatingRequest;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
 import pti.softwareentwicklg.SchatzInDb.model.enums.TaskType;
 import pti.softwareentwicklg.SchatzInDb.model.task.Task;
+import pti.softwareentwicklg.SchatzInDb.model.task.TestSolution;
 import pti.softwareentwicklg.SchatzInDb.model.task.UserSolution;
 import pti.softwareentwicklg.SchatzInDb.model.user.User;
 import pti.softwareentwicklg.SchatzInDb.repository.task.TaskRepository;
+import pti.softwareentwicklg.SchatzInDb.repository.task.TestSolutionRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.task.UserSolutionRepository;
+import pti.softwareentwicklg.SchatzInDb.repository.user.UserRepository;
 import pti.softwareentwicklg.SchatzInDb.utils.SqlUtils;
 
 import java.util.ArrayList;
@@ -25,11 +30,15 @@ public class TestService {
     private final TaskRepository taskRepository;
     private final UserSolutionRepository userSolutionRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final TestSolutionRepository testSolutionRepository;
+    private final UserRepository userRepository;
 
-    public TestService(TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, @Qualifier("taskJdbcTemplate")JdbcTemplate jdbcTemplate) {
+    public TestService(TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, @Qualifier("taskJdbcTemplate")JdbcTemplate jdbcTemplate, TestSolutionRepository testSolutionRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.userSolutionRepository = userSolutionRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.testSolutionRepository = testSolutionRepository;
+        this.userRepository = userRepository;
     }
 
     public List<TaskWithSolvedDto> getTestTasksForUser(Schwierigkeit schwierigkeit, User user) {
@@ -91,4 +100,38 @@ public class TestService {
         Set<String> allowed = Set.of("verdaechtiger", "zeugnis", "student", "kurs"); // добавь свои таблицы
         return tableName != null && allowed.contains(tableName.toLowerCase());
     }
+
+    public RatingRequest getRating() {
+        List<TestSolution> testSolutions = testSolutionRepository.findByFinishedTrue();
+
+        List<RatingRequest.Rating> easy = new ArrayList<>();
+        List<RatingRequest.Rating> medium = new ArrayList<>();
+        List<RatingRequest.Rating> hard = new ArrayList<>();
+
+        for (TestSolution solution : testSolutions) {
+            String username = userRepository.findById(solution.getUserId())
+                    .map(User::getUsername)
+                    .orElse("Unknown");
+
+            RatingRequest.Rating rating = new RatingRequest.Rating(
+                    username,
+                    solution.getSpentTime().toLocalDate()
+            );
+
+            switch (solution.getSchwierigkeitsgrad()) {
+                case EASY -> easy.add(rating);
+                case MEDIUM -> medium.add(rating);
+                case HARD -> hard.add(rating);
+            }
+        }
+
+        RatingRequest ratingRequest = new RatingRequest();
+        ratingRequest.setRatingForEasy(easy);
+        ratingRequest.setRatingForMedium(medium);
+        ratingRequest.setRatingForHard(hard);
+
+        return ratingRequest;
+    }
+
+
 }
