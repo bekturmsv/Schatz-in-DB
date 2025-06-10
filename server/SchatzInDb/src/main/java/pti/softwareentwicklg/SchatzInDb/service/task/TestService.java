@@ -97,7 +97,7 @@ public class TestService {
     }
 
     private boolean isSafeTable(String tableName) {
-        Set<String> allowed = Set.of("verdaechtiger", "zeugnis", "student", "kurs"); // добавь свои таблицы
+        Set<String> allowed = Set.of("verdaechtiger", "fahrzeug", "fall", "fall_fahrzeug", "fall_verdaechtiger", "fall_zeuge", "task", "user_solution", "zeuge");
         return tableName != null && allowed.contains(tableName.toLowerCase());
     }
 
@@ -132,6 +132,5 @@ public class TestService {
 
         return ratingRequest;
     }
-
 
 }
