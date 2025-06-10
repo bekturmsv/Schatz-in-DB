@@ -1,11 +1,10 @@
 package pti.softwareentwicklg.SchatzInDb.service.task;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pti.softwareentwicklg.SchatzInDb.dto.TaskWithSolvedDto;
-import pti.softwareentwicklg.SchatzInDb.dto.response.RatingRequest;
+import pti.softwareentwicklg.SchatzInDb.dto.request.RatingRequest;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
 import pti.softwareentwicklg.SchatzInDb.model.enums.TaskType;
 import pti.softwareentwicklg.SchatzInDb.model.task.Task;
@@ -115,7 +114,7 @@ public class TestService {
 
             RatingRequest.Rating rating = new RatingRequest.Rating(
                     username,
-                    solution.getSpentTime().toLocalDate()
+                    solution.getSpentTimeInSeconds()
             );
 
             switch (solution.getSchwierigkeitsgrad()) {
