@@ -17,10 +17,7 @@ import pti.softwareentwicklg.SchatzInDb.repository.task.UserSolutionRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.user.UserRepository;
 import pti.softwareentwicklg.SchatzInDb.utils.SqlUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,6 +121,12 @@ public class TestService {
             }
         }
 
+        Comparator<RatingRequest.Rating> byTime = Comparator.comparingInt(RatingRequest.Rating::getSpentTimeInSeconds);
+
+        easy.sort(byTime);
+        medium.sort(byTime);
+        hard.sort(byTime);
+
         RatingRequest ratingRequest = new RatingRequest();
         ratingRequest.setRatingForEasy(easy);
         ratingRequest.setRatingForMedium(medium);
@@ -131,5 +134,6 @@ public class TestService {
 
         return ratingRequest;
     }
+
 
 }

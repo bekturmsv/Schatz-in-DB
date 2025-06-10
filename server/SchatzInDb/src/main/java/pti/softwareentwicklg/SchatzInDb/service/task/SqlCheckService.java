@@ -68,12 +68,14 @@ public class SqlCheckService {
 
     @Transactional
     public SqlCheckResponse validateUserTest(TestCheckRequest request) {
-        boolean isCorrect = false;
         System.out.println("Vor Saving Test: " + request);
 
         try {
-
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || auth.getName() == null) {
+                throw new IllegalStateException("Authentication failed or user not logged in");
+            }
+
             String username = auth.getName();
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -86,25 +88,38 @@ public class SqlCheckService {
             }
 
             List<UserSolution> userSolutions = userSolutionRepository.findByUserId(user.getId());
-
             if (userSolutions == null) {
                 throw new IllegalStateException("User solutions could not be loaded for user ID: " + user.getId());
             }
+
             Set<String> correctlySolvedCodes = userSolutions.stream()
-                    .filter(solution -> solution.getCorrect())
+                    .filter(UserSolution::getCorrect)
                     .map(UserSolution::getTaskCode)
                     .collect(Collectors.toSet());
 
-            isCorrect = tasks.stream()
-                    .allMatch(task -> correctlySolvedCodes.contains(task.getTaskCode()));
+            Set<String> allTaskCodes = tasks.stream()
+                    .map(Task::getTaskCode)
+                    .collect(Collectors.toSet());
+
+            Set<String> userSolvedCodes = userSolutions.stream()
+                    .map(UserSolution::getTaskCode)
+                    .collect(Collectors.toSet());
+
+            if (!userSolvedCodes.containsAll(allTaskCodes)) {
+                throw new Exception("Not all test tasks have been solved.");
+            }
+
+            boolean isCorrect = allTaskCodes.stream().allMatch(correctlySolvedCodes::contains);
 
             saveTestResult(request, isCorrect);
 
             return new SqlCheckResponse(isCorrect, null);
-        } catch (Exception ex) {
-            return new SqlCheckResponse(false, ex.getMessage());
+
+        } catch (Exception e) {
+            return new SqlCheckResponse(false, e.getMessage());
         }
     }
+
 
 
 
