@@ -5,7 +5,6 @@ import lombok.Data;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Entity
@@ -20,7 +19,7 @@ public class TestSolution {
     private Schwierigkeit schwierigkeitsgrad;
 
     @Column(name = "spent_time")
-    private LocalDateTime spentTime = LocalDateTime.now();
+    private int spentTimeInSeconds;
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt = LocalDateTime.now();

@@ -1,10 +1,9 @@
-package pti.softwareentwicklg.SchatzInDb.dto.response;
+package pti.softwareentwicklg.SchatzInDb.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import pti.softwareentwicklg.SchatzInDb.model.task.TestSolution;
 
-import java.time.LocalDate;
+import java.time.Duration;
 import java.util.List;
 
 @Data
@@ -20,6 +19,6 @@ public class RatingRequest {
     @AllArgsConstructor
     public static class Rating {
         private String username;
-        private LocalDate times;
+        private int spentTimeInSeconds;
     }
 }
