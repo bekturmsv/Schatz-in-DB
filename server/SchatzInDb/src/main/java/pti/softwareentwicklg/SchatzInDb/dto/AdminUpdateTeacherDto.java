@@ -1,11 +1,13 @@
 package pti.softwareentwicklg.SchatzInDb.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class PlayerProfileUpdateDto {
+public class AdminUpdateTeacherDto {
 
     @NotBlank
     private String firstName;
@@ -14,9 +16,8 @@ public class PlayerProfileUpdateDto {
     private String lastName;
 
     @NotBlank
-    private String username;
+    private String subject;
 
-    @Email
-    @NotBlank
-    private String email;
+    @NotEmpty
+    private List<Long> groupIds;
 }

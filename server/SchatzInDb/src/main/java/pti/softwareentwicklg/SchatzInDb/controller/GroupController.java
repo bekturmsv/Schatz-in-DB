@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import pti.softwareentwicklg.SchatzInDb.dto.GroupDto;
+import pti.softwareentwicklg.SchatzInDb.dto.request.ChangeGroupRequest;
 import pti.softwareentwicklg.SchatzInDb.dto.request.CreateGroupRequest;
 import pti.softwareentwicklg.SchatzInDb.dto.request.JoinGroupRequest;
 import pti.softwareentwicklg.SchatzInDb.dto.response.GroupJoinResponse;
@@ -107,5 +108,21 @@ public class GroupController {
         player.setGroupId(null);
         playerRepository.save(player);
         return ResponseEntity.ok("Student quit group");
+    }
+
+    @PutMapping("/group")
+    @PreAuthorize("hasRole('PLAYER')")
+    public ResponseEntity<String> changeGroup(@RequestBody ChangeGroupRequest request, Authentication authentication) {
+        Player player = (Player) userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Group group = groupRepository.findByCode(request.getGroupCode())
+                .orElse(null);
+        if (group == null) return ResponseEntity.badRequest().body("Group not found");
+
+        player.setGroupId(group);
+        playerRepository.save(player);
+
+        return ResponseEntity.ok("Group changed successfully");
     }
 }

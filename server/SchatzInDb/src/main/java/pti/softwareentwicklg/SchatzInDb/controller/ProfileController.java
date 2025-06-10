@@ -1,11 +1,13 @@
 package pti.softwareentwicklg.SchatzInDb.controller;
 
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pti.softwareentwicklg.SchatzInDb.dto.PlayerProfileUpdateDto;
+import pti.softwareentwicklg.SchatzInDb.dto.request.ChangePasswordRequest;
 import pti.softwareentwicklg.SchatzInDb.model.user.Player;
 import pti.softwareentwicklg.SchatzInDb.model.user.User;
 import pti.softwareentwicklg.SchatzInDb.repository.user.GroupRepository;
@@ -43,7 +45,6 @@ public class ProfileController {
         return ResponseEntity.ok(playerService.getById(user));
     }
 
-    //Тут ошибка если чтото не придет то будет null
     @PutMapping("/player/update/{id}")
     @PreAuthorize("hasRole('PLAYER')")
     public ResponseEntity<?> updatePlayerProfile(@PathVariable Long id,
@@ -60,8 +61,25 @@ public class ProfileController {
         player.setLastName(dto.getLastName());
         player.setUsername(dto.getUsername());
         player.setEmail(dto.getEmail());
-        player.setPassword(passwordEncoder.encode(dto.getNewPassword()));
 
         return ResponseEntity.ok(playerRepository.save(player));
     }
+
+    @PutMapping("/changePassword")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> changePassword(Authentication authentication,
+                                                 @RequestBody ChangePasswordRequest request) {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Wrong old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password updated");
+    }
+
+
 }

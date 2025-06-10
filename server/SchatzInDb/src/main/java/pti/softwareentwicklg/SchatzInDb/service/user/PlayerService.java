@@ -15,6 +15,7 @@ public class PlayerService {
     public PlayerService(PlayerRepository playerRepository, TaskService taskService) {
         this.playerRepository = playerRepository;
         this.taskService = taskService;
+
     }
 
     public Player getById(User user) {
