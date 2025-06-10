@@ -66,7 +66,6 @@ public class SqlCheckService {
         }
     }
 
-<<<<<<< HEAD
     @Transactional
     public SqlCheckResponse validateUserTest(TestCheckRequest request) {
         boolean isCorrect = false;
@@ -109,8 +108,6 @@ public class SqlCheckService {
 
 
 
-=======
->>>>>>> cc0a59f (update profile)
     private void saveUserResult(String taskCode, String userSql, boolean isCorrect){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -124,7 +121,6 @@ public class SqlCheckService {
         solution.setUserId(user.getId());
         userSolutionRepository.save(solution);
     }
-<<<<<<< HEAD
 
     private void saveTestResult(TestCheckRequest request, boolean isCorrect){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -140,6 +136,3 @@ public class SqlCheckService {
         testSolutionRepository.save(solution);
     }
 }
-=======
-}
->>>>>>> cc0a59f (update profile)
