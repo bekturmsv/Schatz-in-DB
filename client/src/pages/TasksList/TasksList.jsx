@@ -1,7 +1,8 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { useGetTasksByTopicQuery } from '../../features/task/taskApi.js';
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { useGetTasksByTopicQuery } from "../../features/task/taskApi.js";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function TasksList() {
     const { difficulty, topicName } = useParams();
@@ -10,7 +11,6 @@ export default function TasksList() {
     const navigate = useNavigate();
     const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
-    // Fetch tasks for the specific difficulty and topic
     const {
         data: response = {},
         isLoading,
@@ -21,48 +21,148 @@ export default function TasksList() {
     );
 
     if (!isAuthenticated) {
-        navigate('/login');
+        navigate("/login");
         return null;
     }
 
-    const tasks = response.tasks ?? [];
+    const tasks = response.tasksNotCompleted ?? [];
 
-    console.log('TasksList.jsx — tasks response:', response);
-
-    if (isLoading) {
-        return <p className="p-4">{t('loadingTasks')}</p>;
-    }
-    if (isError) {
-        return <p className="p-4 text-red-600">{t('errorLoadingTasks')}</p>;
-    }
+    const cardVariants = {
+        hidden: { opacity: 0, y: 24, scale: 0.97 },
+        visible: (i = 1) => ({
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: { delay: i * 0.09, duration: 0.45, ease: "easeOut" },
+        }),
+    };
 
     return (
-        <div className="min-h-screen font-mono bg-green-100 flex flex-col items-center justify-center">
-            <h1 className="text-4xl font-bold text-black uppercase mb-6">
-                {t('tasksForTopic', { topic: decodeURIComponent(topicName) })} ({t(`${difficulty.toLowerCase()}Level`)})
-            </h1>
-            <ul className="w-full max-w-md space-y-2">
-                {tasks.length > 0 ? (
-                    tasks.map((task) => (
-                        <li
-                            key={task.id}
-                            className="bg-white p-4 rounded-lg shadow cursor-pointer hover:bg-gray-50"
-                            onClick={() =>
-                                navigate(
-                                    `/level/${level}/topic/${encodeURIComponent(
-                                        topicName
-                                    )}/task/${task.id}`
-                                )
-                            }
-                        >
-                            <h2 className="text-xl font-medium">{task.title}</h2>
-                            <p className="text-gray-600">{task.description}</p>
-                        </li>
-                    ))
-                ) : (
-                    <p className="text-gray-600">{t('noTasksAvailable')}</p>
+        <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
+            <motion.h1
+                initial={{ opacity: 0, y: -22 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10 text-center"
+                style={{
+                    color: "var(--color-primary)",
+                }}
+            >
+                {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
+                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                    ({t(`${difficulty.toLowerCase()}Level`)})
+                </span>
+            </motion.h1>
+
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "var(--color-primary)",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid var(--color-primary)",
+                        }}
+                    >
+                        {t("loadingTasks")}
+                    </motion.p>
                 )}
-            </ul>
+                {isError && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-lg py-4 px-8 rounded-xl shadow z-10"
+                        style={{
+                            color: "#f87171",
+                            background: "var(--color-card-bg)",
+                            border: "1px solid #f87171",
+                        }}
+                    >
+                        {t("errorLoadingTasks")}
+                    </motion.p>
+                )}
+            </AnimatePresence>
+
+            {!isLoading && !isError && (
+                <motion.ul
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                        visible: {
+                            transition: { staggerChildren: 0.11, delayChildren: 0.14 },
+                        },
+                    }}
+                    className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-7 z-10"
+                >
+                    {tasks.length > 0 ? (
+                        tasks.map((task, idx) => (
+                            <motion.li
+                                key={task.id}
+                                variants={cardVariants}
+                                custom={idx + 1}
+                                whileHover={{
+                                    scale: 1.045,
+                                    boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
+                                    background: "var(--color-card-hover, #eef3fa)",
+                                }}
+                                whileTap={{ scale: 0.97 }}
+                                onClick={() =>
+                                    navigate(
+                                        `/level/${level}/topic/${encodeURIComponent(topicName)}/task/${task.id}`
+                                    )
+                                }
+                                className="cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg"
+                                style={{
+                                    background: "var(--color-card-bg, #f8fafc)",
+                                    borderColor: "var(--color-primary)",
+                                    color: "var(--color-primary)",
+                                    padding: "2rem 1.6rem",
+                                    fontFamily: "var(--font-family)",
+                                    boxShadow: "0 3px 18px 0 rgba(30,36,43,0.03)",
+                                }}
+                            >
+                                <h2
+                                    className="text-xl font-bold mb-1 custom-font"
+                                    style={{
+                                        background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
+                                        backgroundClip: "text",
+                                        color: "transparent",
+                                        WebkitBackgroundClip: "text",
+                                        WebkitTextFillColor: "transparent",
+                                    }}
+                                >
+                                    {task.title}
+                                </h2>
+                                <div
+                                    className="text-base custom-body line-clamp-3"
+                                    style={{
+                                        color: "var(--color-secondary)",
+                                        opacity: 0.88,
+                                    }}
+                                >
+                                    {task.description}
+                                </div>
+                            </motion.li>
+                        ))
+                    ) : (
+                        <motion.div
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="w-full col-span-2 text-center py-8 custom-font"
+                            style={{
+                                color: "var(--color-secondary)",
+                                opacity: 0.8,
+                                background: "var(--color-card-bg, #f8fafc)",
+                                borderRadius: "1rem",
+                            }}
+                        >
+                            {t("noTasksAvailable")}
+                        </motion.div>
+                    )}
+                </motion.ul>
+            )}
         </div>
     );
 }

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useGetTaskByIdQuery, useSubmitTaskAnswerMutation } from "../../features/task/taskApi";
 import { setUser } from "../../features/auth/authSlice";
 import { executeSqlQuery } from "../../utils/SqlExecutor";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Task() {
     const { difficulty, topicName, taskId } = useParams();
@@ -27,34 +28,42 @@ export default function Task() {
         return null;
     }
 
-    const { data: currentTask, isLoading, isError, error } = useGetTaskByIdQuery(
+    const { data: currentTask, isLoading, isError } = useGetTaskByIdQuery(
         { difficulty: difficulty.toUpperCase(), topicName: topicName || fallbackTopicName, taskId: parseInt(taskId) },
-        {
-            skip: !taskId,
-        }
+        { skip: !taskId }
     );
+
+    // Анимация для секций
+    const fadeUp = {
+        hidden: { opacity: 0, y: 32 },
+        visible: (i = 1) => ({
+            opacity: 1,
+            y: 0,
+            transition: { delay: i * 0.12, duration: 0.7, ease: "easeOut" },
+        }),
+    };
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("loading")}</h1>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("loading")}</h1>
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("error")}</h1>
-                <p className="text-lg text-gray-700 mt-2">{t("failedToLoadTask")}</p>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("error")}</h1>
+                <p className="text-lg text-gray-400 mt-2">{t("failedToLoadTask")}</p>
             </div>
         );
     }
 
     if (!currentTask) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">{t("taskNotFound")}</h1>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
+                <h1 className="text-4xl font-bold text-[var(--color-primary)] uppercase">{t("taskNotFound")}</h1>
             </div>
         );
     }
@@ -70,54 +79,51 @@ export default function Task() {
                 <div>
                     {Object.entries(data).map(([tableName, table], index) => {
                         if (!table || !Array.isArray(table)) {
-                            console.log(`Invalid table format for ${tableName}:`, table);
                             return <p key={index}>{t("invalidTableFormat", { tableName })}</p>;
                         }
                         const columns = table.length > 0 ? Object.keys(table[0]) : [];
                         const rows = table.map((item) => columns.map((col) => item[col] || ""));
                         return (
-                            <div key={index} className="mb-6">
-                                <h3 className="text-lg font-bold mb-2">{tableName}</h3>
-                                <table className="border-collapse border border-gray-300">
-                                    <thead>
-                                    <tr>
-                                        {columns.map((col, colIndex) => (
-                                            <th key={colIndex} className="border p-2">
-                                                {col}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {rows.map((row, rowIndex) => (
-                                        <tr key={rowIndex}>
-                                            {row.map((cell, cellIndex) => (
-                                                <td key={cellIndex} className="border p-2">
-                                                    {cell !== undefined ? cell : ""}
-                                                </td>
+                            <div key={index} className="mb-4">
+                                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{tableName}</h3>
+                                <div className="overflow-auto rounded-lg shadow">
+                                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[180px] text-xs">
+                                        <thead>
+                                        <tr>
+                                            {columns.map((col, colIndex) => (
+                                                <th key={colIndex} className="border px-2 py-1 bg-[var(--color-background)] font-medium custom-font text-[var(--color-primary)]">
+                                                    {col}
+                                                </th>
                                             ))}
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {rows.map((row, rowIndex) => (
+                                            <tr key={rowIndex}>
+                                                {row.map((cell, cellIndex) => (
+                                                    <td key={cellIndex} className="border px-2 py-1 custom-font text-[var(--color-secondary)]">
+                                                        {cell !== undefined ? cell : ""}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             );
         } catch (error) {
-            console.error("Error parsing sampleData JSON:", error);
             return <p>{t("errorLoadingTables")}</p>;
         }
     };
 
     const handleSubmit = async () => {
         try {
-            // Выполняем SQL-запрос на фронте
             const result = await executeSqlQuery(answer, currentTask.sampleData);
-            console.log("SQL Query Result:", result);
 
-            // Отправляем результат на бэкенд через RTK Query
             const response = await submitTaskAnswer({
                 taskId: parseInt(taskId),
                 answer: result,
@@ -167,10 +173,9 @@ export default function Task() {
                 toast.error(t("incorrectAnswer"));
             }
         } catch (error) {
-            console.error("Error during submission:", error);
-            if (error.message === 'Invalid SQL syntax') {
+            if (error.message === "Invalid SQL syntax") {
                 toast.error(t("invalidSqlSyntax"));
-            } else if (error.message === 'SQL query or sample data is missing') {
+            } else if (error.message === "SQL query or sample data is missing") {
                 toast.error(t("missingQueryOrData"));
             } else {
                 toast.error(t("submissionError"));
@@ -178,96 +183,144 @@ export default function Task() {
         }
     };
 
-    const handleReset = () => {
-        setAnswer("");
-    };
-
-    const handleShowHint = () => {
-        setShowHint(true);
-    };
-
-    const handleCloseHint = () => {
-        setShowHint(false);
-    };
+    const handleReset = () => setAnswer("");
+    const handleShowHint = () => setShowHint(true);
+    const handleCloseHint = () => setShowHint(false);
 
     return (
-        <div className="min-h-screen bg-gray-100 font-mono flex flex-col">
-            {showHint && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    onClick={handleCloseHint}
-                >
-                    <div
-                        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative"
-                        onClick={(e) => e.stopPropagation()}
+        <div className="min-h-screen bg-custom-background custom-font flex flex-col relative">
+            {/* Модалка подсказки */}
+            <AnimatePresence>
+                {showHint && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                        onClick={handleCloseHint}
                     >
-                        <button
-                            onClick={handleCloseHint}
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                        <motion.div
+                            initial={{ scale: 0.94, y: 24, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.95, y: 16, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 220, damping: 18 }}
+                            className="bg-[var(--color-card-bg)] p-8 rounded-2xl shadow-2xl w-full max-w-md relative"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            ✕
-                        </button>
-                        <h3 className="text-xl font-bold mb-4">{t("hint")}</h3>
-                        <p className="text-gray-700">{currentTask.description}</p>
-                    </div>
-                </div>
-            )}
+                            <button
+                                onClick={handleCloseHint}
+                                className="absolute top-3 right-4 text-2xl text-gray-400 hover:text-gray-700"
+                                title={t("close")}
+                            >
+                                ✕
+                            </button>
+                            <h3 className="text-2xl font-bold mb-4 text-[var(--color-primary)]">{t("hint")}</h3>
+                            <p className="text-[var(--color-secondary)]">{currentTask.description}</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Основной контент */}
+            <div className="flex-grow flex items-center justify-center p-4 md:p-8 relative z-10">
+                <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={fadeUp}
+                    custom={1}
+                    className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-12 justify-center items-stretch"
+                >
+                    {/* Левая колонка */}
+                    <motion.div
+                        variants={fadeUp}
+                        custom={2}
+                        className="flex-1 md:max-w-[700px] bg-[var(--color-card-bg)] rounded-2xl shadow-xl p-7 mb-8 md:mb-0"
+                        style={{
+                            minWidth: 0,
+                            color: "var(--color-primary)"
+                        }}
+                    >
+                        <h2 className="text-2xl font-extrabold mb-4 flex items-center custom-font" style={{ color: "var(--color-primary)" }}>
+                            <span className="mr-2">📝</span> {t("taskDescription")}
+                        </h2>
+                        <p className="mb-3 text-base md:text-lg custom-font text-[var(--color-secondary)]">{currentTask.description}</p>
+                        <div className="overflow-x-auto">{jsonToTables(currentTask)}</div>
+                    </motion.div>
 
-            <div className="flex-grow flex flex-col items-center justify-center p-4">
-                <div className="flex w-full max-w-5xl space-x-4">
-                    <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-md">
-                        <h2 className="text-xl font-bold mb-4">{t("taskDescription")}</h2>
-                        <p>{currentTask.description}</p>
-                        {jsonToTables(currentTask)}
-                    </div>
-
-                    <div className="flex-1 flex flex-col space-y-4">
-                        <div className="bg-gray-200 p-6 rounded-lg shadow-md">
-                            <p className="text-lg">
-                                <span className="font-bold">{t("name")}:</span> {currentTask.title}
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">{t("point")}:</span> {currentTask.points}
-                            </p>
-                            <p className="text-lg">
-                                <span className="font-bold">{t("topic")}:</span> {currentTask.topicName}
-                            </p>
-                            <div className="flex space-x-2 mt-4">
+                    {/* Правая колонка */}
+                    <div className="flex flex-col gap-6 md:w-[350px] min-w-[320px] flex-shrink-0">
+                        {/* Информация о задаче + кнопки */}
+                        <motion.div
+                            variants={fadeUp}
+                            custom={3}
+                            className="rounded-2xl shadow-lg custom-card p-6"
+                            style={{
+                                background: "var(--color-card-bg-alt, #e7f3ee)",
+                                color: "var(--color-secondary)"
+                            }}
+                        >
+                            <div className="flex flex-wrap gap-x-6 gap-y-2 text-base md:text-lg custom-font mb-3">
+                                <span>
+                                    <b>{t("name")}:</b> {currentTask.title}
+                                </span>
+                                <span>
+                                    <b>{t("point")}:</b> {currentTask.points}
+                                </span>
+                                <span>
+                                    <b>{t("topic")}:</b> {currentTask.topicName}
+                                </span>
+                            </div>
+                            <div className="flex gap-3 mt-3">
                                 <button
                                     onClick={handleReset}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition"
+                                    className="bg-gray-300 dark:bg-gray-700 text-black dark:text-gray-100 py-2 px-5 rounded-xl hover:bg-gray-400 dark:hover:bg-gray-600 transition font-semibold custom-font"
+                                    disabled={isCompleted}
                                 >
                                     {t("reset")}
                                 </button>
                                 <button
                                     onClick={handleShowHint}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center"
+                                    className="bg-gradient-to-r from-green-400 to-cyan-400 text-white py-2 px-5 rounded-xl hover:from-green-500 hover:to-green-600 font-semibold shadow transition flex items-center gap-2 custom-font"
+                                    disabled={isCompleted}
                                 >
-                                    <span className="mr-2">?</span> {t("answer")}
+                                    <span>💡</span> {t("hint")}
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="bg-gray-200 p-6 rounded-lg shadow-md flex-1">
-                            <h2 className="text-xl font-bold mb-4">{t("answerBox")}</h2>
+                        </motion.div>
+                        {/* Ответ */}
+                        <motion.div
+                            variants={fadeUp}
+                            custom={4}
+                            className="rounded-2xl shadow-lg flex-1 flex flex-col custom-card p-6"
+                            style={{
+                                background: "var(--color-card-bg)",
+                                color: "var(--color-primary)"
+                            }}
+                        >
+                            <h2 className="text-xl font-bold mb-3 custom-font" style={{ color: "var(--color-primary)" }}>{t("answerBox")}</h2>
                             <textarea
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
-                                className="w-full h-32 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                className="w-full h-36 p-3 border-2 border-blue-100 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition bg-[var(--color-background)] text-[var(--color-primary)]"
                                 placeholder={t("typeYourSqlQueryHere")}
                                 disabled={isCompleted}
                             />
-                        </div>
-
-                        <button
-                            onClick={handleSubmit}
-                            className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition mt-4"
-                            disabled={isCompleted}
-                        >
-                            {t("submit")}
-                        </button>
+                            <button
+                                onClick={handleSubmit}
+                                className={`mt-4 w-full bg-gradient-to-r from-green-500 to-cyan-400 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-green-400 hover:to-green-600 transition custom-font ${
+                                    isCompleted ? "opacity-60 cursor-not-allowed" : ""
+                                }`}
+                                disabled={isCompleted}
+                            >
+                                {t("submit")}
+                            </button>
+                            {isCompleted && (
+                                <div className="mt-4 text-center text-green-600 text-lg font-semibold custom-font">
+                                    {t("correctAnswer")}
+                                </div>
+                            )}
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );

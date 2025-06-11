@@ -18,7 +18,7 @@ export default function MainLayout() {
     return (
         <div className="flex flex-col min-h-screen relative">
             <Navbar />
-            <main className="pt-16 min-h-screen">
+            <main className=" min-h-screen">
                 <Outlet />
             </main>
             {isAuthLoading && <Loading />}
