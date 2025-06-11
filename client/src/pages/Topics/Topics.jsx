@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useGetTopicsQuery } from "../../features/task/taskApi.js";
 import { motion, AnimatePresence } from "framer-motion";
+import DetectiveStory from "@/components/custom/DetectiveStory.jsx";
+import { useState } from "react";
 
 export default function Topic() {
     const { difficulty } = useParams();
@@ -16,6 +18,8 @@ export default function Topic() {
         isLoading,
         isError,
     } = useGetTopicsQuery(level, { skip: !difficulty });
+
+    const [showDetective, setShowDetective] = useState(true);
 
     if (!isAuthenticated) {
         navigate("/login");
@@ -51,6 +55,9 @@ export default function Topic() {
                     ({t(`${difficulty.toLowerCase()}Level`)})
                 </span>
             </motion.h1>
+
+            {/* === Вот тут появится детектив === */}
+            <DetectiveStory isVisible={showDetective} onClose={() => setShowDetective(false)} difficulty={difficulty} />
 
             <AnimatePresence>
                 {isLoading && (
