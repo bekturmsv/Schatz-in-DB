@@ -199,11 +199,14 @@ export default function Register() {
               <option value="" disabled>
                 {isSpecializationsLoading ? t("loading") : t("selectSpecialization")}
               </option>
-              {specializations?.map((specialization, index) => (
-                  <option key={index} value={specialization}>
-                    {specialization}
-                  </option>
-              ))}
+              <option value="COMPUTER SCIENCE" >
+                COMPUTER SCIENCE
+              </option>
+              {/*{specializations?.map((specialization, index) => (*/}
+              {/*    <option key={index} value={specialization}>*/}
+              {/*      {specialization}*/}
+              {/*    </option>*/}
+              {/*))}*/}
             </motion.select>
             <motion.button
                 whileHover={{ scale: 1.04, backgroundColor: "#22c55e", color: "#fff" }}

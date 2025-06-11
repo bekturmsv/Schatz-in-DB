@@ -24,6 +24,8 @@ export default function Navbar() {
 
   const isLogged = Boolean(token);
 
+  console.log(user)
+
   return (
       <nav
           className="fixed top-0 left-0 w-full z-50 custom-card font-mono transition-all duration-300"
@@ -149,7 +151,7 @@ export default function Navbar() {
                           className="cursor-pointer font-bold hover:text-green-500 transition"
                           style={{ color: "var(--color-primary)" }}
                       >
-                        {user.nickname}
+                        {user.username}
                       </Link>
                       <b className="text-orange-500">
                         {user.points} {t("points")}
