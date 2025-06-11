@@ -3,7 +3,9 @@ package pti.softwareentwicklg.SchatzInDb.controller;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pti.softwareentwicklg.SchatzInDb.dto.PlayerProfileUpdateDto;
@@ -11,6 +13,7 @@ import pti.softwareentwicklg.SchatzInDb.dto.ProgressDto;
 import pti.softwareentwicklg.SchatzInDb.dto.TaskStatDto;
 import pti.softwareentwicklg.SchatzInDb.dto.UserLoginDto;
 import pti.softwareentwicklg.SchatzInDb.dto.request.ChangePasswordRequest;
+import pti.softwareentwicklg.SchatzInDb.dto.response.LoginResponse;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
 import pti.softwareentwicklg.SchatzInDb.model.enums.TaskType;
 import pti.softwareentwicklg.SchatzInDb.model.task.Task;
@@ -50,10 +53,68 @@ public class ProfileController {
         this.taskService = taskService;
     }
 
+
     @GetMapping("/player/getAuthorizedUser")
-    public ResponseEntity<?> getById(Principal principal) {
-        User user = userRepository.findByUsername(principal.getName())
+    public ResponseEntity<?> getById(Authentication authentication, @RequestHeader("Authorization") String authHeader) {
+        User user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String jwt = authHeader.startsWith("Bearer ")
+                ? authHeader.substring(7)
+                : authHeader;
+
+        if (user instanceof Player player) {
+            UserLoginDto dto = buildUserLoginDto(user);
+
+            LoginResponse response = new LoginResponse();
+            response.setToken(jwt);
+            response.setUser(dto);
+            return ResponseEntity.ok(response);
+        }
+
+        LoginResponse response = new LoginResponse();
+        response.setToken(jwt);
+        response.setUser(user);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/player/update/{id}")
+    @PreAuthorize("hasRole('PLAYER')")
+    public ResponseEntity<?> updatePlayerProfile(@PathVariable Long id,
+                                                 @RequestBody PlayerProfileUpdateDto dto,
+                                                 Authentication auth) {
+        Player player = playerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Player not found"));
+
+        if (!player.getUsername().equals(auth.getName())) {
+            return ResponseEntity.status(403).body("Cannot edit another player's profile");
+        }
+
+        player.setFirstName(dto.getFirstName());
+        player.setLastName(dto.getLastName());
+        player.setUsername(dto.getUsername());
+        player.setEmail(dto.getEmail());
+
+        return ResponseEntity.ok(playerRepository.save(player));
+    }
+
+    @PutMapping("/changePassword")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> changePassword(Authentication authentication,
+                                                 @RequestBody ChangePasswordRequest request) {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Wrong old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return ResponseEntity.ok("Password updated");
+    }
+
+    private UserLoginDto buildUserLoginDto(User user) {
         UserLoginDto dto = new UserLoginDto();
 
         Player player = playerRepository.findPlayerById(user.getId());
@@ -154,44 +215,6 @@ public class ProfileController {
         dto.setCompletedTasks(completedTasks);
         dto.setCompletedLevels(completedLevels);
 
-        return ResponseEntity.ok(dto);
+        return dto;
     }
-
-    @PutMapping("/player/update/{id}")
-    @PreAuthorize("hasRole('PLAYER')")
-    public ResponseEntity<?> updatePlayerProfile(@PathVariable Long id,
-                                                 @RequestBody PlayerProfileUpdateDto dto,
-                                                 Authentication auth) {
-        Player player = playerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Player not found"));
-
-        if (!player.getUsername().equals(auth.getName())) {
-            return ResponseEntity.status(403).body("Cannot edit another player's profile");
-        }
-
-        player.setFirstName(dto.getFirstName());
-        player.setLastName(dto.getLastName());
-        player.setUsername(dto.getUsername());
-        player.setEmail(dto.getEmail());
-
-        return ResponseEntity.ok(playerRepository.save(player));
-    }
-
-    @PutMapping("/changePassword")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> changePassword(Authentication authentication,
-                                                 @RequestBody ChangePasswordRequest request) {
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            return ResponseEntity.badRequest().body("Wrong old password");
-        }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-        return ResponseEntity.ok("Password updated");
-    }
-
-
 }
