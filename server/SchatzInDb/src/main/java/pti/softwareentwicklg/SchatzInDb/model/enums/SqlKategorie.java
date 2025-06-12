@@ -11,6 +11,10 @@ public enum SqlKategorie {
     ORDER_BY,
     DISTINCT,
     COUNT,
-    SUM
+    SUM,
+    AND,
+    OR,
+    NOT,
+    AVG
 }
 

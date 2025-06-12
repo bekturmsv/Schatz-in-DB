@@ -47,6 +47,14 @@ public class Task {
     @Column(name = "interaction_type")
     private TaskInteractionType interactionType = TaskInteractionType.SQL_INPUT;
 
+    @OneToOne(
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private IncorrectSqlExample incorrectSqlExample;
+
+
     public Task() {
     }
 

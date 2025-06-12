@@ -18,4 +18,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByAktivTrue();
     List<Task> findBySchwierigkeitsgradAndTaskType(Schwierigkeit schwierigkeitsgrad, TaskType taskType);
     List<Task> findBySchwierigkeitsgradAndTaskTypeAndKategorie(Schwierigkeit schwierigkeit, TaskType taskType, SqlKategorie sqlKategorie);
+    boolean existsByTaskCode(String taskCode);
 }

@@ -19,4 +19,10 @@ public class Fall {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal schadenssumme;
+
+    @Column(name = "anzahl_gegenstaende")
+    private Integer anzahlGegenstaende;
+
+    @Column(name="ermittler")
+    private String ermittler;
 }
