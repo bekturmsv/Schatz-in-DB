@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/server/Datenbankspiel.iml" filepath="$PROJECT_DIR$/server/Datenbankspiel.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Schatz-in-DB.iml" filepath="$PROJECT_DIR$/.idea/Schatz-in-DB.iml" />
       <module fileurl="file://$PROJECT_DIR$/server/SchatzInDb/SchatzInDb.iml" filepath="$PROJECT_DIR$/server/SchatzInDb/SchatzInDb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/shatz-in-db.iml" filepath="$PROJECT_DIR$/.idea/shatz-in-db.iml" />
     </modules>
   </component>
 </project>
