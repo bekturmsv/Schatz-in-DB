@@ -2,6 +2,6 @@ package pti.softwareentwicklg.SchatzInDb.model.enums;
 
 public enum TaskInteractionType {
     SQL_INPUT,
-    SQL_ERROR_CORRECTION,
+    INCORRECT_SQL,
     DRAG_AND_DROP
 }
