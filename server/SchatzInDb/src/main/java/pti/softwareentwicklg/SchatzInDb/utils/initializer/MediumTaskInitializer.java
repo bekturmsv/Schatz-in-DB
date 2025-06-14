@@ -64,7 +64,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von SELECT, FROM und WHERE beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -116,7 +116,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von SELECT, FROM und ORDER BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -181,7 +181,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: AVG-Funktion korrekt verwenden.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -194,7 +194,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: korrekte Reihenfolge von SELECT, COUNT und GROUP BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -233,7 +233,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: korrekte Platzierung von COUNT und GROUP BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -259,7 +259,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: korrekte Syntax für LEFT JOIN und WHERE IS NULL beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -289,7 +289,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von JOINs und ON-Klauseln beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -315,7 +315,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von FROM, JOIN und WHERE beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(
@@ -367,7 +367,7 @@ public class MediumTaskInitializer {
                         Schwierigkeit.MEDIUM,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von WHERE und ORDER BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         12
                 ),
                 createTask(

@@ -13,8 +13,11 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-public class TaskWithSolvedDto extends BaseTaskDto {
-    public TaskWithSolvedDto(Long id, String taskCode, String aufgabe, SqlKategorie kategorie, Schwierigkeit schwierigkeitsgrad, String hint, TaskType taskType, TaskInteractionType taskInteractionType, boolean solved, String tableName, List<Map<String, Object>> tableData) {
+public class IncorrectSqlTaskDto extends BaseTaskDto {
+    private String wrongQuery;
+
+    public IncorrectSqlTaskDto(Long id, String taskCode, String aufgabe, SqlKategorie kategorie, Schwierigkeit schwierigkeitsgrad, String hint, TaskType taskType, TaskInteractionType taskInteractionType, boolean solved, String tableName, List<Map<String, Object>> tableData, String wrongQuery) {
         super(id, taskCode, aufgabe, kategorie, schwierigkeitsgrad, hint, taskType, taskInteractionType, solved, tableName, tableData);
+        this.wrongQuery = wrongQuery;
     }
 }
