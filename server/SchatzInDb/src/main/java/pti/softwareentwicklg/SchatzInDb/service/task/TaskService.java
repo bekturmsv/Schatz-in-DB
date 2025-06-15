@@ -5,15 +5,21 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import pti.softwareentwicklg.SchatzInDb.dto.BaseTaskDto;
+import pti.softwareentwicklg.SchatzInDb.dto.DragAndDropTaskDto;
+import pti.softwareentwicklg.SchatzInDb.dto.IncorrectSqlTaskDto;
 import pti.softwareentwicklg.SchatzInDb.dto.TaskWithSolvedDto;
 import pti.softwareentwicklg.SchatzInDb.dto.response.TestAvailabilityResponse;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
 import pti.softwareentwicklg.SchatzInDb.model.enums.SqlKategorie;
 import pti.softwareentwicklg.SchatzInDb.model.enums.TaskType;
+import pti.softwareentwicklg.SchatzInDb.model.task.DragAndDropExample;
+import pti.softwareentwicklg.SchatzInDb.model.task.IncorrectSqlExample;
 import pti.softwareentwicklg.SchatzInDb.model.task.Task;
 import pti.softwareentwicklg.SchatzInDb.model.task.UserSolution;
-import pti.softwareentwicklg.SchatzInDb.model.user.Player;
 import pti.softwareentwicklg.SchatzInDb.model.user.User;
+import pti.softwareentwicklg.SchatzInDb.repository.task.DragAndDropExampleRepository;
+import pti.softwareentwicklg.SchatzInDb.repository.task.IncorrectSqlExampleRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.task.TaskRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.task.UserSolutionRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.user.PlayerRepository;
@@ -29,12 +35,16 @@ public class TaskService {
     private final UserSolutionRepository userSolutionRepository;
     private final JdbcTemplate jdbcTemplate;
     private final PlayerRepository playerRepository;
+    private final IncorrectSqlExampleRepository incorrectSqlExampleRepository;
+    private final DragAndDropExampleRepository dragAndDropExampleRepository;
 
-    public TaskService(TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, @Qualifier("taskJdbcTemplate") JdbcTemplate jdbcTemplate, PlayerRepository playerRepository) {
+    public TaskService(TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, @Qualifier("taskJdbcTemplate") JdbcTemplate jdbcTemplate, PlayerRepository playerRepository, IncorrectSqlExampleRepository incorrectSqlExampleRepository, DragAndDropExampleRepository dragAndDropExampleRepository) {
         this.taskRepository = taskRepository;
         this.userSolutionRepository = userSolutionRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.playerRepository = playerRepository;
+        this.incorrectSqlExampleRepository = incorrectSqlExampleRepository;
+        this.dragAndDropExampleRepository = dragAndDropExampleRepository;
     }
 
     public List<Task> getAllTasks() {
@@ -42,7 +52,7 @@ public class TaskService {
     }
 
     //IdTask
-    public TaskWithSolvedDto getTaskById(Long taskId, User user) {
+    public BaseTaskDto getTaskById(Long taskId, User user) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
@@ -64,19 +74,61 @@ public class TaskService {
             }
         }
 
-        return new TaskWithSolvedDto(
-                task.getId(),
-                task.getTaskCode(),
-                task.getAufgabe(),
-                task.getKategorie(),
-                task.getSchwierigkeitsgrad(),
-                task.getHint(),
-                task.getTaskType(),
-                task.getInteractionType(),
-                solved,
-                tableName,
-                tableData
-        );
+
+        switch (task.getInteractionType()) {
+            case INCORRECT_SQL -> {
+                IncorrectSqlExample incorrect = incorrectSqlExampleRepository.getByTask(task);
+                if (incorrect == null) throw new IllegalStateException("Incorrect SQL example not found");
+                return new IncorrectSqlTaskDto(
+                        task.getId(),
+                        task.getTaskCode(),
+                        task.getAufgabe(),
+                        task.getKategorie(),
+                        task.getSchwierigkeitsgrad(),
+                        task.getHint(),
+                        task.getTaskType(),
+                        task.getInteractionType(),
+                        solved,
+                        tableName,
+                        tableData,
+                        incorrect.getWrongQuery()
+                );
+            }
+            case DRAG_AND_DROP -> {
+                DragAndDropExample dragDrop = dragAndDropExampleRepository.getByTask(task);
+                return new DragAndDropTaskDto(
+                        task.getId(),
+                        task.getTaskCode(),
+                        task.getAufgabe(),
+                        task.getKategorie(),
+                        task.getSchwierigkeitsgrad(),
+                        task.getHint(),
+                        task.getTaskType(),
+                        task.getInteractionType(),
+                        solved,
+                        tableName,
+                        tableData,
+                        dragDrop.getDragAndDropQuery()
+                );
+            }
+
+            case SQL_INPUT -> {
+                return new TaskWithSolvedDto (
+                        task.getId(),
+                        task.getTaskCode(),
+                        task.getAufgabe(),
+                        task.getKategorie(),
+                        task.getSchwierigkeitsgrad(),
+                        task.getHint(),
+                        task.getTaskType(),
+                        task.getInteractionType(),
+                        solved,
+                        tableName,
+                        tableData
+                );
+            }
+        }
+        return null;
     }
 
     // Levels

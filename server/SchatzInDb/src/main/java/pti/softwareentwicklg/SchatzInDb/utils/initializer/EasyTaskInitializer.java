@@ -63,7 +63,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: SELECT tatort FROM fall",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -89,7 +89,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: SELECT name FROM verdaechtiger WHERE schuhgroesse = 44",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -143,7 +143,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von SELECT, FROM und ORDER BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -169,7 +169,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: Bedingungen korrekt mit AND verknüpfen.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -235,7 +235,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von COUNT und FROM beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -274,7 +274,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: richtige Reihenfolge von SELECT, COUNT und GROUP BY beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -352,7 +352,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: richtige Tabellenreihenfolge und ON-Klausel beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
@@ -378,7 +378,7 @@ public class EasyTaskInitializer {
                         Schwierigkeit.EASY,
                         "Fehlerbefehl korrigieren: richtige ON-Klausel bei LEFT JOIN beachten.",
                         TaskType.REGULAR,
-                        TaskInteractionType.SQL_ERROR_CORRECTION,
+                        TaskInteractionType.INCORRECT_SQL,
                         10
                 ),
                 createTask(
