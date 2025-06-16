@@ -24,7 +24,9 @@ public class ThemeInitializer {
                 createTheme("default", 0L),
                 createTheme("dark", 300L),
                 createTheme("neon", 510L),
-                createTheme("vintage", 650L)
+                createTheme("vintage", 650L),
+                createTheme("forest", 20L),
+                createTheme("retro", 20L)
         );
 
         for(Theme theme : themes) {

@@ -32,10 +32,12 @@ public class TestController {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean available = testService.isTestAvailableForUser(user, schwierigkeitsgrad);
+
         if (!testService.isTestAvailableForUser(user, schwierigkeitsgrad)) {
             return ResponseEntity
                     .status(403)
-                    .body(Map.of("message", "The test is not available. First solve all the usual task."));
+                    .body(Map.of("available", available));
         }
 
         List<TaskWithSolvedDto> testTasks = testService.getTestTasksForUser(schwierigkeitsgrad, user);
