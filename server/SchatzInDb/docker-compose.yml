@@ -19,9 +19,11 @@ services:
       SPRING_DATASOURCE_TASKDB_USERNAME: postgres
       SPRING_DATASOURCE_TASKDB_PASSWORD: postgresql
       SPRING_DATASOURCE_TASKDB_DRIVER_CLASS_NAME: org.postgresql.Driver
-
     networks:
       - backend
+    volumes:
+      - /srv/queryCrime/logs:/srv/queryCrime/logs
+    restart: unless-stopped
 
   userdb:
     image: postgres:15
@@ -36,6 +38,7 @@ services:
       - backend
     volumes:
       - userdb-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   taskdb:
     image: postgres:15
@@ -50,6 +53,7 @@ services:
       - backend
     volumes:
       - taskdb-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 networks:
   backend:

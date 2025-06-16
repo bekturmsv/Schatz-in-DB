@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pti.softwareentwicklg.SchatzInDb.dto.BaseTaskDto;
 import pti.softwareentwicklg.SchatzInDb.dto.TaskWithSolvedDto;
 import pti.softwareentwicklg.SchatzInDb.dto.response.TestAvailabilityResponse;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Schwierigkeit;
@@ -46,7 +47,7 @@ public class TaskController {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        TaskWithSolvedDto dto = taskService.getTaskById(id, user);
+        BaseTaskDto dto = taskService.getTaskById(id, user);
         return ResponseEntity.ok(dto);
     }
 

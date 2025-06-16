@@ -54,6 +54,12 @@ public class Task {
     )
     private IncorrectSqlExample incorrectSqlExample;
 
+    @OneToOne(
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private DragAndDropExample dragAndDropExample;
 
     public Task() {
     }

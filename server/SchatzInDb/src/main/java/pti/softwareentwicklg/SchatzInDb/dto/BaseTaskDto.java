@@ -12,9 +12,18 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class TaskWithSolvedDto extends BaseTaskDto {
-    public TaskWithSolvedDto(Long id, String taskCode, String aufgabe, SqlKategorie kategorie, Schwierigkeit schwierigkeitsgrad, String hint, TaskType taskType, TaskInteractionType taskInteractionType, boolean solved, String tableName, List<Map<String, Object>> tableData) {
-        super(id, taskCode, aufgabe, kategorie, schwierigkeitsgrad, hint, taskType, taskInteractionType, solved, tableName, tableData);
-    }
+public abstract class BaseTaskDto {
+    private Long id;
+    private String taskCode;
+    private String aufgabe;
+    private SqlKategorie kategorie;
+    private Schwierigkeit schwierigkeitsgrad;
+    private String hint;
+    private TaskType taskType;
+    private TaskInteractionType taskInteractionType;
+    private boolean solved;
+    private String tableName;
+    private List<Map<String, Object>> tableData;
 }
