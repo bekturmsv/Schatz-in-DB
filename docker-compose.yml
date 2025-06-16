@@ -1,6 +1,10 @@
+version: "3.8"
+
 services:
-  app:
-    build: .
+  backend:
+    build:
+      context: ./server/SchatzInDb
+      dockerfile: Dockerfile
     container_name: spring-app
     depends_on:
       - userdb
@@ -13,7 +17,6 @@ services:
       SPRING_DATASOURCE_USERDB_USERNAME: postgres
       SPRING_DATASOURCE_USERDB_PASSWORD: postgresql
       SPRING_DATASOURCE_USERDB_DRIVER_CLASS_NAME: org.postgresql.Driver
-
       # TASK DB
       SPRING_DATASOURCE_TASKDB_JDBC_URL: jdbc:postgresql://taskdb:5432/datenbankspiel_task
       SPRING_DATASOURCE_TASKDB_USERNAME: postgres
@@ -54,6 +57,16 @@ services:
     volumes:
       - taskdb-data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: react-app
+    ports:
+      - "3000:80"  # Внешний 3000 : внутренний для nginx 80
+    networks:
+      - backend
 
 networks:
   backend:
