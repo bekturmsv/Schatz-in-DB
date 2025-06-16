@@ -4,9 +4,11 @@ import {Navigate} from "react-router-dom";
 const RequireAdmin = ({children}) => {
     const role = useSelector((state) => state.auth.role);
 
-    if(role !== "admin") {
-        return <Navigate to="/" />
-    }
+    // if(role !== "ADMIN") {
+    //     return <Navigate to="/" />
+    // }
+
+    console.log(role)
 
     return children;
 }

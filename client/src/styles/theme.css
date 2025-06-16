@@ -1,101 +1,248 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&display=swap');
-@import "tailwindcss";
-@tailwind base;
-@tailwind utilities;
-
-@font-face {
-  font-family: "Bungee Inline";
-  src: url("/src/assets/fonts/BungeeInline-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-
+/* Подключи любые нужные шрифты заранее! */
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Roboto:wght@400;700&family=Fira+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Inter:wght@400;500;700&family=Fira+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Special+Elite&family=EB+Garamond:wght@400;700&display=swap');
 /* —— Default Theme —— */
 :root {
-  --color-primary: #60a5fa;
+  --color-primary: #1065cd;
   --color-secondary: #10b981;
-  --color-background: #90D785;
-  --font-family: "Bungee Inline", sans-serif;
-  --bg-image: url("/assets/images/theme1/background.jpg");
+  --color-background: #f5fffa;
+  --font-family: 'Inter', Arial, sans-serif;
+  --font-ui: 'Bungee Inline', cursive;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+  --card-bg: #fff;
+  --color-card-bg: #f8fafc;        /* светлый фон карточек */
+  --color-card-hover: #f3f6fa;
+  --card-shadow: 0 8px 24px 0 rgba(96, 165, 250, 0.08);
+  --card-radius: 1.3rem;
+  --btn-bg: linear-gradient(90deg, #60a5fa 0%, #10b981 100%);
+  --btn-bg-hover: linear-gradient(90deg, #10b981 0%, #60a5fa 100%);
+  --btn-radius: 1.2rem;
+  --btn-shadow: 0 3px 12px 0 rgba(16,185,129,0.14);
+  --input-bg: #f3f4f6;
+  --input-radius: 0.9rem;
+  --input-shadow: 0 1px 6px 0 rgba(16,185,129,0.08);
+  --transition-main: all 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* —— Dark Theme —— */
+/* —— DARK THEME —— */
 [data-theme="dark"] {
-  --color-primary: #60a5fa;
-  --color-secondary: #34d399;
-  --color-background: #1f2937;
-  --font-family: "Roboto", sans-serif;
-  --bg-image: url("/assets/images/theme2/background.jpg");
+  --color-primary: #b3e5fc;
+  --color-secondary: #80cbc4;
+  --color-background: #191f2a;
+  --font-family: 'Inter', Arial, sans-serif;
+  --font-ui: 'Bungee Inline', cursive;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: linear-gradient(135deg, #232a36 0%, #384050 100%);
+  --card-bg: #242b39;
+  --card-shadow: 0 12px 40px 0 rgba(0,0,0,0.22);
+  --card-radius: 1.15rem;
+  --color-card-bg: #23272d;        /* глубокий серый для карточек */
+  --color-card-hover: #262b32;
+  --btn-bg: linear-gradient(90deg, #80cbc4 0%, #60a5fa 100%);
+  --btn-bg-hover: linear-gradient(90deg, #60a5fa 0%, #80cbc4 100%);
+  --btn-radius: 1.2rem;
+  --btn-shadow: 0 2px 12px 0 rgba(96,165,250,0.10);
+  --input-bg: #232a36;
+  --input-radius: 0.9rem;
+  --input-shadow: 0 1px 6px 0 rgba(80,203,196,0.09);
+  --transition-main: all 0.45s cubic-bezier(0.4,0,0.2,1);
+  --logo-gradient: linear-gradient(90deg, #80cbc4 0%, #b3e5fc 90%);
 }
 
-/* —— Retro Theme —— */
+/* —— NEON THEME —— */
+[data-theme="neon"] {
+  --color-primary: #00fff7;
+  --color-secondary: #ff00c3;
+  --color-background: #0a0822;
+  --font-family: 'Orbitron', 'Inter', Arial, sans-serif;
+  --font-ui: 'Orbitron', 'Bungee Inline', cursive;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: radial-gradient(ellipse at center, #1b1547 0%, #0a0822 100%);
+  --card-bg: #191436;
+  --card-shadow: 0 4px 24px 0 rgba(0,255,247,0.14);
+  --card-radius: 1.2rem;
+  --color-card-bg: #191436;
+  --color-card-hover: #231c47;
+  --btn-bg: linear-gradient(90deg, #00fff7 0%, #ff00c3 100%);
+  --btn-bg-hover: linear-gradient(90deg, #ff00c3 0%, #00fff7 100%);
+  --btn-radius: 1.2rem;
+  --btn-shadow: 0 2px 16px 0 rgba(0,255,247,0.18);
+  --input-bg: #211d3a;
+  --input-radius: 0.8rem;
+  --input-shadow: 0 1px 6px 0 rgba(0,255,247,0.09);
+  --transition-main: all 0.48s cubic-bezier(0.4,0,0.2,1);
+  --logo-gradient: linear-gradient(90deg, #8f7cff 5%, #00f0ff 90%);
+}
+
+/* —— VINTAGE THEME —— */
+[data-theme="vintage"] {
+  --color-primary: #4c3415;
+  --color-secondary: #b98127;
+  --color-background: #f7efe0;
+  --font-family: 'EB Garamond', serif;
+  --font-ui: 'Special Elite', cursive;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: repeating-linear-gradient(135deg, #f7efe0 0px, #f5ecd7 24px, #f3e9cb 48px, #f7efe0 72px);
+  --card-bg: #fffaf3;
+  --card-shadow: 0 4px 20px 0 rgba(183,151,82,0.11);
+  --card-radius: 1rem;
+  --color-card-bg: #fdf7ea;
+  --color-card-hover: #f7eed6;
+  --btn-bg: linear-gradient(90deg, #b98127 0%, #f7efe0 100%);
+  --btn-bg-hover: linear-gradient(90deg, #f7efe0 0%, #b98127 100%);
+  --btn-radius: 0.7rem;
+  --btn-shadow: 0 2px 8px 0 rgba(183,151,82,0.14);
+  --input-bg: #f8f1db;
+  --input-radius: 0.6rem;
+  --input-shadow: 0 1px 6px 0 rgba(183,151,82,0.06);
+  --transition-main: all 0.32s cubic-bezier(0.4,0,0.2,1);
+  --logo-gradient: linear-gradient(90deg, #ad6b3c 10%, #ffefb5 90%);
+}
+
+/* —— RETRO THEME —— */
 [data-theme="retro"] {
-  --color-primary: #f87171;
-  --color-secondary: #facc15;
-  --color-background: #fef3c7;
-  --font-family: "Courier New", monospace;
-  --bg-image: url("/assets/images/theme3/background.jpg");
+  --color-primary: #ff9800;
+  --color-secondary: #e53935;
+  --color-background: #fffbe8;
+  --font-family: 'Courier New', monospace;
+  --font-ui: 'Courier New', monospace;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: linear-gradient(90deg, #ffe082 0%, #e1bee7 100%);
+  --card-bg: #fffde7;
+  --card-shadow: 0 4px 16px 0 rgba(255,193,7,0.13);
+  --card-radius: 0.5rem;
+  --btn-bg: linear-gradient(90deg, #ffe082 0%, #e53935 100%);
+  --btn-bg-hover: linear-gradient(90deg, #e53935 0%, #ffe082 100%);
+  --btn-radius: 0.2rem;
+  --btn-shadow: 0 2px 8px 0 rgba(229,57,53,0.10);
+  --input-bg: #fffde7;
+  --input-radius: 0.2rem;
+  --input-shadow: 0 1px 6px 0 rgba(229,57,53,0.07);
+  --transition-main: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  --logo-gradient: linear-gradient(90deg, #ff9800 0%, #e53935 100%);
 }
 
-/* —— Ocean Theme —— */
-[data-theme="ocean"] {
-  --color-primary: #0288d1;
-  --color-secondary: #4caf50;
-  --color-background: #e0f7fa;
-  --font-family: "Roboto", sans-serif;
-  --bg-image: url("/assets/images/ocean-bg.jpg");
-}
-
-/* —— Forest Theme —— */
+/* —— FOREST THEME —— */
 [data-theme="forest"] {
-  --color-primary: #4caf50;
+  --color-primary: #388e3c;
   --color-secondary: #ff6f61;
   --color-background: #e8f5e9;
-  --font-family: "Bungee Inline", sans-serif;
-  --bg-image: url("/assets/images/forest-bg.jpg");
+  --font-family: 'Bungee Inline', cursive;
+  --font-ui: 'Bungee Inline', cursive;
+  --font-code: 'Fira Mono', monospace;
+  --bg-image: linear-gradient(115deg, #e8f5e9 0%, #b9f6ca 100%);
+  --card-bg: #fafafa;
+  --card-shadow: 0 8px 24px 0 rgba(56,142,60,0.09);
+  --card-radius: 1.7rem;
+  --btn-bg: linear-gradient(90deg, #388e3c 0%, #b9f6ca 100%);
+  --btn-bg-hover: linear-gradient(90deg, #b9f6ca 0%, #388e3c 100%);
+  --btn-radius: 1.7rem;
+  --btn-shadow: 0 3px 12px 0 rgba(56,142,60,0.14);
+  --input-bg: #f5fffa;
+  --input-radius: 1.1rem;
+  --input-shadow: 0 1px 6px 0 rgba(56,142,60,0.09);
+  --transition-main: all 0.55s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* —— Global Base Layer —— */
+/* —— GLOBAL BASE —— */
 @layer base {
   html {
-    /*background-color: var(--color-background);*/
-    color: var(--color-primary);
-    font-family: var(--font-family);
-    background-image: var(--bg-image);
+    background: var(--bg-image), var(--color-background);
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--color-primary);
+    font-family: var(--font-family);
+    transition: var(--transition-main);
+    min-height: 100vh;
   }
-
   body {
-    /*background-color: var(--color-background);*/
+    background: none;
     color: var(--color-primary);
+    font-family: var(--font-family);
   }
 
-  nav {
-    /*background-color: var(--color-background);*/
+  .logo-title {
+    font-family: var(--font-ui), var(--font-family), sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     color: var(--color-primary);
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    line-height: 1.12;
+    display: inline-block;
   }
-
-  footer {
-    /*background-color: var(--color-background);*/
+  .custom-card {
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    border-radius: var(--card-radius);
+    transition: var(--transition-main);
+  }
+  .custom-btn {
+    background: var(--btn-bg);
     color: var(--color-primary);
+    border-radius: var(--btn-radius);
+    box-shadow: var(--btn-shadow);
+    font-family: var(--font-ui);
+    transition: var(--transition-main);
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    outline: none;
+    border: none;
+    cursor: pointer;
   }
-
-  .bg-custom-background {
-    background-color: var(--color-background) !important;
-  }
-  
-  .custom-font {
-    font-family: var(--font-family), sans-serif;
-  }
-  
-  .text-primary {
-    color: var(--color-primary);
-  }
-
-  .text-secondary {
+  .custom-btn:hover {
+    background: var(--btn-bg-hover);
     color: var(--color-secondary);
+    box-shadow: 0 6px 32px 0 rgba(34,197,94,0.09);
+    transform: scale(1.05);
+  }
+  .custom-input {
+    background: var(--input-bg);
+    border-radius: var(--input-radius);
+    box-shadow: var(--input-shadow);
+    font-family: var(--font-code);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: 0.65rem 1.1rem;
+    transition: var(--transition-main);
+  }
+  .custom-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px var(--color-secondary);
+  }
+  .custom-title {
+    font-family: var(--font-ui), cursive;
+    font-size: 2.4rem;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+    margin-bottom: 0.6em;
+    text-shadow: 0 3px 16px var(--color-background);
+    transition: var(--transition-main);
+  }
+  .custom-card * {
+    transition: var(--transition-main);
+  }
+  .custom-shadow {
+    box-shadow: var(--card-shadow);
+  }
+
+  .custom-font {
+    font-family: var(--font-ui), var(--font-family), sans-serif !important;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    /* Если хочешь — можешь добавить тень или ещё стили для заголовков/спец-текста */
+  }
+}
+
+@media (max-width: 600px) {
+  .logo-title {
+    font-size: 1.1rem;
   }
 }
