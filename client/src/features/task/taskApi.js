@@ -16,16 +16,27 @@ export const taskApi = createApi({
     }),
     endpoints: (builder) => ({
         getTopics: builder.query({
-            query: (difficulty) => `api/task/${difficulty.toUpperCase()}/topics`,
+            query: (difficulty) => ({
+                url: "api/task/getTopics",
+                params: {schwierigkeit: difficulty},
+            })
         }),
         getTasksByTopic: builder.query({
-            // Меняем topicId на topicName и путь на ваш:
             query: ({ difficulty, topicName }) =>
-                `api/task/${difficulty}/${topicName}/tasks`,
+                ({
+                    url: '/api/task/getByDifficult',
+                    params: {
+                        schwierigkeit: difficulty,
+                        sqlKategorie: topicName
+                    }
+                })
         }),
         getTaskById: builder.query({
-            query: ({ difficulty, topicName, taskId }) =>
-                `api/task/${difficulty.toUpperCase()}/${topicName}/tasks/${taskId}`,
+            query: ({  taskId }) =>
+                `api/task/getById/${taskId}`,
+        }),
+        getLevels: builder.query({
+            query: () => "api/task/getLevels"
         }),
         submitTaskAnswer: builder.mutation({
             query: ({ taskId, answer }) => ({
@@ -34,6 +45,7 @@ export const taskApi = createApi({
                 body: { answer: JSON.stringify(answer) },
             }),
         }),
+
     }),
 });
 
@@ -41,5 +53,6 @@ export const {
     useGetTopicsQuery,
     useGetTasksByTopicQuery,
     useGetTaskByIdQuery,
+    useGetLevelsQuery,
     useSubmitTaskAnswerMutation
 } = taskApi;

@@ -1,30 +1,31 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getUser } from "../../data/mockUser";
 import { motion } from "framer-motion";
+import { useGetLevelsQuery } from "../../features/task/taskApi.js";
 
 export default function DifficultyLevel() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const user = getUser();
+    const { data, isLoading, isError } = useGetLevelsQuery();
 
-    const difficulties = Object.keys(user.completedLevels).map((key) => ({
-        key,
-        label: t(key),
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        isCompleted: user.completedLevels[key],
-    }));
+    if (isLoading) return <div className="text-center mt-24">{t("loading")}</div>;
+    if (isError || !data) return <div className="text-center mt-24 text-red-400">{t("errorLoadingLevels")}</div>;
 
-    const handleDifficultySelect = (difficulty, isLocked) => {
-        if (!isLocked) {
-            navigate(`/level/${difficulty.toLowerCase()}`);
-        }
-    };
-
-    const progress = user.progress.tasksSolved;
-    const total = user.progress.totalTasks;
+    // Get progress and levels
+    const progress = data.totalCompletedTasks;
+    const total = data.totalTasks;
     const percent = Math.round((progress / total) * 100);
 
+    // Map levels from API
+    const difficulties = data.levels.map((lvl, idx) => ({
+        key: lvl.title,
+        label: t(lvl.title), // "EASY", "MEDIUM", "HARD" must be in translations!
+        name: lvl.title.charAt(0).toUpperCase() + lvl.title.slice(1).toLowerCase(),
+        isCompleted: lvl.completed,
+        idx,
+    }));
+
+    // Animation stuff
     const container = {
         hidden: { opacity: 0 },
         visible: {
@@ -35,6 +36,12 @@ export default function DifficultyLevel() {
     const item = {
         hidden: { opacity: 0, y: 32, scale: 0.98 },
         visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" } },
+    };
+
+    const handleDifficultySelect = (difficulty, isLocked) => {
+        if (!isLocked) {
+            navigate(`/level/${difficulty.toLowerCase()}`);
+        }
     };
 
     return (
@@ -89,39 +96,31 @@ export default function DifficultyLevel() {
                     className="flex flex-col space-y-6 w-full max-w-lg"
                 >
                     {difficulties.map((diff, idx) => {
-                        let isLocked = false;
-                        if (idx > 0) {
-                            const prevLevel = difficulties[idx - 1];
-                            isLocked = !prevLevel.isCompleted;
-                        }
+                        // Lock level if previous is not completed (except first)
+                        let isLocked = idx > 0 ? !difficulties[idx - 1].isCompleted : false;
                         return (
                             <motion.button
                                 key={diff.key}
                                 variants={item}
                                 onClick={() => handleDifficultySelect(diff.name, isLocked)}
                                 disabled={isLocked}
-                                whileHover={
-                                    !isLocked
-                                        ? { scale: 1.025 }
-                                        : {}
-                                }
+                                whileHover={!isLocked ? { scale: 1.025 } : {}}
                                 whileTap={!isLocked ? { scale: 0.98 } : {}}
-                                className={`
-                                    relative py-4 px-8 rounded-xl text-2xl md:text-2xl uppercase font-semibold transition
+                                className={
+                                    `relative py-4 px-8 rounded-xl text-2xl md:text-2xl uppercase font-semibold transition
                                     flex items-center justify-center border-2 shadow-md custom-font
                                     focus:outline-none
-                                    ${diff.isCompleted
-                                    ? "bg-[var(--color-secondary)]/90 border-[var(--color-secondary)] text-white"
-                                    : !isLocked
-                                        ? "bg-[var(--color-card-bg,rgba(30,36,43,0.87))] dark:bg-[var(--color-card-bg,#23272d)] border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-card-hover,#323843)] dark:hover:bg-[#262b32]"
-                                        : "bg-gray-200 dark:bg-[#18181b] border-gray-300 text-gray-400 cursor-not-allowed"
+                                    ${
+                                        diff.isCompleted
+                                            ? "bg-[var(--color-secondary)]/90 border-[var(--color-secondary)] text-white"
+                                            : !isLocked
+                                                ? "bg-[var(--color-card-bg,rgba(30,36,43,0.87))] dark:bg-[var(--color-card-bg,#23272d)] border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-card-hover,#323843)] dark:hover:bg-[#262b32]"
+                                                : "bg-gray-200 dark:bg-[#18181b] border-gray-300 text-gray-400 cursor-not-allowed"
+                                    }`
                                 }
-                                `}
                                 style={{
                                     minHeight: 64,
                                     letterSpacing: "0.045em",
-                                    // Светлее на ховере (через :hover или tailwind hover:),
-                                    // можно добавить еще в css: .card-hover
                                 }}
                             >
                                 <span>{diff.label}</span>

@@ -199,6 +199,7 @@ export default function Register() {
               <option value="" disabled>
                 {isSpecializationsLoading ? t("loading") : t("selectSpecialization")}
               </option>
+
               {specializations?.map((specialization, index) => (
                   <option key={index} value={specialization}>
                     {specialization}

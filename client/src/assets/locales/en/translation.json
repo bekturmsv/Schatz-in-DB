@@ -98,6 +98,15 @@
   "loginSuccessful": "Login successful!",
   "loginFailed": "Login failed",
   "usernameAndPasswordRequired": "Username and password are required.",
-  "dontHaveAccount": "Don't have an account?"
+  "dontHaveAccount": "Don't have an account?",
+  "errorLoadingLevels": "Failed to load levels",
+  "difficultyLevel": "Difficulty Level",
+  "progress": "Progress",
+  "totalTasksSolved": "Solved tasks",
+  "completePreviousLevelFirst": "Complete the previous level first",
+  "EASY": "Easy",
+  "MEDIUM": "Medium",
+  "HARD": "Hard",
+  "task": "Task"
 
 }

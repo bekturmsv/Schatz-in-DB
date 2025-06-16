@@ -98,5 +98,14 @@
   "loginSuccessful": "Anmeldung erfolgreich!",
   "loginFailed": "Anmeldung fehlgeschlagen",
   "usernameAndPasswordRequired": "Benutzername und Passwort sind erforderlich.",
-  "dontHaveAccount": "Sie haben noch kein Konto?"
+  "dontHaveAccount": "Sie haben noch kein Konto?",
+  "errorLoadingLevels": "Fehler beim Laden der Level",
+  "difficultyLevel": "Schwierigkeitsgrad",
+  "progress": "Fortschritt",
+  "totalTasksSolved": "Gelöste Aufgaben",
+  "completePreviousLevelFirst": "Schließe zuerst das vorherige Level ab",
+  "EASY": "Leicht",
+  "MEDIUM": "Mittel",
+  "HARD": "Schwer",
+  "task": "Aufgabe"
 }
