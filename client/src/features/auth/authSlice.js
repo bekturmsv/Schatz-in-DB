@@ -30,10 +30,11 @@ export const initializeAuth = createAsyncThunk(
         return null;
       }
       try {
-        const user = await dispatch(authApi.endpoints.getMe.initiate()).unwrap();
-        // if (result.token) dispatch(setToken(result.token));
-        if (user) dispatch(setUser(user));
-        return user;
+        const result = await dispatch(authApi.endpoints.getMe.initiate()).unwrap();
+        if (result.token) dispatch(setToken(result.token));
+
+        if (result.user) dispatch(setUser(result.user));
+        return result.user;
       } catch (error) {
         if (error && error.status === 401) {
           dispatch(logout());

@@ -49,15 +49,13 @@ export const authApi = createApi({
     }),
     getSpecializations: builder.query({
       query: () => ({
-        // url: "/api/specialist/getAll",
-        url: "/api/specializations",
+        url: "/api/specialist/getAll",
         method: "GET",
       }),
     }),
     getMe: builder.query({
       query: () => ({
-        // url: "/api/profile/player/getAuthorizedUser",
-        url: "/api/auth/me",
+        url: "/api/profile/player/getAuthorizedUser",
         method: "GET",
       }),
       transformResponse: (response) => response,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -9,14 +9,12 @@ import { executeSqlQuery } from "../../utils/SqlExecutor";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Task() {
-    const { difficulty, topicName, taskId } = useParams();
+    const { taskId } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const user = useSelector((state) => state.auth.user);
-    const { state } = useLocation();
-    const fallbackTopicName = state?.topicName || "WHERE";
 
     const [answer, setAnswer] = useState("");
     const [showHint, setShowHint] = useState(false);
@@ -29,7 +27,7 @@ export default function Task() {
     }
 
     const { data: currentTask, isLoading, isError } = useGetTaskByIdQuery(
-        { difficulty: difficulty.toUpperCase(), topicName: topicName || fallbackTopicName, taskId: parseInt(taskId) },
+        { taskId: parseInt(taskId) },
         { skip: !taskId }
     );
 
@@ -68,61 +66,45 @@ export default function Task() {
         );
     }
 
-    const jsonToTables = (json) => {
-        if (!json || !json.sampleData) return <p>{t("noTablesAvailable")}</p>;
-        try {
-            const data = json.sampleData;
-            if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
-                return <p>{t("noTablesAvailable")}</p>;
-            }
-            return (
-                <div>
-                    {Object.entries(data).map(([tableName, table], index) => {
-                        if (!table || !Array.isArray(table)) {
-                            return <p key={index}>{t("invalidTableFormat", { tableName })}</p>;
-                        }
-                        const columns = table.length > 0 ? Object.keys(table[0]) : [];
-                        const rows = table.map((item) => columns.map((col) => item[col] || ""));
-                        return (
-                            <div key={index} className="mb-4">
-                                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{tableName}</h3>
-                                <div className="overflow-auto rounded-lg shadow">
-                                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[180px] text-xs">
-                                        <thead>
-                                        <tr>
-                                            {columns.map((col, colIndex) => (
-                                                <th key={colIndex} className="border px-2 py-1 bg-[var(--color-background)] font-medium custom-font text-[var(--color-primary)]">
-                                                    {col}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {rows.map((row, rowIndex) => (
-                                            <tr key={rowIndex}>
-                                                {row.map((cell, cellIndex) => (
-                                                    <td key={cellIndex} className="border px-2 py-1 custom-font text-[var(--color-secondary)]">
-                                                        {cell !== undefined ? cell : ""}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            );
-        } catch (error) {
-            return <p>{t("errorLoadingTables")}</p>;
+    // Отрисовка таблицы по новым полям
+    const renderTaskTable = (task) => {
+        if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) {
+            return <p>{t("noTablesAvailable")}</p>;
         }
+        const columns = Object.keys(task.tableData[0]);
+        return (
+            <div>
+                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{task.tableName}</h3>
+                <div className="overflow-auto rounded-lg shadow">
+                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[180px] text-xs">
+                        <thead>
+                        <tr>
+                            {columns.map((col, i) => (
+                                <th key={i} className="border px-2 py-1 bg-[var(--color-background)] font-medium custom-font text-[var(--color-primary)]">{col}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {task.tableData.map((row, i) => (
+                            <tr key={i}>
+                                {columns.map((col, j) => (
+                                    <td key={j} className="border px-2 py-1 custom-font text-[var(--color-secondary)]">
+                                        {row[col] != null ? row[col] : ""}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
     };
 
+    // handleSubmit может остаться прежним, если не поменялся формат ответа от submitTaskAnswer
     const handleSubmit = async () => {
         try {
-            const result = await executeSqlQuery(answer, currentTask.sampleData);
+            const result = await executeSqlQuery(answer, { [currentTask.tableName]: currentTask.tableData });
 
             const response = await submitTaskAnswer({
                 taskId: parseInt(taskId),
@@ -133,42 +115,9 @@ export default function Task() {
                 toast.success(t("correctAnswer"));
                 setIsCompleted(true);
 
-                const updatedCompletedTasks = {
-                    ...user.completedTasks,
-                    [difficulty.toUpperCase()]: [
-                        ...(user.completedTasks[difficulty.toUpperCase()] || []),
-                        parseInt(taskId),
-                    ],
-                };
-
-                const updatedTasks = user.tasks.map((userTask) => {
-                    if (
-                        userTask.type.toUpperCase() === difficulty.toUpperCase() &&
-                        userTask.theme === currentTask.topicName
-                    ) {
-                        return {
-                            ...userTask,
-                            completed: userTask.completed + 1,
-                        };
-                    }
-                    return userTask;
-                });
-
-                const updatedProgress = {
-                    ...user.progress,
-                    tasksSolved: user.progress.tasksSolved + 1,
-                };
-                const updatedPoints = user.points + currentTask.points;
-
-                const updatedUser = {
-                    completedTasks: updatedCompletedTasks,
-                    tasks: updatedTasks,
-                    progress: updatedProgress,
-                    points: updatedPoints,
-                };
-
-                dispatch(setUser({ ...user, ...updatedUser }));
-                setTimeout(() => navigate(`/level/${difficulty.toUpperCase()}`), 1000);
+                // Здесь можно обновлять пользователя и прогресс, если нужно
+                // ...
+                setTimeout(() => navigate(-1), 1000);
             } else {
                 toast.error(t("incorrectAnswer"));
             }
@@ -215,7 +164,7 @@ export default function Task() {
                                 ✕
                             </button>
                             <h3 className="text-2xl font-bold mb-4 text-[var(--color-primary)]">{t("hint")}</h3>
-                            <p className="text-[var(--color-secondary)]">{currentTask.description}</p>
+                            <p className="text-[var(--color-secondary)]">{currentTask.hint}</p>
                         </motion.div>
                     </motion.div>
                 )}
@@ -241,9 +190,19 @@ export default function Task() {
                     >
                         <h2 className="text-2xl font-extrabold mb-4 flex items-center custom-font" style={{ color: "var(--color-primary)" }}>
                             <span className="mr-2">📝</span> {t("taskDescription")}
+                            {currentTask.solved && (
+                                <span className="ml-3 text-green-500" title={t("taskCompleted")}>
+                                    <svg className="inline w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                        <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
+                                    </svg>
+                                </span>
+                            )}
                         </h2>
-                        <p className="mb-3 text-base md:text-lg custom-font text-[var(--color-secondary)]">{currentTask.description}</p>
-                        <div className="overflow-x-auto">{jsonToTables(currentTask)}</div>
+                        <div className="mb-3 text-base md:text-lg custom-font text-[var(--color-secondary)] whitespace-pre-line">
+                            {currentTask.aufgabe}
+                        </div>
+                        <div className="overflow-x-auto">{renderTaskTable(currentTask)}</div>
                     </motion.div>
 
                     {/* Правая колонка */}
@@ -260,13 +219,13 @@ export default function Task() {
                         >
                             <div className="flex flex-wrap gap-x-6 gap-y-2 text-base md:text-lg custom-font mb-3">
                                 <span>
-                                    <b>{t("name")}:</b> {currentTask.title}
+                                    <b>{t("taskCode")}:</b> {currentTask.taskCode}
                                 </span>
                                 <span>
-                                    <b>{t("point")}:</b> {currentTask.points}
+                                    <b>{t("category")}:</b> {currentTask.kategorie}
                                 </span>
                                 <span>
-                                    <b>{t("topic")}:</b> {currentTask.topicName}
+                                    <b>{t("difficulty")}:</b> {currentTask.schwierigkeitsgrad}
                                 </span>
                             </div>
                             <div className="flex gap-3 mt-3">

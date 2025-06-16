@@ -12,7 +12,7 @@ export default function TasksList() {
     const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
 
     const {
-        data: response = {},
+        data: response = [],
         isLoading,
         isError,
     } = useGetTasksByTopicQuery(
@@ -25,7 +25,8 @@ export default function TasksList() {
         return null;
     }
 
-    const tasks = response.tasksNotCompleted ?? [];
+    // Теперь response - это сразу массив заданий
+    const tasks = Array.isArray(response) ? response : [];
 
     const cardVariants = {
         hidden: { opacity: 0, y: 24, scale: 0.97 },
@@ -113,7 +114,10 @@ export default function TasksList() {
                                         `/level/${level}/topic/${encodeURIComponent(topicName)}/task/${task.id}`
                                     )
                                 }
-                                className="cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg"
+                                className={`
+                                    cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg
+                                    ${task.solved ? "bg-green-50 dark:bg-green-900/20" : ""}
+                                    `}
                                 style={{
                                     background: "var(--color-card-bg, #f8fafc)",
                                     borderColor: "var(--color-primary)",
@@ -124,7 +128,7 @@ export default function TasksList() {
                                 }}
                             >
                                 <h2
-                                    className="text-xl font-bold mb-1 custom-font"
+                                    className="text-xl font-bold mb-1 custom-font flex items-center"
                                     style={{
                                         background: "linear-gradient(90deg, var(--color-primary), var(--color-secondary))",
                                         backgroundClip: "text",
@@ -133,7 +137,23 @@ export default function TasksList() {
                                         WebkitTextFillColor: "transparent",
                                     }}
                                 >
-                                    {task.title}
+                                    {task.aufgabe?.split('\n')[0] || t("task")}
+                                    <span className="ml-2 flex items-center">
+                                    {task.solved && (
+                                        <motion.span
+                                            initial={{ scale: 0, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ delay: 0.08 }}
+                                            className="text-2xl"
+                                            title={t("taskCompleted")}
+                                        >
+                                            <svg className="inline w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                                <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
+                                            </svg>
+                                        </motion.span>
+                                    )}
+                                  </span>
                                 </h2>
                                 <div
                                     className="text-base custom-body line-clamp-3"
@@ -142,7 +162,7 @@ export default function TasksList() {
                                         opacity: 0.88,
                                     }}
                                 >
-                                    {task.description}
+                                    {task.aufgabe?.split('\n').slice(1).join('\n')}
                                 </div>
                             </motion.li>
                         ))

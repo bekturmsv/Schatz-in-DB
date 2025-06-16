@@ -10,10 +10,11 @@ import Loading from "@/components/custom/Loading.jsx";
 export default function MainLayout() {
     const dispatch = useDispatch();
     const isAuthLoading = useSelector((state) => state.auth.isAuthLoading);
+    const token = useSelector((state) => state.auth.token);
 
     useEffect(() => {
         dispatch(initializeAuth());
-    }, [dispatch]);
+    }, [token,dispatch]);
 
     return (
         <div className="flex flex-col min-h-screen relative">
