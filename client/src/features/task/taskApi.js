@@ -45,6 +45,13 @@ export const taskApi = createApi({
                 body: { answer: JSON.stringify(answer) },
             }),
         }),
+        validateSql: builder.mutation({
+            query: ({userSql, taskCode})=> ({
+                url: "api/sql/validate",
+                method: 'POST',
+                body: { userSql, taskCode }
+            })
+        })
 
     }),
 });
@@ -54,5 +61,6 @@ export const {
     useGetTasksByTopicQuery,
     useGetTaskByIdQuery,
     useGetLevelsQuery,
-    useSubmitTaskAnswerMutation
+    useSubmitTaskAnswerMutation,
+    useValidateSqlMutation
 } = taskApi;
