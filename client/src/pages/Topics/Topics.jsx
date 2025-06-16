@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useGetTopicsQuery } from "../../features/task/taskApi.js";
 import { motion, AnimatePresence } from "framer-motion";
 import DetectiveStory from "@/components/custom/DetectiveStory.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Topic() {
     const { difficulty } = useParams();
@@ -19,27 +19,63 @@ export default function Topic() {
         isError,
     } = useGetTopicsQuery(level, { skip: !difficulty });
 
-    const [showDetective, setShowDetective] = useState(true);
+    // Ключи для localStorage
+    const detectiveGreetingKey = `detective_shown_${difficulty}`;
+    const detectiveCongratsKey = `detective_congrats_shown_${difficulty}`;
 
+    // --- Флаги показа детектива
+    const [showDetectiveGreeting, setShowDetectiveGreeting] = useState(() => {
+        return !localStorage.getItem(detectiveGreetingKey);
+    });
+    const [showDetectiveCongrats, setShowDetectiveCongrats] = useState(() => {
+        return !localStorage.getItem(detectiveCongratsKey);
+    });
+
+    // Для финального примера (ты можешь вставить свою логику)
+    // Например, когда все темы решены:
+    const topics = response.tasks ?? [];
+    // ЭТО ПРИМЕР: считаем, что все темы решены если их 0 (или можешь сделать свою логику)
+    const allTopicsCompleted = topics.length === 0; // <-- подправь под себя
+
+    // После закрытия приветствия ставим флаг
+    useEffect(() => {
+        if (!showDetectiveGreeting) {
+            localStorage.setItem(detectiveGreetingKey, "true");
+        }
+    }, [showDetectiveGreeting, detectiveGreetingKey]);
+
+    // После закрытия поздравления ставим флаг
+    useEffect(() => {
+        if (!showDetectiveCongrats) {
+            localStorage.setItem(detectiveCongratsKey, "true");
+        }
+    }, [showDetectiveCongrats, detectiveCongratsKey]);
+
+    // Не даём войти неавторизованным
     if (!isAuthenticated) {
         navigate("/login");
         return null;
     }
 
-    const topics = response.tasks ?? [];
-
-    const cardVariants = {
-        hidden: { opacity: 0, y: 24, scale: 0.97 },
-        visible: (i = 1) => ({
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" },
-        }),
-    };
-
     return (
         <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
+
+            {/* Детектив в начале (только 1 раз) */}
+            <DetectiveStory
+                isVisible={showDetectiveGreeting}
+                onClose={() => setShowDetectiveGreeting(false)}
+                difficulty={difficulty}
+                isEnd={false}
+            />
+
+            {/* Детектив в конце (только 1 раз) */}
+            <DetectiveStory
+                isVisible={showDetectiveCongrats && allTopicsCompleted}
+                onClose={() => setShowDetectiveCongrats(false)}
+                difficulty={difficulty}
+                isEnd={true}
+            />
+
             <motion.h1
                 initial={{ opacity: 0, y: -24 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -55,9 +91,6 @@ export default function Topic() {
                     ({t(`${difficulty.toLowerCase()}Level`)})
                 </span>
             </motion.h1>
-
-            {/* === Вот тут появится детектив === */}
-            <DetectiveStory isVisible={showDetective} onClose={() => setShowDetective(false)} difficulty={difficulty} />
 
             <AnimatePresence>
                 {isLoading && (
@@ -90,7 +123,7 @@ export default function Topic() {
                 )}
             </AnimatePresence>
 
-            {!isLoading && !isError && (
+            {!isLoading && !isError && !allTopicsCompleted && (
                 <motion.ul
                     initial="hidden"
                     animate="visible"
@@ -104,8 +137,17 @@ export default function Topic() {
                     {topics.map((topic, idx) => (
                         <motion.li
                             key={topic.name}
-                            variants={cardVariants}
-                            custom={idx + 1}
+                            variants={{
+                                hidden: { opacity: 0, y: 24, scale: 0.97 },
+                                visible: {
+                                    opacity: 1,
+                                    y: 0,
+                                    scale: 1,
+                                    transition: { delay: (idx + 1) * 0.08, duration: 0.5, ease: "easeOut" },
+                                },
+                            }}
+                            initial="hidden"
+                            animate="visible"
                             whileHover={{
                                 scale: 1.04,
                                 boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
