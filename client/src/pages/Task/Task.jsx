@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useGetTaskByIdQuery, useSubmitTaskAnswerMutation } from "../../features/task/taskApi";
-import { setUser } from "../../features/auth/authSlice";
-import { executeSqlQuery } from "../../utils/SqlExecutor";
+import {useGetTaskByIdQuery, useGetTasksByTopicQuery, useValidateSqlMutation} from "../../features/task/taskApi";
 import { motion, AnimatePresence } from "framer-motion";
+import {initializeAuth} from "@/features/auth/authSlice.js";
 
 export default function Task() {
     const { taskId } = useParams();
@@ -14,24 +13,185 @@ export default function Task() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-    const user = useSelector((state) => state.auth.user);
+
+    // Для refetch списка задач — нам нужны параметры топика и сложности
+    const pathParts = window.location.pathname.split('/');
+    // Пример: /level/MEDIUM/topic/Datatypes/task/10
+    // ['', 'level', 'MEDIUM', 'topic', 'Datatypes', 'task', '10']
+    const difficulty = pathParts[2];
+    const topicName = decodeURIComponent(pathParts[4] || '');
+
+    // Получаем refetch для списка задач
+    const {
+        refetch: refetchTasksList
+    } = useGetTasksByTopicQuery(
+        { difficulty, topicName },
+        { skip: !difficulty || !topicName || !isAuthenticated }
+    );
+
+    // Состояния
+    const [availableBlocks, setAvailableBlocks] = useState([]);
+    const [userBlocks, setUserBlocks] = useState([]);
+    const [draggedBlock, setDraggedBlock] = useState(null);
+    const dropInputRef = useRef();
 
     const [answer, setAnswer] = useState("");
     const [showHint, setShowHint] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
-    const [submitTaskAnswer] = useSubmitTaskAnswerMutation();
+    const [submissionStatus, setSubmissionStatus] = useState(null);
+    const [validateSql, { isLoading: isValidating }] = useValidateSqlMutation();
+
+    const {
+        data: currentTask,
+        isLoading,
+        isError,
+        refetch
+    } = useGetTaskByIdQuery(
+        { taskId: parseInt(taskId) },
+        { skip: !taskId }
+    );
 
     if (!isAuthenticated) {
         navigate("/login");
         return null;
     }
 
-    const { data: currentTask, isLoading, isError } = useGetTaskByIdQuery(
-        { taskId: parseInt(taskId) },
-        { skip: !taskId }
-    );
+    // DRAG & DROP setup
+    useEffect(() => {
+        if (
+            currentTask &&
+            currentTask.taskInteractionType === "DRAG_AND_DROP" &&
+            Array.isArray(currentTask.dragAndDropQuery)
+        ) {
+            setAvailableBlocks(currentTask.dragAndDropQuery);
+            setUserBlocks([]);
+        }
+    }, [currentTask]);
 
-    // Анимация для секций
+    useEffect(() => {
+        if (
+            currentTask?.taskInteractionType === "INCORRECT_SQL" &&
+            currentTask?.wrongQuery &&
+            !answer
+        ) {
+            setAnswer(currentTask.wrongQuery);
+        }
+    }, [currentTask, answer]);
+
+    const solved = currentTask?.solved || isCompleted;
+
+    // DRAG & DROP handlers
+    const onDragStart = (block, origin, idx) => {
+        setDraggedBlock({ block, origin, idx });
+    };
+    const onDropToInput = () => {
+        if (!draggedBlock || solved) return;
+        if (draggedBlock.origin === "available") {
+            setUserBlocks([...userBlocks, draggedBlock.block]);
+            setAvailableBlocks(availableBlocks.filter((b, i) => i !== draggedBlock.idx));
+        }
+        setDraggedBlock(null);
+    };
+    const onDropToAvailable = () => {
+        if (!draggedBlock || solved) return;
+        if (draggedBlock.origin === "input") {
+            setAvailableBlocks([...availableBlocks, draggedBlock.block]);
+            setUserBlocks(userBlocks.filter((b, i) => i !== draggedBlock.idx));
+        }
+        setDraggedBlock(null);
+    };
+
+    const moveBlockInUserBlocks = (fromIdx, toIdx) => {
+        if (fromIdx === toIdx) return;
+        const updated = [...userBlocks];
+        const [removed] = updated.splice(fromIdx, 1);
+        updated.splice(toIdx, 0, removed);
+        setUserBlocks(updated);
+    };
+
+    // Submit logic
+    const handleSubmit = async () => {
+        let userSql = "";
+        if (currentTask.taskInteractionType === "DRAG_AND_DROP") {
+            userSql = userBlocks.join(" ").replace(/\s+/g, " ").trim();
+        } else if (currentTask.taskInteractionType === "INCORRECT_SQL") {
+            userSql = answer.trim();
+        } else {
+            userSql = answer.trim();
+        }
+        userSql = userSql.replace(/;+$/g, "").trim();
+
+        try {
+            const response = await validateSql({
+                userSql,
+                taskCode: currentTask.taskCode
+            }).unwrap();
+
+            if (response.correct) {
+                setSubmissionStatus("correct");
+                setIsCompleted(true);
+                toast.success(t("correctAnswer"));
+                // Обновить задачу, пользователя, список задач
+                await refetch();
+                await dispatch(initializeAuth());
+                await refetchTasksList();
+                setTimeout(() => navigate(-1), 1200);
+            } else {
+                setSubmissionStatus("incorrect");
+                toast.error(t("incorrectAnswer"));
+            }
+        } catch (error) {
+            setSubmissionStatus("error");
+            toast.error(t("submissionError"));
+        }
+    };
+
+    const handleReset = () => {
+        setAnswer(currentTask.taskInteractionType === "INCORRECT_SQL" ? (currentTask.wrongQuery || "") : "");
+        if (currentTask.taskInteractionType === "DRAG_AND_DROP" && Array.isArray(currentTask.dragAndDropQuery)) {
+            setAvailableBlocks(currentTask.dragAndDropQuery);
+            setUserBlocks([]);
+        }
+        setSubmissionStatus(null);
+    };
+    const handleShowHint = () => setShowHint(true);
+    const handleCloseHint = () => setShowHint(false);
+
+    // Таблица задачи (fix)
+    function renderTaskTable(task) {
+        if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) {
+            return <p>{t("noTablesAvailable")}</p>;
+        }
+        const columns = Object.keys(task.tableData[0]);
+        return (
+            <div>
+                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{task.tableName}</h3>
+                <div className="overflow-auto rounded-lg shadow">
+                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[220px] text-sm">
+                        <thead>
+                        <tr>
+                            {columns.map((col, i) => (
+                                <th key={i} className="border px-3 py-2 bg-[var(--color-background)] font-semibold custom-font text-[var(--color-primary)]">{col}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {task.tableData.map((row, i) => (
+                            <tr key={i}>
+                                {columns.map((col, j) => (
+                                    <td key={j} className="border px-3 py-2 custom-font text-[var(--color-secondary)]">
+                                        {row[col] != null ? row[col] : ""}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
     const fadeUp = {
         hidden: { opacity: 0, y: 32 },
         visible: (i = 1) => ({
@@ -41,6 +201,107 @@ export default function Task() {
         }),
     };
 
+    // Drag and drop UI
+    const renderDragAndDrop = () => (
+        <div className="flex flex-col gap-4 mb-3">
+            {/* Available blocks */}
+            <div
+                className="min-h-[62px] bg-blue-50 dark:bg-blue-950 rounded-xl p-3 flex flex-wrap gap-4 items-center border-2 border-dashed border-blue-200 dark:border-blue-800"
+                onDragOver={e => { e.preventDefault(); }}
+                onDrop={onDropToAvailable}
+            >
+                {availableBlocks.length === 0 && (
+                    <span className="text-blue-300 italic">{t("dragDropBlockPool")}</span>
+                )}
+                {availableBlocks.map((block, idx) => (
+                    <motion.div
+                        key={block + idx}
+                        className="cursor-grab py-2 px-5 bg-blue-200 dark:bg-blue-800/90 text-blue-950 dark:text-blue-50 rounded-xl shadow font-mono text-xl font-bold transition-all min-w-[60px] min-h-[48px] flex items-center justify-center"
+                        draggable={!solved}
+                        onDragStart={() => onDragStart(block, "available", idx)}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        {block}
+                    </motion.div>
+                ))}
+            </div>
+            {/* Drop zone */}
+            <div
+                className="min-h-[72px] bg-green-50 dark:bg-green-950 border-2 border-dashed border-green-300 dark:border-green-800 rounded-xl p-3 flex flex-wrap gap-4 items-center"
+                ref={dropInputRef}
+                onDragOver={e => { e.preventDefault(); }}
+                onDrop={onDropToInput}
+            >
+                {userBlocks.length === 0 && (
+                    <span className="text-green-300 italic">{t("dragDropAnswerZone")}</span>
+                )}
+                {userBlocks.map((block, idx) => (
+                    <motion.div
+                        key={block + idx}
+                        className="cursor-grab py-2 px-5 bg-green-200 dark:bg-green-800/90 text-green-950 dark:text-green-50 rounded-xl shadow font-mono text-xl font-bold transition-all min-w-[60px] min-h-[48px] flex items-center justify-center"
+                        draggable={!solved}
+                        onDragStart={() => onDragStart(block, "input", idx)}
+                        onDragOver={e => {
+                            e.preventDefault();
+                        }}
+                        onDrop={e => {
+                            if (!draggedBlock || draggedBlock.origin !== "input") return;
+                            moveBlockInUserBlocks(draggedBlock.idx, idx);
+                            setDraggedBlock(null);
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        {block}
+                    </motion.div>
+                ))}
+            </div>
+            <input
+                className="w-full p-4 border rounded-lg font-mono mt-2 text-lg bg-[var(--color-background)] text-[var(--color-primary)]"
+                value={userBlocks.join(" ")}
+                readOnly
+            />
+        </div>
+    );
+
+    // UI variants based on task type
+    let answerBox;
+    if (currentTask?.taskInteractionType === "DRAG_AND_DROP") {
+        answerBox = (
+            <>
+                <label className="font-semibold mb-2 block text-lg">{t("dragBlocksArrange")}</label>
+                {renderDragAndDrop()}
+                <div className="text-base text-[var(--color-secondary)] mb-2">
+                    {t("dragDropInstruction")}
+                </div>
+            </>
+        );
+    } else if (currentTask?.taskInteractionType === "INCORRECT_SQL") {
+        answerBox = (
+            <>
+                <label className="font-semibold mb-2 block">{t("editSqlWithError")}</label>
+                <textarea
+                    value={answer}
+                    onChange={e => setAnswer(e.target.value)}
+                    className="w-full h-36 p-4 border-2 border-blue-100 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition bg-[var(--color-background)] text-[var(--color-primary)]"
+                    disabled={solved}
+                />
+            </>
+        );
+    } else {
+        answerBox = (
+            <>
+                <label className="font-semibold mb-2 block">{t("sqlInputLabel")}</label>
+                <textarea
+                    value={answer}
+                    onChange={e => setAnswer(e.target.value)}
+                    className="w-full h-36 p-4 border-2 border-blue-100 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition bg-[var(--color-background)] text-[var(--color-primary)]"
+                    disabled={solved}
+                />
+            </>
+        );
+    }
+
+    // Loader/error UI
     if (isLoading) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-custom-background custom-font">
@@ -65,80 +326,9 @@ export default function Task() {
             </div>
         );
     }
-
-    // Отрисовка таблицы по новым полям
-    const renderTaskTable = (task) => {
-        if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) {
-            return <p>{t("noTablesAvailable")}</p>;
-        }
-        const columns = Object.keys(task.tableData[0]);
-        return (
-            <div>
-                <h3 className="text-base font-semibold mb-1 custom-font text-[var(--color-primary)]">{task.tableName}</h3>
-                <div className="overflow-auto rounded-lg shadow">
-                    <table className="border-collapse border border-gray-600 dark:border-gray-700 min-w-[180px] text-xs">
-                        <thead>
-                        <tr>
-                            {columns.map((col, i) => (
-                                <th key={i} className="border px-2 py-1 bg-[var(--color-background)] font-medium custom-font text-[var(--color-primary)]">{col}</th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {task.tableData.map((row, i) => (
-                            <tr key={i}>
-                                {columns.map((col, j) => (
-                                    <td key={j} className="border px-2 py-1 custom-font text-[var(--color-secondary)]">
-                                        {row[col] != null ? row[col] : ""}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    };
-
-    // handleSubmit может остаться прежним, если не поменялся формат ответа от submitTaskAnswer
-    const handleSubmit = async () => {
-        try {
-            const result = await executeSqlQuery(answer, { [currentTask.tableName]: currentTask.tableData });
-
-            const response = await submitTaskAnswer({
-                taskId: parseInt(taskId),
-                answer: result,
-            }).unwrap();
-
-            if (response.isCorrect) {
-                toast.success(t("correctAnswer"));
-                setIsCompleted(true);
-
-                // Здесь можно обновлять пользователя и прогресс, если нужно
-                // ...
-                setTimeout(() => navigate(-1), 1000);
-            } else {
-                toast.error(t("incorrectAnswer"));
-            }
-        } catch (error) {
-            if (error.message === "Invalid SQL syntax") {
-                toast.error(t("invalidSqlSyntax"));
-            } else if (error.message === "SQL query or sample data is missing") {
-                toast.error(t("missingQueryOrData"));
-            } else {
-                toast.error(t("submissionError"));
-            }
-        }
-    };
-
-    const handleReset = () => setAnswer("");
-    const handleShowHint = () => setShowHint(true);
-    const handleCloseHint = () => setShowHint(false);
-
     return (
         <div className="min-h-screen bg-custom-background custom-font flex flex-col relative">
-            {/* Модалка подсказки */}
+            {/* Hint modal */}
             <AnimatePresence>
                 {showHint && (
                     <motion.div
@@ -154,7 +344,7 @@ export default function Task() {
                             exit={{ scale: 0.95, y: 16, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 220, damping: 18 }}
                             className="bg-[var(--color-card-bg)] p-8 rounded-2xl shadow-2xl w-full max-w-md relative"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={e => e.stopPropagation()}
                         >
                             <button
                                 onClick={handleCloseHint}
@@ -169,20 +359,23 @@ export default function Task() {
                     </motion.div>
                 )}
             </AnimatePresence>
-            {/* Основной контент */}
+            {/* Main content */}
             <div className="flex-grow flex items-center justify-center p-4 md:p-8 relative z-10">
                 <motion.div
                     initial="hidden"
                     animate="visible"
-                    variants={fadeUp}
+                    variants={{
+                        hidden: { opacity: 0, y: 32 },
+                        visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.11, delayChildren: 0.13 } }
+                    }}
                     custom={1}
                     className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-12 justify-center items-stretch"
                 >
-                    {/* Левая колонка */}
+                    {/* Left column */}
                     <motion.div
                         variants={fadeUp}
                         custom={2}
-                        className="flex-1 md:max-w-[700px] bg-[var(--color-card-bg)] rounded-2xl shadow-xl p-7 mb-8 md:mb-0"
+                        className="flex-1 md:max-w-[720px] bg-[var(--color-card-bg)] rounded-2xl shadow-xl p-8 mb-8 md:mb-0"
                         style={{
                             minWidth: 0,
                             color: "var(--color-primary)"
@@ -190,7 +383,7 @@ export default function Task() {
                     >
                         <h2 className="text-2xl font-extrabold mb-4 flex items-center custom-font" style={{ color: "var(--color-primary)" }}>
                             <span className="mr-2">📝</span> {t("taskDescription")}
-                            {currentTask.solved && (
+                            {solved && (
                                 <span className="ml-3 text-green-500" title={t("taskCompleted")}>
                                     <svg className="inline w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <circle cx="12" cy="12" r="10" strokeWidth="2" />
@@ -205,9 +398,9 @@ export default function Task() {
                         <div className="overflow-x-auto">{renderTaskTable(currentTask)}</div>
                     </motion.div>
 
-                    {/* Правая колонка */}
-                    <div className="flex flex-col gap-6 md:w-[350px] min-w-[320px] flex-shrink-0">
-                        {/* Информация о задаче + кнопки */}
+                    {/* Right column */}
+                    <div className="flex flex-col gap-6 md:w-[380px] min-w-[320px] flex-shrink-0">
+                        {/* Task info + buttons */}
                         <motion.div
                             variants={fadeUp}
                             custom={3}
@@ -227,25 +420,30 @@ export default function Task() {
                                 <span>
                                     <b>{t("difficulty")}:</b> {currentTask.schwierigkeitsgrad}
                                 </span>
+                                {currentTask.points && (
+                                    <span>
+                                        <b>{t("points")}:</b> {currentTask.points}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex gap-3 mt-3">
                                 <button
                                     onClick={handleReset}
                                     className="bg-gray-300 dark:bg-gray-700 text-black dark:text-gray-100 py-2 px-5 rounded-xl hover:bg-gray-400 dark:hover:bg-gray-600 transition font-semibold custom-font"
-                                    disabled={isCompleted}
+                                    disabled={solved}
                                 >
                                     {t("reset")}
                                 </button>
                                 <button
                                     onClick={handleShowHint}
                                     className="bg-gradient-to-r from-green-400 to-cyan-400 text-white py-2 px-5 rounded-xl hover:from-green-500 hover:to-green-600 font-semibold shadow transition flex items-center gap-2 custom-font"
-                                    disabled={isCompleted}
+                                    disabled={solved}
                                 >
                                     <span>💡</span> {t("hint")}
                                 </button>
                             </div>
                         </motion.div>
-                        {/* Ответ */}
+                        {/* Answer box */}
                         <motion.div
                             variants={fadeUp}
                             custom={4}
@@ -256,25 +454,31 @@ export default function Task() {
                             }}
                         >
                             <h2 className="text-xl font-bold mb-3 custom-font" style={{ color: "var(--color-primary)" }}>{t("answerBox")}</h2>
-                            <textarea
-                                value={answer}
-                                onChange={(e) => setAnswer(e.target.value)}
-                                className="w-full h-36 p-3 border-2 border-blue-100 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 font-mono text-base transition bg-[var(--color-background)] text-[var(--color-primary)]"
-                                placeholder={t("typeYourSqlQueryHere")}
-                                disabled={isCompleted}
-                            />
+                            {answerBox}
                             <button
                                 onClick={handleSubmit}
                                 className={`mt-4 w-full bg-gradient-to-r from-green-500 to-cyan-400 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-green-400 hover:to-green-600 transition custom-font ${
-                                    isCompleted ? "opacity-60 cursor-not-allowed" : ""
+                                    solved || isValidating ? "opacity-60 cursor-not-allowed" : ""
                                 }`}
-                                disabled={isCompleted}
+                                disabled={solved || isValidating}
                             >
-                                {t("submit")}
+                                {isValidating ? t("submitting") : t("submit")}
                             </button>
-                            {isCompleted && (
-                                <div className="mt-4 text-center text-green-600 text-lg font-semibold custom-font">
-                                    {t("correctAnswer")}
+                            {submissionStatus && (
+                                <div
+                                    className={`mt-4 text-center text-lg font-semibold custom-font ${
+                                        submissionStatus === "correct"
+                                            ? "text-green-600"
+                                            : submissionStatus === "incorrect"
+                                                ? "text-red-600"
+                                                : "text-red-600"
+                                    }`}
+                                >
+                                    {submissionStatus === "correct"
+                                        ? t("correctAnswer")
+                                        : submissionStatus === "incorrect"
+                                            ? t("incorrectAnswer")
+                                            : t("submissionError")}
                                 </div>
                             )}
                         </motion.div>

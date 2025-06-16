@@ -11,28 +11,15 @@ const initialState = {
   isAuthLoading: false,
 };
 
-let inactivityTimeout;
-
-const resetInactivityTimeout = (dispatch) => {
-  if (inactivityTimeout) clearTimeout(inactivityTimeout);
-  inactivityTimeout = setTimeout(() => {
-    dispatch(logout());
-    localStorage.removeItem("authToken");
-  }, 900000);
-};
-
+// Асинхронная инициализация пользователя по токену
 export const initializeAuth = createAsyncThunk(
     "auth/initialize",
     async (_, { dispatch, getState }) => {
       const token = getState().auth.token;
-      if (!token) {
-        // Нет токена — не надо грузить, сразу сбрасываем loading
-        return null;
-      }
+      if (!token) return null;
       try {
         const result = await dispatch(authApi.endpoints.getMe.initiate()).unwrap();
         if (result.token) dispatch(setToken(result.token));
-
         if (result.user) dispatch(setUser(result.user));
         return result.user;
       } catch (error) {
@@ -58,7 +45,6 @@ const authSlice = createSlice({
       state.token = action.payload;
       if (action.payload) {
         localStorage.setItem("authToken", action.payload);
-        resetInactivityTimeout();
       }
     },
     logout: (state) => {
@@ -67,7 +53,6 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.role = "player";
       localStorage.removeItem("authToken");
-      if (inactivityTimeout) clearTimeout(inactivityTimeout);
     },
   },
   extraReducers: (builder) => {
@@ -102,13 +87,3 @@ export const logoutUser = () => async (dispatch) => {
 };
 
 export default authSlice.reducer;
-
-// inactivity таймер
-document.addEventListener("click", () => {
-  const state = window.store.getState();
-  if (state.auth.token) resetInactivityTimeout(window.store.dispatch);
-});
-document.addEventListener("keydown", () => {
-  const state = window.store.getState();
-  if (state.auth.token) resetInactivityTimeout(window.store.dispatch);
-});
