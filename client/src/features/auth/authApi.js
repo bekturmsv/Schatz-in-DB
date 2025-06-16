@@ -1,46 +1,71 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import api from "../../api/axiosConfig";
+import { setUser, setToken } from "./authSlice";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: api.defaults.baseURL,
-    prepareHeaders: (headers) => {
-      // You can add headers if you need to
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth.token;
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
       return headers;
-    },
-    /**
-     * The function that will be used to make requests to the api.
-     * @param {string} input - The url to make the request to.
-     * @param {object} init - The options to pass to the fetch function.
-     * @returns {Promise} - A promise that resolves to the response data.
-     */
-    fetchFn: async (input, init) => {
-      const response = await api({
-        url: input,
-        method: init.method || "GET",
-        data: init.body,
-        headers: init.headers,
-      });
-      return { data: response.data };
     },
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: "/login",
+        url: "/api/auth/login",
         method: "POST",
         body: credentials,
       }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          // data = { token, user }
+          if (data.token) dispatch(setToken(data.token));
+          if (data.user) dispatch(setUser(data.user));
+        } catch (error) {
+          throw error;
+        }
+      },
     }),
     register: builder.mutation({
       query: (userData) => ({
-        url: "/register",
+        url: "/api/auth/register",
         method: "POST",
         body: userData,
       }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.token) dispatch(setToken(data.token));
+          if (data.user) dispatch(setUser(data.user));
+        } catch (error) {
+          throw error;
+        }
+      },
+    }),
+    getSpecializations: builder.query({
+      query: () => ({
+        url: "/api/specialist/getAll",
+        method: "GET",
+      }),
+    }),
+    getMe: builder.query({
+      query: () => ({
+        url: "/api/profile/player/getAuthorizedUser",
+        method: "GET",
+      }),
+      transformResponse: (response) => response,
     }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetSpecializationsQuery,
+  useGetMeQuery,
+} = authApi;
