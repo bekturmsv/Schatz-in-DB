@@ -20,6 +20,7 @@ import RequireAdmin from "@/hoc/RequireAdmin.jsx";
 import CreateTask from "@/pages/Admin/Tasks/CreateTask.jsx";
 import Topic from "@/pages/Topics/Topics.jsx";
 import TasksList from "@/pages/TasksList/TasksList.jsx";
+import RatingPage from "@/pages/Rating/RatingPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -93,10 +94,17 @@ const router = createBrowserRouter([
         element: <RequireAdmin>
           <CreateTask />
         </RequireAdmin>
+      },
+      {
+        path: "/leaderboard",
+        element: (<ProtectedRoute>
+          <RatingPage/>
+        </ProtectedRoute>)
       }
 
     ],
   },
+
 ]);
 
 createRoot(document.getElementById("root")).render(
