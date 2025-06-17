@@ -21,6 +21,8 @@ import CreateTask from "@/pages/Admin/Tasks/CreateTask.jsx";
 import Topic from "@/pages/Topics/Topics.jsx";
 import TasksList from "@/pages/TasksList/TasksList.jsx";
 import RatingPage from "@/pages/Rating/RatingPage.jsx";
+import MaterialsListPage from "@/pages/MaterialList/MaterialListPage.jsx";
+import MaterialDetailPage from "@/pages/MaterialDetail/MaterialDetailPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +102,22 @@ const router = createBrowserRouter([
         element: (<ProtectedRoute>
           <RatingPage/>
         </ProtectedRoute>)
+      },
+      {
+        path: "/materials",
+        element: (
+            <ProtectedRoute>
+              <MaterialsListPage/>
+            </ProtectedRoute>
+        )
+      },
+      {
+        path: "/materials/:id",
+        element: (
+            <ProtectedRoute>
+              <MaterialDetailPage />
+            </ProtectedRoute>
+        )
       }
 
     ],
