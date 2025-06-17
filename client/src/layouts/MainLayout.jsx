@@ -7,13 +7,18 @@ import { useEffect, useRef } from "react";
 import { initializeAuth } from "@/features/auth/authSlice.js";
 import Loading from "@/components/custom/Loading.jsx";
 import { useInactivityLogout } from "@/hooks/useInactivityLogout.js";
+import { initTheme } from "@/features/theme/themeSlice.js";
 
 export default function MainLayout() {
     const dispatch = useDispatch();
     const isAuthLoading = useSelector((state) => state.auth.isAuthLoading);
     const didInit = useRef(false);
 
-    // Вызываем initializeAuth только 1 раз при монтировании
+    // Ставим тему из localStorage на <html> при старте приложения
+    useEffect(() => {
+        dispatch(initTheme());
+    }, [dispatch]);
+
     useEffect(() => {
         if (!didInit.current) {
             dispatch(initializeAuth());

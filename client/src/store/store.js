@@ -5,6 +5,7 @@ import authReducer from "../features/auth/authSlice";
 import { authApi } from "../features/auth/authApi";
 import {taskApi} from "@/features/task/taskApi.js";
 import {themeApi} from "@/features/theme/themeApi.js";
+import {ratingApi} from "@/features/rating/ratingApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -14,9 +15,10 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [themeApi.reducerPath]: themeApi.reducer,
+    [ratingApi.reducerPath]: ratingApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(authApi.middleware, taskApi.middleware, themeApi.middleware),
+      getDefaultMiddleware().concat(authApi.middleware, taskApi.middleware, themeApi.middleware, ratingApi.middleware),
 });
 
 window.store = store;
