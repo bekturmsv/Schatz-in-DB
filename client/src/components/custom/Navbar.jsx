@@ -131,7 +131,7 @@ export default function Navbar() {
                           {t('Progress')}
                         </button>
                         <button
-                            onClick={() => { navigate('/training'); setIsOpen(false); }}
+                            onClick={() => { navigate('/materials'); setIsOpen(false); }}
                             className="cursor-pointer hover:text-green-500 font-semibold transition py-2 md:py-0 text-lg"
                             style={{ color: "var(--color-primary)" }}
                         >
