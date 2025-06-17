@@ -11,21 +11,18 @@ export default function DifficultyLevel() {
     if (isLoading) return <div className="text-center mt-24">{t("loading")}</div>;
     if (isError || !data) return <div className="text-center mt-24 text-red-400">{t("errorLoadingLevels")}</div>;
 
-    // Get progress and levels
     const progress = data.totalCompletedTasks;
     const total = data.totalTasks;
     const percent = Math.round((progress / total) * 100);
 
-    // Map levels from API
     const difficulties = data.levels.map((lvl, idx) => ({
         key: lvl.title,
-        label: t(lvl.title), // "EASY", "MEDIUM", "HARD" must be in translations!
+        label: t(lvl.title),
         name: lvl.title.charAt(0).toUpperCase() + lvl.title.slice(1).toLowerCase(),
         isCompleted: lvl.completed,
         idx,
     }));
 
-    // Animation stuff
     const container = {
         hidden: { opacity: 0 },
         visible: {
@@ -97,7 +94,8 @@ export default function DifficultyLevel() {
                 >
                     {difficulties.map((diff, idx) => {
                         // Lock level if previous is not completed (except first)
-                        let isLocked = idx > 0 ? !difficulties[idx - 1].isCompleted : false;
+                        // + теперь заблокирован если уже completed!
+                        let isLocked = diff.isCompleted || (idx > 0 ? !difficulties[idx - 1].isCompleted : false);
                         return (
                             <motion.button
                                 key={diff.key}
@@ -112,7 +110,7 @@ export default function DifficultyLevel() {
                                     focus:outline-none
                                     ${
                                         diff.isCompleted
-                                            ? "bg-[var(--color-secondary)]/90 border-[var(--color-secondary)] text-white"
+                                            ? "bg-gray-200 dark:bg-[#18181b] border-gray-300 text-gray-400 cursor-not-allowed"
                                             : !isLocked
                                                 ? "bg-[var(--color-card-bg,rgba(30,36,43,0.87))] dark:bg-[var(--color-card-bg,#23272d)] border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-card-hover,#323843)] dark:hover:bg-[#262b32]"
                                                 : "bg-gray-200 dark:bg-[#18181b] border-gray-300 text-gray-400 cursor-not-allowed"

@@ -1,167 +1,167 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux'; // Добавляем useDispatch
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
-import mockTasks from '../../data/mockTasks';
-import { getUser, updateUser } from '../../data/mockUser';
-import { setUser } from '../../features/auth/authSlice'; // Импортируем setUser
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import {
+    useGetFinalTestByDifficultyQuery,
+    useValidateSqlMutation,
+    useValidateFinalTestMutation
+} from "../../features/task/taskApi";
 
 export default function FinalTest() {
     const { difficulty } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const dispatch = useDispatch(); // Добавляем dispatch
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-    // Проверяем авторизацию
+    const {
+        data: tasks = [],
+        isLoading,
+        isError,
+    } = useGetFinalTestByDifficultyQuery(difficulty?.toUpperCase());
+
+    const [current, setCurrent] = useState(0);
+    const [userAnswers, setUserAnswers] = useState([]);
+    const [solved, setSolved] = useState([]);
+    const [checking, setChecking] = useState(false);
+    const [showHint, setShowHint] = useState(false);
+    const [timer, setTimer] = useState(0);
+    const [testFinished, setTestFinished] = useState(false);
+
+    const [validateSql] = useValidateSqlMutation();
+    const [validateFinalTest] = useValidateFinalTestMutation();
+
+    useEffect(() => {
+        setUserAnswers(tasks.map(() => ""));
+        setSolved(tasks.map(() => false));
+    }, [tasks]);
+
+    useEffect(() => {
+        if (testFinished) return;
+        const id = setInterval(() => setTimer(t => t + 1), 1000);
+        return () => clearInterval(id);
+    }, [testFinished]);
+
     if (!isAuthenticated) {
-        navigate('/login');
+        navigate("/login");
         return null;
     }
 
-    // Получаем данные теста
-    const levelData = mockTasks[difficulty.toLowerCase()];
-    if (!levelData || !levelData.finalTest.tasks.length) {
+    if (isLoading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-mono">
-                <h1 className="text-4xl font-bold text-black uppercase">
-                    {t('testNotFound')}
-                </h1>
+            <div className="min-h-screen flex flex-col items-center justify-center font-mono">
+                <h1 className="text-3xl text-gray-600">{t("loading")}</h1>
+            </div>
+        );
+    }
+    if (isError || !tasks.length) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center font-mono">
+                <h1 className="text-3xl text-red-400">{t("testNotFound")}</h1>
             </div>
         );
     }
 
-    const tasks = levelData.finalTest.tasks;
-    const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
-    const [completedTasks, setCompletedTasks] = useState([]);
-    const [answers, setAnswers] = useState(tasks.map(() => '')); // Сохраняем ответы для каждой задачи
-    const [showHint, setShowHint] = useState(false);
-    const [timer, setTimer] = useState(0);
-    const [isTimerRunning, setIsTimerRunning] = useState(true);
+    const currentTask = tasks[current];
+    const allCorrect = solved.every(Boolean);
 
-    // Таймер
-    useEffect(() => {
-        let interval;
-        if (isTimerRunning) {
-            interval = setInterval(() => {
-                setTimer((prev) => prev + 1);
-            }, 1000);
+    // Проверить ответ
+    const handleSubmit = async () => {
+        if (!currentTask) return;
+        setChecking(true);
+        const answer = userAnswers[current].trim();
+        try {
+            const result = await validateSql({
+                userSql: answer,
+                taskCode: currentTask.taskCode,
+            }).unwrap();
+            if (result.correct) {
+                toast.success(t("correctAnswer"));
+                setSolved((old) => {
+                    const arr = [...old];
+                    arr[current] = true;
+                    return arr;
+                });
+            } else {
+                toast.error(t("incorrectAnswer"));
+            }
+        } catch (e) {
+            toast.error(t("submissionError"));
         }
-        return () => clearInterval(interval);
-    }, [isTimerRunning]);
+        setChecking(false);
+    };
 
-    // Форматирование времени
+    // Завершить тест
+    const handleFinish = async () => {
+        setTestFinished(true);
+        try {
+            await validateFinalTest({
+                schwierigkeit: difficulty?.toUpperCase(),
+                spentTimeInSeconds: timer,
+            }).unwrap();
+            toast.success(t("testCompleted"));
+            setTimeout(() => {
+                // Важно: редиректим на топики с передачей showCongrats!
+                navigate(`/level/${difficulty}`, {
+                    state: { showCongrats: true }
+                });
+            }, 1800);
+        } catch {
+            toast.error(t("submissionError"));
+        }
+    };
+
+    // Helper render table
+    function renderTaskTable(task) {
+        if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) return null;
+        const columns = Object.keys(task.tableData[0]);
+        return (
+            <div className="my-2">
+                <h3 className="text-base font-semibold mb-1">{task.tableName}</h3>
+                <div className="overflow-x-auto rounded-lg shadow">
+                    <table className="border-collapse border border-gray-400 min-w-[220px] text-sm">
+                        <thead>
+                        <tr>
+                            {columns.map((col, i) => (
+                                <th key={i} className="border px-2 py-1 bg-gray-100 font-semibold">{col}</th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {task.tableData.map((row, i) => (
+                            <tr key={i}>
+                                {columns.map((col, j) => (
+                                    <td key={j} className="border px-2 py-1">{row[col] != null ? row[col] : ""}</td>
+                                ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const currentTask = tasks[currentTaskIndex];
-
-    // Проверка ответа
-    const handleSubmit = () => {
-        if (answers[currentTaskIndex].trim().toUpperCase() === currentTask.correctAnswer.toUpperCase()) {
-            toast.success(t('correctAnswer'));
-            setCompletedTasks([...completedTasks, currentTask.id]);
-
-            // Если все задачи завершены
-            if (completedTasks.length + 1 === tasks.length) {
-                setIsTimerRunning(false);
-                toast.success(t('levelCompleted', { time: formatTime(timer) }));
-
-                // Обновляем данные пользователя
-                const user = getUser();
-
-                // Обновляем completedLevels
-                const updatedCompletedLevels = {
-                    ...user.completedLevels,
-                    [difficulty.toLowerCase()]: true,
-                };
-
-                // Обновляем tasks
-                const updatedTasks = user.tasks.map((task) => {
-                    if (task.type.toLowerCase() === difficulty.toLowerCase()) {
-                        return { ...task, completed: task.total };
-                    }
-                    return task;
-                });
-
-                // Обновляем progress и points
-                const totalPoints = tasks.reduce((sum, task) => sum + task.points, 0);
-                const updatedProgress = {
-                    ...user.progress,
-                    tasksSolved: user.progress.tasksSolved + tasks.length,
-                };
-                const updatedPoints = user.points + totalPoints;
-
-                const updatedUser = {
-                    completedLevels: updatedCompletedLevels,
-                    tasks: updatedTasks,
-                    progress: updatedProgress,
-                    points: updatedPoints,
-                };
-
-                updateUser(updatedUser);
-                dispatch(setUser({ ...user, ...updatedUser })); // Обновляем данные в Redux
-
-                setTimeout(() => navigate('/play'), 2000);
-            } else {
-                setCurrentTaskIndex((prev) => (prev + 1) % tasks.length);
-            }
-        } else {
-            toast.error(t('incorrectAnswer'));
-        }
-    };
-
-    // Сброс ответа для текущей задачи
-    const handleReset = () => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[currentTaskIndex] = '';
-        setAnswers(updatedAnswers);
-    };
-
-    // Обновление ответа
-    const handleAnswerChange = (e) => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[currentTaskIndex] = e.target.value;
-        setAnswers(updatedAnswers);
-    };
-
-    // Показать подсказку
-    const handleShowHint = () => {
-        setShowHint(true);
-    };
-
-    // Закрыть подсказку
-    const handleCloseHint = () => {
-        setShowHint(false);
-    };
-
-    // Переключение задач
-    const handleNext = () => {
-        setCurrentTaskIndex((prev) => (prev + 1) % tasks.length);
-    };
-
-    const handlePrevious = () => {
-        setCurrentTaskIndex((prev) => (prev - 1 + tasks.length) % tasks.length);
-    };
-
     return (
-        <div className="min-h-screen bg-gray-100 font-mono flex flex-col">
-            {/* Модальное окно с подсказкой */}
+        <div className="min-h-screen bg-custom-background flex flex-col items-center font-mono">
             {showHint && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                    onClick={handleCloseHint}
+                    onClick={() => setShowHint(false)}
                 >
                     <div
                         className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={e => e.stopPropagation()}
                     >
                         <button
-                            onClick={handleCloseHint}
+                            onClick={() => setShowHint(false)}
                             className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                         >
                             ✕
@@ -172,77 +172,92 @@ export default function FinalTest() {
                 </div>
             )}
 
-            <div className="flex-grow flex flex-col items-center justify-center p-4">
-                <div className="flex w-full max-w-5xl space-x-4">
-                    {/* Левая часть: Описание задачи */}
-                    <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-md">
-                        <h2 className="text-xl font-bold mb-4">{t('taskDescription')}</h2>
-                        <p>{currentTask.description}</p>
-                    </div>
+            <div className="w-full max-w-4xl mt-8 mb-3 flex flex-col items-center">
+                <h1 className="text-3xl font-bold mb-2">{t('finalTest')}</h1>
+                <div className="flex gap-6 items-center text-lg font-semibold mb-2">
+                    <span>
+                        {t('task')} {current + 1}/{tasks.length}
+                    </span>
+                    <span>
+                        ⏰ {t('timer')}: <span className="font-mono">{formatTime(timer)}</span>
+                    </span>
+                </div>
+            </div>
 
-                    {/* Правая часть: Информация о задаче и поле для ответа */}
-                    <div className="flex-1 flex flex-col space-y-4">
-                        <div className="bg-gray-200 p-6 rounded-lg shadow-md">
-                            <h2 className="text-xl font-bold mb-2">{t('finalTest')}</h2>
-                            <div className="flex justify-between items-center mb-4">
-                                <p className="text-lg">
-                                    {currentTaskIndex + 1} / {tasks.length}
-                                </p>
-                                <p className="text-lg">
-                                    <span className="font-bold">{t('remainingTime')}:</span> {formatTime(timer)}
-                                </p>
-                            </div>
-                            <div className="flex space-x-2 mb-4">
-                                <button
-                                    onClick={handleReset}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition"
-                                >
-                                    {t('reset')}
-                                </button>
-                                <button
-                                    onClick={handleShowHint}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition flex items-center"
-                                >
-                                    <span className="mr-2">?</span> {t('answer')}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Поле для ответа */}
-                        <div className="bg-gray-200 p-6 rounded-lg shadow-md flex-1">
-                            <h2 className="text-xl font-bold mb-4">{t('answerBox')}</h2>
-                            <textarea
-                                value={answers[currentTaskIndex]}
-                                onChange={handleAnswerChange}
-                                className="w-full h-32 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                                placeholder={t('typeYourQueryHere')}
-                            />
-                            <div className="flex justify-between mt-4">
-                                <button
-                                    onClick={handlePrevious}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition"
-                                    disabled={currentTaskIndex === 0}
-                                >
-                                    {t('previous')}
-                                </button>
-                                <button
-                                    onClick={handleNext}
-                                    className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition"
-                                    disabled={currentTaskIndex === tasks.length - 1 && completedTasks.length !== tasks.length - 1}
-                                >
-                                    {t('next')}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Кнопка отправки ответа */}
+            <div className="flex-grow flex flex-col items-center w-full">
+                <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 mb-6 flex flex-col gap-3">
+                    <div className="text-lg font-bold mb-2">{t('taskDescription')}</div>
+                    <div className="mb-2 whitespace-pre-line">{currentTask.aufgabe}</div>
+                    {renderTaskTable(currentTask)}
+                </div>
+                <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 mb-3 flex flex-col gap-3">
+                    <div className="flex gap-2 mb-2">
                         <button
-                            onClick={handleSubmit}
-                            className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition mt-4"
+                            onClick={() => setShowHint(true)}
+                            className="bg-yellow-200 hover:bg-yellow-300 text-gray-900 px-3 py-1 rounded font-bold"
                         >
-                            {t('submit')}
+                            💡 {t('hint')}
+                        </button>
+                        <button
+                            onClick={() => setUserAnswers(a => {
+                                const arr = [...a];
+                                arr[current] = '';
+                                return arr;
+                            })}
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded font-bold"
+                            disabled={solved[current]}
+                        >
+                            {t('reset')}
                         </button>
                     </div>
+                    <textarea
+                        value={userAnswers[current]}
+                        disabled={solved[current]}
+                        onChange={e => setUserAnswers(a => {
+                            const arr = [...a];
+                            arr[current] = e.target.value;
+                            return arr;
+                        })}
+                        className="w-full h-28 p-2 border rounded font-mono"
+                        placeholder={t('typeYourQueryHere')}
+                    />
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSubmit}
+                            disabled={checking || solved[current]}
+                            className={`bg-green-500 text-white px-6 py-2 rounded font-bold hover:bg-green-600 transition ${solved[current] ? "opacity-60" : ""}`}
+                        >
+                            {solved[current] ? t("solved") : checking ? t("checking") : t("check")}
+                        </button>
+                        <button
+                            onClick={() => setCurrent(c => c - 1)}
+                            disabled={current === 0}
+                            className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded font-bold"
+                        >
+                            {t('previous')}
+                        </button>
+                        <button
+                            onClick={() => setCurrent(c => c + 1)}
+                            disabled={current === tasks.length - 1}
+                            className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded font-bold"
+                        >
+                            {t('next')}
+                        </button>
+                    </div>
+                    <div className="mt-2 text-green-700 font-bold text-lg">
+                        {solved[current] && t('correctAnswer')}
+                    </div>
+                </div>
+                <div className="w-full max-w-3xl flex flex-col items-end mb-8">
+                    <button
+                        onClick={handleFinish}
+                        className={`bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-3 rounded-xl font-bold text-xl shadow-xl mt-3 transition ${
+                            !allCorrect || testFinished ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={!allCorrect || testFinished}
+                    >
+                        🏁 {t('finishTest')}
+                    </button>
                 </div>
             </div>
         </div>

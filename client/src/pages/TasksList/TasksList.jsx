@@ -25,7 +25,6 @@ export default function TasksList() {
         return null;
     }
 
-    // Теперь response - это сразу массив заданий
     const tasks = Array.isArray(response) ? response : [];
 
     const cardVariants = {
@@ -103,20 +102,27 @@ export default function TasksList() {
                                 key={task.id}
                                 variants={cardVariants}
                                 custom={idx + 1}
-                                whileHover={{
-                                    scale: 1.045,
-                                    boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
-                                    background: "var(--color-card-hover, #eef3fa)",
-                                }}
-                                whileTap={{ scale: 0.97 }}
-                                onClick={() =>
-                                    navigate(
-                                        `/level/${level}/topic/${encodeURIComponent(topicName)}/task/${task.id}`
-                                    )
+                                whileHover={
+                                    !task.solved
+                                        ? {
+                                            scale: 1.045,
+                                            boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
+                                            background: "var(--color-card-hover, #eef3fa)",
+                                        }
+                                        : {}
+                                }
+                                whileTap={!task.solved ? { scale: 0.97 } : {}}
+                                onClick={
+                                    task.solved
+                                        ? undefined
+                                        : () =>
+                                            navigate(
+                                                `/level/${level}/topic/${encodeURIComponent(topicName)}/task/${task.id}`
+                                            )
                                 }
                                 className={`
                                     cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg
-                                    ${task.solved ? "bg-green-50 dark:bg-green-900/20" : ""}
+                                    ${task.solved ? "bg-green-50 dark:bg-green-900/20 pointer-events-none opacity-60" : ""}
                                     `}
                                 style={{
                                     background: "var(--color-card-bg, #f8fafc)",
@@ -125,6 +131,8 @@ export default function TasksList() {
                                     padding: "2rem 1.6rem",
                                     fontFamily: "var(--font-family)",
                                     boxShadow: "0 3px 18px 0 rgba(30,36,43,0.03)",
+                                    pointerEvents: task.solved ? "none" : "auto",
+                                    opacity: task.solved ? 0.6 : 1,
                                 }}
                             >
                                 <h2
