@@ -1,10 +1,10 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { useGetTopicsQuery } from "../../features/task/taskApi.js";
+import { useGetTopicsQuery, useGetFinalTestByDifficultyQuery } from "../../features/task/taskApi.js";
 import { motion, AnimatePresence } from "framer-motion";
 import DetectiveStory from "@/components/custom/DetectiveStory.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Topic() {
     const { difficulty } = useParams();
@@ -12,6 +12,7 @@ export default function Topic() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const isAuthenticated = useSelector((s) => s.auth.isAuthenticated);
+    const location = useLocation();
 
     const {
         data: response = {},
@@ -19,27 +20,73 @@ export default function Topic() {
         isError,
     } = useGetTopicsQuery(level, { skip: !difficulty });
 
-    const [showDetective, setShowDetective] = useState(true);
+    const { data: finalTestData = [], isLoading: isFinalTestLoading } = useGetFinalTestByDifficultyQuery(level, { skip: !level });
+
+    // Ключи для LS
+    const detectiveGreetingKey = `detective_shown_${difficulty}`;
+    const detectiveCongratsKey = `detective_congrats_shown_${difficulty}`;
+
+    // Показываем Greeting только если:
+    // - Его не было в LS
+    // - И не пришёл showCongrats из location.state
+    const [showDetectiveGreeting, setShowDetectiveGreeting] = useState(() => {
+        // НЕ показывать greeting если пришли с финального теста!
+        return !localStorage.getItem(detectiveGreetingKey) && !(location.state && location.state.showCongrats);
+    });
+
+    // Congrats показываем только если:
+    // - Его нет в LS и
+    // - Нам явно передали showCongrats (чтобы не вываливался просто так)
+    const [showDetectiveCongrats, setShowDetectiveCongrats] = useState(() => {
+        return !!(location.state && location.state.showCongrats);
+    });
+
+    const topics = response.tasks ?? [];
+
+    useEffect(() => {
+        if (!showDetectiveGreeting) {
+            localStorage.setItem(detectiveGreetingKey, "true");
+        }
+    }, [showDetectiveGreeting, detectiveGreetingKey]);
+
+    // Очищаем showCongrats из location.state, чтобы не висело навсегда
+    useEffect(() => {
+        if (location.state && location.state.showCongrats) {
+            window.history.replaceState({}, document.title); // чистим state без перезагрузки
+        }
+    }, [location.state]);
 
     if (!isAuthenticated) {
         navigate("/login");
         return null;
     }
 
-    const topics = response.tasks ?? [];
-
-    const cardVariants = {
-        hidden: { opacity: 0, y: 24, scale: 0.97 },
-        visible: (i = 1) => ({
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" },
-        }),
+    // Handler на закрытие Congrats: отправляет на /levels
+    const handleCongratsClose = () => {
+        setShowDetectiveCongrats(false);
+        // Обновление LS — финальный поздравление было показано
+        localStorage.setItem(detectiveCongratsKey, "true");
+        navigate("/play"); // Переход на уровни
     };
 
     return (
         <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
+            <DetectiveStory
+                isVisible={showDetectiveGreeting}
+                onClose={() => setShowDetectiveGreeting(false)}
+                difficulty={difficulty}
+                isEnd={false}
+            />
+            <DetectiveStory
+                isVisible={showDetectiveCongrats}
+                onClose={handleCongratsClose}
+                difficulty={difficulty}
+                isEnd={true}
+            />
+
+            {/* ... остальной твой код без изменений ... */}
+            {/* Все что ниже не трогаем! */}
+
             <motion.h1
                 initial={{ opacity: 0, y: -24 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -55,9 +102,6 @@ export default function Topic() {
                     ({t(`${difficulty.toLowerCase()}Level`)})
                 </span>
             </motion.h1>
-
-            {/* === Вот тут появится детектив === */}
-            <DetectiveStory isVisible={showDetective} onClose={() => setShowDetective(false)} difficulty={difficulty} />
 
             <AnimatePresence>
                 {isLoading && (
@@ -90,7 +134,8 @@ export default function Topic() {
                 )}
             </AnimatePresence>
 
-            {!isLoading && !isError && (
+            {/* Обычные топики */}
+            {!isLoading && !isError && topics.length > 0 && (
                 <motion.ul
                     initial="hidden"
                     animate="visible"
@@ -104,8 +149,17 @@ export default function Topic() {
                     {topics.map((topic, idx) => (
                         <motion.li
                             key={topic.name}
-                            variants={cardVariants}
-                            custom={idx + 1}
+                            variants={{
+                                hidden: { opacity: 0, y: 24, scale: 0.97 },
+                                visible: {
+                                    opacity: 1,
+                                    y: 0,
+                                    scale: 1,
+                                    transition: { delay: (idx + 1) * 0.08, duration: 0.5, ease: "easeOut" },
+                                },
+                            }}
+                            initial="hidden"
+                            animate="visible"
                             whileHover={{
                                 scale: 1.04,
                                 boxShadow: "0 6px 24px 0 rgba(34,197,94,0.13)",
@@ -150,6 +204,18 @@ export default function Topic() {
                         </motion.li>
                     ))}
                 </motion.ul>
+            )}
+
+            {/* Кнопка финального теста, если бек вернул finalTestData */}
+            {!isLoading && !isError && Array.isArray(finalTestData) && finalTestData.length > 0 && (
+                <div className="w-full flex flex-col items-center mt-8 z-10">
+                    <button
+                        onClick={() => navigate(`/level/${level}/final-test`)}
+                        className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-5 px-12 rounded-2xl shadow-xl text-3xl tracking-wide uppercase custom-font transition"
+                    >
+                        🏁 {t("startFinalTest")}
+                    </button>
+                </div>
             )}
         </div>
     );

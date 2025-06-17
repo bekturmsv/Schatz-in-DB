@@ -107,6 +107,7 @@
   "EASY": "Easy",
   "MEDIUM": "Medium",
   "HARD": "Hard",
-  "task": "Task"
+  "task": "Task",
+  "yourProgress": "Your Progress"
 
 }

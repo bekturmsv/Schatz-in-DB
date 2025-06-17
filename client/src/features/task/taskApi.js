@@ -6,7 +6,6 @@ export const taskApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: import.meta.env.VITE_API_BASE_URL,
         prepareHeaders: (headers, { getState }) => {
-            // Получаем токен из store (RTK Query сам передаёт getState)
             const token = getState().auth.token;
             if (token) {
                 headers.set('Authorization', `Bearer ${token}`);
@@ -18,25 +17,20 @@ export const taskApi = createApi({
         getTopics: builder.query({
             query: (difficulty) => ({
                 url: "api/task/getTopics",
-                params: {schwierigkeit: difficulty},
-            })
+                params: { schwierigkeit: difficulty },
+            }),
         }),
         getTasksByTopic: builder.query({
-            query: ({ difficulty, topicName }) =>
-                ({
-                    url: '/api/task/getByDifficult',
-                    params: {
-                        schwierigkeit: difficulty,
-                        sqlKategorie: topicName
-                    }
-                })
+            query: ({ difficulty, topicName }) => ({
+                url: '/api/task/getByDifficult',
+                params: { schwierigkeit: difficulty, sqlKategorie: topicName }
+            }),
         }),
         getTaskById: builder.query({
-            query: ({  taskId }) =>
-                `api/task/getById/${taskId}`,
+            query: ({ taskId }) => `api/task/getById/${taskId}`,
         }),
         getLevels: builder.query({
-            query: () => "api/task/getLevels"
+            query: () => "api/task/getLevels",
         }),
         submitTaskAnswer: builder.mutation({
             query: ({ taskId, answer }) => ({
@@ -45,7 +39,27 @@ export const taskApi = createApi({
                 body: { answer: JSON.stringify(answer) },
             }),
         }),
-
+        validateSql: builder.mutation({
+            query: ({ userSql, taskCode }) => ({
+                url: "api/sql/validate",
+                method: 'POST',
+                body: { userSql, taskCode },
+            }),
+        }),
+        // Ключевой момент: параметр называется schwierigkeitsgrad
+        getFinalTestByDifficulty: builder.query({
+            query: (difficulty) => ({
+                url: "/api/test/getTestByDifficulty",
+                params: { schwierigkeitsgrad: difficulty },
+            }),
+        }),
+        validateFinalTest: builder.mutation({
+            query: ({ schwierigkeitsgrad, spentTimeInSeconds }) => ({
+                url: "/api/sql/test/validate",
+                method: "POST",
+                body: { schwierigkeitsgrad, spentTimeInSeconds },
+            }),
+        }),
     }),
 });
 
@@ -54,5 +68,8 @@ export const {
     useGetTasksByTopicQuery,
     useGetTaskByIdQuery,
     useGetLevelsQuery,
-    useSubmitTaskAnswerMutation
+    useSubmitTaskAnswerMutation,
+    useValidateSqlMutation,
+    useGetFinalTestByDifficultyQuery,
+    useValidateFinalTestMutation,
 } = taskApi;
