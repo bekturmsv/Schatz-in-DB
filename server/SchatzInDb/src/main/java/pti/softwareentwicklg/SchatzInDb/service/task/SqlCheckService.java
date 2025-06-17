@@ -53,12 +53,14 @@ public class SqlCheckService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isCorrect = false;
+        List<Map<String, Object>> userResult = null;
+        List<Map<String, Object>> expectedResult = null;
 
         try {
             Task task = taskRepository.findByTaskCode(taskCode)
                     .orElseThrow(() -> new RuntimeException("Task not found"));
-            List<Map<String, Object>> userResult = jdbcTemplate.queryForList(userSql);
-            List<Map<String, Object>> expectedResult = jdbcTemplate.queryForList(task.getSolution());
+            userResult = jdbcTemplate.queryForList(userSql);
+            expectedResult = jdbcTemplate.queryForList(task.getSolution());
 
             isCorrect = userResult.equals(expectedResult);
             if (!isCorrect) {
@@ -72,7 +74,11 @@ public class SqlCheckService {
 
             playerRepository.save((Player) user);
             saveUserResult(taskCode,  userSql, true);
-            return new SqlCheckResponse(true, null);
+            return new SqlCheckResponse(
+                    true,
+                    null,
+                    userResult
+            );
 
         } catch (Exception ex) {
             return new SqlCheckResponse(false, ex.getMessage());
