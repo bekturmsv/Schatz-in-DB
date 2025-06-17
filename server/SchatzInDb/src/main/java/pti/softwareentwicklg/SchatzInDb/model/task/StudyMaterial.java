@@ -3,6 +3,7 @@ package pti.softwareentwicklg.SchatzInDb.model.task;
 import jakarta.persistence.*;
 import jakarta.persistence.GeneratedValue;
 import lombok.Data;
+import pti.softwareentwicklg.SchatzInDb.model.enums.SqlKategorie;
 
 @Data
 @Entity
@@ -11,13 +12,13 @@ public class StudyMaterial {
     @GeneratedValue
     private Long id;
 
-    private String description;
-    private String type;
-    private String filePath;
-    private String videoUrl;
-    private String externalLink;
-    private Long teacherId;
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    private String description;
+    private SqlKategorie sqlKategorie;
+
+    @Column(name = "teacher_id")
+    private Long teacher;
+
 }
