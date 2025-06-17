@@ -4,23 +4,29 @@ import { useNavigate } from "react-router-dom";
 import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { setUser } from "@/features/auth/authSlice.js";
-import { useGetThemesQuery, usePurchaseThemeMutation } from "@/features/theme/themeApi.js";
+import {
+  useGetThemesQuery,
+  usePurchaseThemeMutation,
+  useSetThemeMutation,
+} from "@/features/theme/themeApi.js";
 import { motion } from "framer-motion";
 
 export default function Profile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-  const currentTheme = useSelector((state) => state.theme.currentTheme);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const { data: allThemes = [] } = useGetThemesQuery();
-  const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
 
-  const [carouselPosition, setCarouselPosition] = useState(0);
-  const carouselRef = useRef(null);
+  // Redux
+  const user = useSelector((state) => state.auth.user);
+  const reduxTheme = useSelector((state) => state.theme.currentTheme);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  // API
+  const { data: allThemes = [], refetch } = useGetThemesQuery();
+  const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
+  const [setThemeApi, { isLoading: isSettingTheme }] = useSetThemeMutation();
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -28,19 +34,40 @@ export default function Profile() {
     }
   }, [isAuthenticated, user, navigate]);
 
+  // Берём тему из Redux (это правильнее — иначе могут быть баги при обновлении user)
+  const currentTheme = reduxTheme || user?.currentTheme || "default";
+
+  // Когда currentTheme меняется, обновим data-theme (на случай если что-то пропустили)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-theme", currentTheme);
+      localStorage.setItem("theme", currentTheme);
+    }
+  }, [currentTheme]);
+
   if (!isAuthenticated || !user) return null;
 
-  const purchasedThemeNames = Array.isArray(user.purchasedThemes)
-      ? user.purchasedThemes.map((t) => t.name)
-      : [];
-  const purchasedThemeOptions = allThemes.filter((t) =>
-      purchasedThemeNames.includes(t.name)
+  // Купленные темы
+  const purchasedThemeNames = useMemo(
+      () =>
+          Array.isArray(user.purchasedThemes)
+              ? user.purchasedThemes.map((t) => t.name)
+              : [],
+      [user.purchasedThemes]
+  );
+
+  const purchasedThemeOptions = useMemo(
+      () => allThemes.filter((t) => purchasedThemeNames.includes(t.name)),
+      [allThemes, purchasedThemeNames]
   );
 
   const progressPercentage =
-      (user.progress.tasksSolved / user.progress.totalTasks) * 100;
+      user.progress && user.progress.totalTasks
+          ? (user.progress.tasksSolved / user.progress.totalTasks) * 100
+          : 0;
 
-  const handlePurchaseTheme = (theme) => {
+  // Покупка темы
+  const handlePurchaseTheme = async (theme) => {
     if (user.points < theme.cost) {
       toast.error(t("notEnoughPoints"));
       return;
@@ -49,53 +76,44 @@ export default function Profile() {
       toast.info(t("themeAlreadyPurchased"));
       return;
     }
-    const updatedPoints = user.points - theme.cost;
-    const updatedPurchasedThemes = [
-      ...user.purchasedThemes,
-      { name: theme.name, cost: theme.cost },
-    ];
-    dispatch(
-        setUser({
-          ...user,
-          points: updatedPoints,
-          purchasedThemes: updatedPurchasedThemes,
-        })
-    );
-    toast.success(t("themePurchased", { theme: theme.name }));
+    try {
+      await purchaseTheme({ name: theme.name }).unwrap();
+      dispatch(
+          setUser({
+            ...user,
+            points: user.points - theme.cost,
+            purchasedThemes: [
+              ...user.purchasedThemes,
+              { name: theme.name, cost: theme.cost },
+            ],
+          })
+      );
+      toast.success(t("themePurchased", { theme: theme.name }));
+      refetch();
+    } catch {
+      toast.error(t("purchaseFailed"));
+    }
   };
 
-  const handleSelectTheme = (themeName) => {
+  // Смена темы
+  const handleSelectTheme = async (themeName) => {
     if (!purchasedThemeNames.includes(themeName)) {
       toast.error(t("themeNotPurchased"));
       return;
     }
-    dispatch(setTheme(themeName));
-    toast.success(t("themeSelected", { theme: themeName }));
+    try {
+      await setThemeApi({ name: themeName }).unwrap();
+      dispatch(setTheme(themeName)); // Redux + localStorage + <html>
+      dispatch(setUser({ ...user, currentTheme: themeName })); // Обновим user
+      toast.success(t("themeSelected", { theme: themeName }));
+    } catch {
+      toast.error(t("themeSelectError"));
+    }
   };
 
-  const scrollLeft = (e) => {
-    e.preventDefault();
-    const carousel = carouselRef.current;
-    carousel.scrollLeft -= 320;
-    setCarouselPosition(Math.max(carouselPosition - 1, 0));
-  };
+  const lastTasks = Array.isArray(user.lastTasks) ? user.lastTasks : [];
 
-  const scrollRight = (e) => {
-    e.preventDefault();
-    const carousel = carouselRef.current;
-    carousel.scrollLeft += 320;
-    setCarouselPosition(Math.min(carouselPosition + 1, user.tasks.length - 3));
-  };
-
-  const completedTasks = user.tasks.filter((task) => task.completed > 0);
-  const latestCompletedTasks =
-      completedTasks.length > 0
-          ? completedTasks
-              .sort((a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0))
-              .slice(0, 3)
-          : [];
-
-  // Card and section fade variants
+  // fadeUp анимация (как у тебя)
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
     visible: (i = 1) => ({
@@ -104,7 +122,6 @@ export default function Profile() {
       transition: { delay: i * 0.15, duration: 0.7, ease: "easeOut" },
     }),
   };
-
   return (
       <div
           className="min-h-screen font-mono pt-4"
@@ -156,16 +173,28 @@ export default function Profile() {
                   />
                 </svg>
               </motion.div>
-              <h2 className="text-xl font-bold custom-font" style={{ color: "var(--color-primary)" }}>
+              <h2
+                  className="text-xl font-bold custom-font"
+                  style={{ color: "var(--color-primary)" }}
+              >
                 {user.firstname} {user.lastname}
               </h2>
-              <p className="mb-4 custom-font" style={{ color: "var(--color-secondary)" }}>
-                @{user.nickname}
+              <p
+                  className="mb-4 custom-font"
+                  style={{ color: "var(--color-secondary)" }}
+              >
+                @{user.nickname || user.username}
               </p>
-              <p className="mb-2 custom-body" style={{ color: "var(--color-primary)" }}>
+              <p
+                  className="mb-2 custom-body"
+                  style={{ color: "var(--color-primary)" }}
+              >
                 {t("group")}: {user.specialistGroup || t("notSpecified")}
               </p>
-              <p className="mb-4 custom-body" style={{ color: "var(--color-primary)" }}>
+              <p
+                  className="mb-4 custom-body"
+                  style={{ color: "var(--color-primary)" }}
+              >
                 {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
               </p>
               <Button className="custom-btn px-7 py-2 text-base">
@@ -195,7 +224,10 @@ export default function Profile() {
                   <circle cx="10" cy="10" r="8" />
                   <circle cx="10" cy="10" r="5" fill="#fff" />
                 </svg>
-                <span className="text-3xl font-extrabold custom-font" style={{ color: "var(--color-secondary)" }}>
+                <span
+                    className="text-3xl font-extrabold custom-font"
+                    style={{ color: "var(--color-secondary)" }}
+                >
                 {user.points} {t("points")}
               </span>
               </motion.div>
@@ -208,101 +240,93 @@ export default function Profile() {
               >
                 <div className="flex items-center justify-between mb-3 custom-font">
                 <span>
-                  {t("difficulty")}: <span style={{ color: "var(--color-secondary)" }}>{user.progress.difficulty}</span>
-                </span>
-                  <span>
-                  {t("currentTopic")}: <span style={{ color: "var(--color-secondary)" }}>{user.progress.topic}</span>
+                  {t("yourProgress")}:{" "}
+                  <span style={{ color: "var(--color-secondary)" }}>
+                    {user.progress.difficulty}
+                  </span>
                 </span>
                 </div>
                 <div className="mb-2 flex items-center gap-2 custom-body">
-                  <span className="font-semibold">{progressPercentage.toFixed(0)}%</span>
-                  <span style={{ color: "var(--color-secondary)", opacity: 0.75 }}>{t("outOf")}</span>
+                <span className="font-semibold">
+                  {progressPercentage.toFixed(0)}%
+                </span>
+                  <span
+                      style={{ color: "var(--color-secondary)", opacity: 0.75 }}
+                  >
+                  {t("outOf")}
+                </span>
                   <span className="font-bold">{user.progress.totalTasks}</span>
-                  <span style={{ color: "var(--color-secondary)", opacity: 0.75 }}>{t("tasksSolved")}</span>
+                  <span
+                      style={{ color: "var(--color-secondary)", opacity: 0.75 }}
+                  >
+                  {t("tasksSolved")}
+                </span>
                 </div>
-                {/* Анимированный прогресс-бар */}
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercentage}%` }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                     className="h-4 rounded-full"
                     style={{
-                      background: "var(--progress-gradient, linear-gradient(90deg, var(--color-secondary), var(--color-primary)))",
+                      background:
+                          "var(--progress-gradient, linear-gradient(90deg, var(--color-secondary), var(--color-primary)))",
                       maxWidth: "100%",
                     }}
                 />
                 <div className="w-full bg-[var(--color-card-bg, #ececec)] rounded-full h-4 mt-[-16px] z-0"></div>
               </motion.div>
 
-              {/* Карусель задач */}
-              <motion.div
-                  variants={fadeUp}
-                  custom={4}
-                  className="relative mb-2"
-              >
-                <div className="flex items-center mb-3">
-                  <h3 className="text-xl font-bold flex-1 custom-font" style={{ color: "var(--color-primary)" }}>{t("tasks")}</h3>
-                  <Button
-                      onClick={scrollLeft}
-                      disabled={carouselPosition === 0}
-                      className="mr-2 rounded-full custom-btn text-xl px-2 py-1"
-                  >
-                    &#8592;
-                  </Button>
-                  <Button
-                      onClick={scrollRight}
-                      disabled={carouselPosition >= user.tasks.length - 3}
-                      className="rounded-full custom-btn text-xl px-2 py-1"
-                  >
-                    &#8594;
-                  </Button>
-                </div>
-                <div
-                    id="taskCarousel"
-                    ref={carouselRef}
-                    className="flex overflow-x-auto space-x-4 snap-x snap-mandatory touch-pan-x scrollbar-hide"
-                    style={{
-                      scrollBehavior: "smooth",
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
+              {/* Блок последних решённых задач */}
+              <motion.div variants={fadeUp} custom={5} className="mb-4">
+                <h3
+                    className="text-xl font-bold custom-font mb-4"
+                    style={{ color: "var(--color-primary)" }}
                 >
-                  {/* Hide scrollbar for Webkit (Chrome, Safari) */}
-                  <style>
-                    {`
-                  #taskCarousel::-webkit-scrollbar {
-                    display: none;
-                  }
-                `}
-                  </style>
-                  {user.tasks.map((task, index) => (
-                      <motion.div
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.06 }}
-                          className="min-w-[300px] h-40 custom-card flex-shrink-0 snap-start p-4 flex flex-col justify-between"
-                      >
-                        <div className="custom-font text-lg truncate" style={{ color: "var(--color-secondary)" }}>
-                          {t("type")}: {task.type}
-                        </div>
-                        <div className="truncate custom-body">
-                          {t("theme")}: <span className="font-semibold">{task.theme}</span>
-                        </div>
-                        <div className="truncate custom-body">
-                          {task.completed || 0}/{task.total || 0}
-                        </div>
-                      </motion.div>
-                  ))}
-                </div>
+                  {t("lastCompletedTasks")}
+                </h3>
+                {lastTasks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {lastTasks.map((task, idx) => (
+                          <div
+                              key={idx}
+                              className="custom-card p-4 flex flex-col gap-1 shadow rounded-2xl"
+                          >
+                            <div
+                                className="font-semibold text-base custom-font"
+                                style={{ color: "var(--color-secondary)" }}
+                            >
+                              {t("theme")}:{" "}
+                              <span className="font-bold">{task.theme}</span>
+                            </div>
+                            <div className="custom-body">
+                              {t("type")}: <span>{task.type}</span>
+                            </div>
+                            <div className="custom-body">
+                              {t("taskCode")}: <span>{task.taskCode}</span>
+                            </div>
+                          </div>
+                      ))}
+                    </div>
+                ) : (
+                    <div className="p-5 bg-[var(--color-card-bg,#ececec)] rounded-xl text-[var(--color-secondary)] text-center shadow">
+                      {t("noCompletedTasks") || "Нет последних решённых задач"}
+                    </div>
+                )}
               </motion.div>
 
               {/* Темы/стили */}
-              <h3 className="text-xl font-bold mb-2 mt-3 custom-font" style={{ color: "var(--color-primary)" }}>
+              <h3
+                  className="text-xl font-bold mb-2 mt-3 custom-font"
+                  style={{ color: "var(--color-primary)" }}
+              >
                 {t("styles")}
               </h3>
               <div className="mb-6">
-                <label htmlFor="theme-select" className="block mb-2 font-semibold custom-font" style={{ color: "var(--color-primary)" }}>
+                <label
+                    htmlFor="theme-select"
+                    className="block mb-2 font-semibold custom-font"
+                    style={{ color: "var(--color-primary)" }}
+                >
                   {t("select")} {t("theme")}:
                 </label>
                 <select
@@ -310,10 +334,12 @@ export default function Profile() {
                     value={currentTheme}
                     onChange={(e) => handleSelectTheme(e.target.value)}
                     className="w-full p-2 custom-input"
+                    disabled={isSettingTheme}
                 >
                   {purchasedThemeOptions.map((theme) => (
                       <option key={theme.name} value={theme.name}>
-                        {theme.name} ({theme.cost} {t("points")}) {currentTheme === theme.name ? `(${t("selected")})` : ""}
+                        {theme.name} ({theme.cost} {t("points")}){" "}
+                        {currentTheme === theme.name ? `(${t("selected")})` : ""}
                       </option>
                   ))}
                 </select>
@@ -322,7 +348,10 @@ export default function Profile() {
                 {allThemes.map((theme) => (
                     <motion.div
                         key={theme.name}
-                        whileHover={{ scale: 1.07, boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)" }}
+                        whileHover={{
+                          scale: 1.07,
+                          boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)",
+                        }}
                         className={`relative h-24 custom-card flex items-center justify-center shadow-lg transition-all`}
                         style={{
                           background: purchasedThemeNames.includes(theme.name)
@@ -331,10 +360,25 @@ export default function Profile() {
                         }}
                     >
                       <div className="text-center w-full custom-card p-2">
-                        <p className="custom-font text-lg" style={{ color: "var(--color-primary)" }}>{theme.name}</p>
-                        <p className="mb-1 custom-body" style={{ color: "var(--color-secondary)" }}>{theme.cost} {t("points")}</p>
+                        <p
+                            className="custom-font text-lg"
+                            style={{ color: "var(--color-primary)" }}
+                        >
+                          {theme.name}
+                        </p>
+                        <p
+                            className="mb-1 custom-body"
+                            style={{ color: "var(--color-secondary)" }}
+                        >
+                          {theme.cost} {t("points")}
+                        </p>
                         {purchasedThemeNames.includes(theme.name) ? (
-                            <span className="custom-font" style={{ color: "var(--color-secondary)" }}>{t("purchased")}</span>
+                            <span
+                                className="custom-font"
+                                style={{ color: "var(--color-secondary)" }}
+                            >
+                        {t("purchased")}
+                      </span>
                         ) : (
                             <Button
                                 onClick={() => handlePurchaseTheme(theme)}
