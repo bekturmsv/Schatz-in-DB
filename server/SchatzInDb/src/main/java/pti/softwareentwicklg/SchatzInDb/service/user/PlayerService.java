@@ -20,7 +20,6 @@ public class PlayerService {
 
     public Player getById(User user) {
         Player player = playerRepository.findPlayerById(user.getId());
-        player.setTotal_points((long) taskService.recalcAndSaveUserPoints(user.getId()));
         return player;
     }
 }

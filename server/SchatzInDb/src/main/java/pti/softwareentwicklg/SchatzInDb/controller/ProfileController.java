@@ -140,7 +140,7 @@ public class ProfileController {
         dto.setMatriculationNumber(player.getMatriculation_number());
         dto.setSpecialistGroup(player.getSpecialist_group());
         dto.setEmail(player.getEmail());
-        dto.setPoints((long) taskService.recalcAndSaveUserPoints(user.getId()));
+        dto.setPoints(player.getTotal_points());
         dto.setPurchasedThemes(player.getPurchasedThemes());
         dto.setCurrentTheme(player.getDesign());
 
