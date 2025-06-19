@@ -81,7 +81,7 @@ public class SqlCheckService {
             );
 
         } catch (Exception ex) {
-            return new SqlCheckResponse(false, ex.getMessage());
+            return new SqlCheckResponse(false, ex.getMessage(), userResult);
         }
     }
 
