@@ -7,7 +7,7 @@ const initialState = {
   isAuthenticated: !!localStorage.getItem("authToken"),
   role: "player",
   status: "idle",
-  isAuthLoading: false,
+  isAuthLoading: true,
 };
 
 export const initializeAuth = createAsyncThunk(
