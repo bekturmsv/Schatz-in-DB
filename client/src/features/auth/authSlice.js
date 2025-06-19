@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "./authApi";
+import {taskApi} from "@/features/task/taskApi.js";
+import {materialApi} from "@/features/material/materialApi.js";
+import {themeApi} from "@/features/theme/themeApi.js";
+import {ratingApi} from "@/features/rating/ratingApi.js";
 
 const initialState = {
   user: null,
@@ -83,6 +87,13 @@ export const { setUser, setToken, logout } = authSlice.actions;
 export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
   dispatch({ type: "theme/setTheme", payload: "default" });
+
+  // СБРАСЫВАЕМ ВСЕ КЭШИ RTK QUERY
+  dispatch(authApi.util.resetApiState());
+  dispatch(taskApi.util.resetApiState());
+  dispatch(themeApi.util.resetApiState());
+  dispatch(ratingApi.util.resetApiState());
+  dispatch(materialApi.util.resetApiState());
 };
 
 export default authSlice.reducer;
