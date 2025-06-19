@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "./authApi";
-import { setTheme } from "../theme/themeSlice";
 
 const initialState = {
   user: null,
@@ -11,7 +10,6 @@ const initialState = {
   isAuthLoading: false,
 };
 
-// Асинхронная инициализация пользователя по токену
 export const initializeAuth = createAsyncThunk(
     "auth/initialize",
     async (_, { dispatch, getState }) => {
@@ -75,6 +73,7 @@ const authSlice = createSlice({
         })
         .addCase(initializeAuth.rejected, (state) => {
           state.status = "failed";
+          state.isAuthLoading = false;
         });
   },
 });
@@ -83,7 +82,7 @@ export const { setUser, setToken, logout } = authSlice.actions;
 
 export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
-  dispatch(setTheme("default"));
+  dispatch({ type: "theme/setTheme", payload: "default" });
 };
 
 export default authSlice.reducer;

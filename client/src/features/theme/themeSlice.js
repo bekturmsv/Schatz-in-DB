@@ -17,14 +17,12 @@ const themeSlice = createSlice({
   reducers: {
     setTheme(state, action) {
       state.currentTheme = action.payload;
-      // Важно: меняем data-theme и сохраняем в localStorage!
       if (typeof window !== "undefined") {
         document.documentElement.setAttribute("data-theme", action.payload);
         localStorage.setItem("theme", action.payload);
       }
     },
     initTheme(state) {
-      // При инициализации (например, в MainLayout)
       const saved = getInitialTheme();
       state.currentTheme = saved;
       if (typeof window !== "undefined") {
