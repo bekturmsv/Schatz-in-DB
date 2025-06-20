@@ -107,5 +107,20 @@
   "EASY": "Leicht",
   "MEDIUM": "Mittel",
   "HARD": "Schwer",
-  "task": "Aufgabe"
+  "task": "Aufgabe",
+  "sqlExecutionError": "SQL konnte nicht ausgeführt werden oder ein Fehler ist aufgetreten.",
+  "noSqlResult": "Kein Ergebnis oder Sql-Abfrage kann nicht ausgeführt werden",
+  "completeTask": "Aufgabe abschließen",
+  "returnToTask": "Zurück zur Aufgabe",
+  "close": "Schließen",
+  "taskCompleted": "Aufgabe abgeschlossen",
+  "dragDropBlockPool": "Blöcke von hier ziehen",
+  "dragDropAnswerZone": "Antwort hier ablegen",
+  "dragBlocksArrange": "Ordne die SQL-Blöcke in der richtigen Reihenfolge an",
+  "dragDropInstruction": "Ziehe die obenstehenden SQL-Blöcke in das Antwortfeld und ordne sie korrekt an.",
+  "editSqlWithError": "Bearbeite die fehlerhafte SQL-Anfrage",
+  "sqlInputLabel": "Gib deine SQL-Abfrage ein",
+  "taskCode": "Aufgabencode",
+  "category": "Kategorie"
+
 }
