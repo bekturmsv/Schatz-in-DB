@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "./authApi";
-import { setTheme } from "../theme/themeSlice";
+import {taskApi} from "@/features/task/taskApi.js";
+import {materialApi} from "@/features/material/materialApi.js";
+import {themeApi} from "@/features/theme/themeApi.js";
+import {ratingApi} from "@/features/rating/ratingApi.js";
 
 const initialState = {
   user: null,
@@ -8,10 +11,9 @@ const initialState = {
   isAuthenticated: !!localStorage.getItem("authToken"),
   role: "player",
   status: "idle",
-  isAuthLoading: false,
+  isAuthLoading: true,
 };
 
-// Асинхронная инициализация пользователя по токену
 export const initializeAuth = createAsyncThunk(
     "auth/initialize",
     async (_, { dispatch, getState }) => {
@@ -75,6 +77,7 @@ const authSlice = createSlice({
         })
         .addCase(initializeAuth.rejected, (state) => {
           state.status = "failed";
+          state.isAuthLoading = false;
         });
   },
 });
@@ -83,7 +86,14 @@ export const { setUser, setToken, logout } = authSlice.actions;
 
 export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
-  dispatch(setTheme("default"));
+  dispatch({ type: "theme/setTheme", payload: "default" });
+
+  // СБРАСЫВАЕМ ВСЕ КЭШИ RTK QUERY
+  dispatch(authApi.util.resetApiState());
+  dispatch(taskApi.util.resetApiState());
+  dispatch(themeApi.util.resetApiState());
+  dispatch(ratingApi.util.resetApiState());
+  dispatch(materialApi.util.resetApiState());
 };
 
 export default authSlice.reducer;

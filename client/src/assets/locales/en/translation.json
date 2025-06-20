@@ -108,6 +108,19 @@
   "MEDIUM": "Medium",
   "HARD": "Hard",
   "task": "Task",
-  "yourProgress": "Your Progress"
-
+  "yourProgress": "Your Progress",
+  "sqlExecutionError": "SQL could not be executed or an error occurred.",
+  "noSqlResult": "No result or sql query cannot be run",
+  "completeTask": "Complete task",
+  "returnToTask": "Return to task",
+  "close": "Close",
+  "taskCompleted": "Task completed",
+  "dragDropBlockPool": "Drag blocks from here",
+  "dragDropAnswerZone": "Drop your answer here",
+  "dragBlocksArrange": "Arrange SQL blocks in the correct order",
+  "dragDropInstruction": "Drag the SQL blocks above into the answer zone and arrange them in the correct order.",
+  "editSqlWithError": "Edit the SQL query with an error",
+  "sqlInputLabel": "Enter your SQL query",
+  "taskCode": "Task Code",
+  "category": "Category"
 }

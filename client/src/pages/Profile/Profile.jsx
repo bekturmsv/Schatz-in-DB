@@ -5,7 +5,7 @@ import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useEffect, useMemo } from "react";
-import { setUser } from "@/features/auth/authSlice.js";
+import { setUser, initializeAuth } from "@/features/auth/authSlice.js";
 import {
   useGetThemesQuery,
   usePurchaseThemeMutation,
@@ -23,8 +23,11 @@ export default function Profile() {
   const reduxTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
+  // FIXED: Always use reduxTheme as source of truth for the current theme!
+  const currentTheme = reduxTheme || "default";
+
   // API
-  const { data: allThemes = [], refetch } = useGetThemesQuery();
+  const { data: allThemes = [], refetch: refetchThemes } = useGetThemesQuery();
   const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
   const [setThemeApi, { isLoading: isSettingTheme }] = useSetThemeMutation();
 
@@ -34,10 +37,7 @@ export default function Profile() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Берём тему из Redux (это правильнее — иначе могут быть баги при обновлении user)
-  const currentTheme = reduxTheme || user?.currentTheme || "default";
-
-  // Когда currentTheme меняется, обновим data-theme (на случай если что-то пропустили)
+  // Меняй тему сразу
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", currentTheme);
@@ -47,7 +47,6 @@ export default function Profile() {
 
   if (!isAuthenticated || !user) return null;
 
-  // Купленные темы
   const purchasedThemeNames = useMemo(
       () =>
           Array.isArray(user.purchasedThemes)
@@ -66,7 +65,6 @@ export default function Profile() {
           ? (user.progress.tasksSolved / user.progress.totalTasks) * 100
           : 0;
 
-  // Покупка темы
   const handlePurchaseTheme = async (theme) => {
     if (user.points < theme.cost) {
       toast.error(t("notEnoughPoints"));
@@ -78,34 +76,31 @@ export default function Profile() {
     }
     try {
       await purchaseTheme({ name: theme.name }).unwrap();
-      dispatch(
-          setUser({
-            ...user,
-            points: user.points - theme.cost,
-            purchasedThemes: [
-              ...user.purchasedThemes,
-              { name: theme.name, cost: theme.cost },
-            ],
-          })
-      );
       toast.success(t("themePurchased", { theme: theme.name }));
-      refetch();
+      // Можно рефетчить темы, если надо
+      dispatch(initializeAuth());
     } catch {
       toast.error(t("purchaseFailed"));
     }
   };
 
-  // Смена темы
+  // ---- КЛЮЧ: МГНОВЕННАЯ СМЕНА ТЕМЫ ----
   const handleSelectTheme = async (themeName) => {
     if (!purchasedThemeNames.includes(themeName)) {
       toast.error(t("themeNotPurchased"));
       return;
     }
     try {
+      // Сначала ставим тему в Redux (мгновенно), чтобы UI и select реагировали сразу
+      dispatch(setTheme(themeName)); // <--- МГНОВЕННО
+      if (typeof window !== "undefined") {
+        document.documentElement.setAttribute("data-theme", themeName);
+        localStorage.setItem("theme", themeName);
+      }
       await setThemeApi({ name: themeName }).unwrap();
-      dispatch(setTheme(themeName)); // Redux + localStorage + <html>
-      dispatch(setUser({ ...user, currentTheme: themeName })); // Обновим user
       toast.success(t("themeSelected", { theme: themeName }));
+      // Не обязательно сразу обновлять user, чтобы не сбросить локальную тему!
+      // dispatch(initializeAuth()); // Оставь, если хочешь синхронизацию с бэком
     } catch {
       toast.error(t("themeSelectError"));
     }
@@ -113,7 +108,6 @@ export default function Profile() {
 
   const lastTasks = Array.isArray(user.lastTasks) ? user.lastTasks : [];
 
-  // fadeUp анимация (как у тебя)
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
     visible: (i = 1) => ({
@@ -122,6 +116,7 @@ export default function Profile() {
       transition: { delay: i * 0.15, duration: 0.7, ease: "easeOut" },
     }),
   };
+
   return (
       <div
           className="min-h-screen font-mono pt-4"
@@ -331,7 +326,7 @@ export default function Profile() {
                 </label>
                 <select
                     id="theme-select"
-                    value={currentTheme}
+                    value={currentTheme} // FIXED: Use only reduxTheme
                     onChange={(e) => handleSelectTheme(e.target.value)}
                     className="w-full p-2 custom-input"
                     disabled={isSettingTheme}
