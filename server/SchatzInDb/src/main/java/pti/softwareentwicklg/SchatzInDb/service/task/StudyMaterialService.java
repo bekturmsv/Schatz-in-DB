@@ -23,7 +23,7 @@ public class StudyMaterialService {
     public StudyMaterial createMaterial(StudyMaterial material, Long teacherId) {
         userRepo.findById(teacherId)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher not found"));
-        material.setTeacherId(teacherId);
+        material.setTeacher(teacherId);
         return materialRepo.save(material);
     }
 
@@ -34,7 +34,7 @@ public class StudyMaterialService {
 
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
     public List<StudyMaterial> getMaterialsByTeacher(Long teacherId) {
-        return materialRepo.findByTeacherId(teacherId);
+        return materialRepo.findByTeacher(teacherId);
     }
 
     @PreAuthorize("hasAnyRole('PLAYER', 'TEACHER', 'ADMIN')")
@@ -43,17 +43,6 @@ public class StudyMaterialService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Material " + id + " not found"));
-    }
-
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public StudyMaterial updateMaterial(Long id, StudyMaterial updatedMaterial) {
-        StudyMaterial existing = getMaterialById(id);
-        existing.setDescription(updatedMaterial.getDescription());
-        existing.setType(updatedMaterial.getType());
-        existing.setFilePath(updatedMaterial.getFilePath());
-        existing.setVideoUrl(updatedMaterial.getVideoUrl());
-        existing.setExternalLink(updatedMaterial.getExternalLink());
-        return materialRepo.save(existing);
     }
 
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")

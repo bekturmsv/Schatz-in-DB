@@ -12,10 +12,12 @@ import pti.softwareentwicklg.SchatzInDb.model.enums.TaskType;
 import pti.softwareentwicklg.SchatzInDb.model.task.Task;
 import pti.softwareentwicklg.SchatzInDb.model.task.TestSolution;
 import pti.softwareentwicklg.SchatzInDb.model.task.UserSolution;
+import pti.softwareentwicklg.SchatzInDb.model.user.Player;
 import pti.softwareentwicklg.SchatzInDb.model.user.User;
 import pti.softwareentwicklg.SchatzInDb.repository.task.TaskRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.task.TestSolutionRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.task.UserSolutionRepository;
+import pti.softwareentwicklg.SchatzInDb.repository.user.PlayerRepository;
 import pti.softwareentwicklg.SchatzInDb.repository.user.UserRepository;
 
 import java.util.List;
@@ -31,35 +33,52 @@ public class SqlCheckService {
     private final UserSolutionRepository userSolutionRepository;
     private final UserRepository userRepository;
     private final TestSolutionRepository testSolutionRepository;
+    private final PlayerRepository playerRepository;
 
 
-    public SqlCheckService(@Qualifier("taskJdbcTemplate")JdbcTemplate jdbcTemplate, TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, UserRepository userRepository, TestSolutionRepository testSolutionRepository) {
+    public SqlCheckService(@Qualifier("taskJdbcTemplate")JdbcTemplate jdbcTemplate, TaskRepository taskRepository, UserSolutionRepository userSolutionRepository, UserRepository userRepository, TestSolutionRepository testSolutionRepository, PlayerRepository playerRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.taskRepository = taskRepository;
         this.userSolutionRepository = userSolutionRepository;
         this.userRepository = userRepository;
         this.testSolutionRepository = testSolutionRepository;
+        this.playerRepository = playerRepository;
     }
 
     @Transactional
     public SqlCheckResponse validateUserSql(String userSql, String taskCode) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         boolean isCorrect = false;
-        System.out.println("Vor Saving SQL: " + userSql);
+        List<Map<String, Object>> userResult = null;
+        List<Map<String, Object>> expectedResult = null;
 
         try {
             Task task = taskRepository.findByTaskCode(taskCode)
                     .orElseThrow(() -> new RuntimeException("Task not found"));
-            List<Map<String, Object>> userResult = jdbcTemplate.queryForList(userSql);
-            List<Map<String, Object>> expectedResult = jdbcTemplate.queryForList(task.getSolution());
+            userResult = jdbcTemplate.queryForList(userSql);
+            expectedResult = jdbcTemplate.queryForList(task.getSolution());
 
             isCorrect = userResult.equals(expectedResult);
             if (!isCorrect) {
                 throw new RuntimeException("Неправильный результат запроса.");
             }
 
-            System.out.println("After Saving SQL: " + userSql);
+            if(user instanceof Player) {
+                Long points = ((Player) user).getTotal_points();
+                ((Player) user).setTotal_points(points + task.getPoints());
+            }
+
+            playerRepository.save((Player) user);
             saveUserResult(taskCode,  userSql, true);
-            return new SqlCheckResponse(true, null);
+            return new SqlCheckResponse(
+                    true,
+                    null,
+                    userResult
+            );
 
         } catch (Exception ex) {
             return new SqlCheckResponse(false, ex.getMessage());

@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import {useGetTaskByIdQuery, useGetTasksByTopicQuery, useValidateSqlMutation} from "../../features/task/taskApi";
+import {
+    useGetTaskByIdQuery,
+    useGetTasksByTopicQuery,
+    useValidateSqlMutation
+} from "../../features/task/taskApi";
 import { motion, AnimatePresence } from "framer-motion";
-import {initializeAuth} from "@/features/auth/authSlice.js";
+import { initializeAuth } from "@/features/auth/authSlice.js";
 
 export default function Task() {
     const { taskId } = useParams();
@@ -16,15 +20,11 @@ export default function Task() {
 
     // Для refetch списка задач — нам нужны параметры топика и сложности
     const pathParts = window.location.pathname.split('/');
-    // Пример: /level/MEDIUM/topic/Datatypes/task/10
-    // ['', 'level', 'MEDIUM', 'topic', 'Datatypes', 'task', '10']
     const difficulty = pathParts[2];
     const topicName = decodeURIComponent(pathParts[4] || '');
 
     // Получаем refetch для списка задач
-    const {
-        refetch: refetchTasksList
-    } = useGetTasksByTopicQuery(
+    const { refetch: refetchTasksList } = useGetTasksByTopicQuery(
         { difficulty, topicName },
         { skip: !difficulty || !topicName || !isAuthenticated }
     );
@@ -39,7 +39,18 @@ export default function Task() {
     const [showHint, setShowHint] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [submissionStatus, setSubmissionStatus] = useState(null);
+
+    // Состояние для модального окна результата SQL
+    const [resultModal, setResultModal] = useState({
+        open: false,
+        correct: false,
+        userResult: null,
+        userSql: "", // Добавляем userSql в состояние модалки
+    });
+
     const [validateSql, { isLoading: isValidating }] = useValidateSqlMutation();
+
+
 
     const {
         data: currentTask,
@@ -81,9 +92,7 @@ export default function Task() {
     const solved = currentTask?.solved || isCompleted;
 
     // DRAG & DROP handlers
-    const onDragStart = (block, origin, idx) => {
-        setDraggedBlock({ block, origin, idx });
-    };
+    const onDragStart = (block, origin, idx) => setDraggedBlock({ block, origin, idx });
     const onDropToInput = () => {
         if (!draggedBlock || solved) return;
         if (draggedBlock.origin === "available") {
@@ -100,7 +109,6 @@ export default function Task() {
         }
         setDraggedBlock(null);
     };
-
     const moveBlockInUserBlocks = (fromIdx, toIdx) => {
         if (fromIdx === toIdx) return;
         const updated = [...userBlocks];
@@ -109,8 +117,9 @@ export default function Task() {
         setUserBlocks(updated);
     };
 
-    // Submit logic
-    const handleSubmit = async () => {
+    // ===== handleSubmit: Показывает модалку с результатом SQL после submit, не обновляет страницу =====
+    const handleSubmit = async (e) => {
+        e?.preventDefault(); // Prevent form submission from refreshing the page
         let userSql = "";
         if (currentTask.taskInteractionType === "DRAG_AND_DROP") {
             userSql = userBlocks.join(" ").replace(/\s+/g, " ").trim();
@@ -127,22 +136,37 @@ export default function Task() {
                 taskCode: currentTask.taskCode
             }).unwrap();
 
-            if (response.correct) {
-                setSubmissionStatus("correct");
-                setIsCompleted(true);
-                toast.success(t("correctAnswer"));
-                // Обновить задачу, пользователя, список задач
-                await refetch();
-                await dispatch(initializeAuth());
-                await refetchTasksList();
-                setTimeout(() => navigate(-1), 1200);
-            } else {
-                setSubmissionStatus("incorrect");
-                toast.error(t("incorrectAnswer"));
-            }
+            setSubmissionStatus(response.correct ? "correct" : "incorrect");
+
+            // Показываем модалку с результатом, включая userSql
+            setResultModal({
+                open: true,
+                correct: response.correct,
+                userResult: response.userResult || null,
+                userSql: userSql,
+            });
+
+            console.log(response);
         } catch (error) {
             setSubmissionStatus("error");
-            toast.error(t("submissionError"));
+            setResultModal({
+                open: true,
+                correct: false,
+                userResult: null,
+                userSql: userSql,
+            });
+        }
+    };
+
+    // ===== Закрыть модалку, обработать переход и завершение =====
+    const handleResultOk = async () => {
+        setResultModal((prev) => ({ ...prev, open: false }));
+        if (resultModal.correct) {
+            setIsCompleted(true);
+            await refetch();
+            await dispatch(initializeAuth());
+            await refetchTasksList();
+            navigate(-1); // Navigate back only after user confirms
         }
     };
 
@@ -157,7 +181,91 @@ export default function Task() {
     const handleShowHint = () => setShowHint(true);
     const handleCloseHint = () => setShowHint(false);
 
-    // Таблица задачи (fix)
+    // Модалка с результатом SQL
+    function renderResultModal() {
+        if (!resultModal.open) return null;
+
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                onClick={handleResultOk}
+            >
+                <motion.div
+                    initial={{ scale: 0.96, y: 14, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.97, y: 12, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 210, damping: 22 }}
+                    className="bg-[var(--color-card-bg)] p-8 rounded-2xl shadow-2xl w-full max-w-xl relative"
+                    onClick={e => e.stopPropagation()}
+                >
+                    <h2 className={`text-2xl font-bold mb-5 custom-font ${resultModal.correct ? "text-green-600" : "text-red-600"}`}>
+                        {resultModal.correct ? t("correctAnswer") : t("incorrectAnswer")}
+                    </h2>
+                    {resultModal.correct && resultModal.userResult && Array.isArray(resultModal.userResult) && (
+                        <div className="overflow-x-auto max-h-64">
+                            <ResultTable data={resultModal.userResult} />
+                        </div>
+                    )}
+                    {!resultModal.correct && resultModal.userSql === "" && (
+                        <div className="text-gray-400">{t("sqlExecutionError") || "SQL konnte nicht gestartet werden oder es ist ein Fehler aufgetreten"}</div>
+                    )}
+                    {!resultModal.correct && resultModal.userSql !== "" && !resultModal.userResult && (
+                        <div className="text-gray-400">{t("noSqlResult") || "Kein Ergebnis."}</div>
+                    )}
+                    {!resultModal.correct && resultModal.userResult && Array.isArray(resultModal.userResult) && (
+                        <div className="overflow-x-auto max-h-64">
+                            <ResultTable data={resultModal.userResult} />
+                        </div>
+                    )}
+                    <button
+                        className={`mt-6 w-full py-3 rounded-xl font-bold text-lg shadow ${
+                            resultModal.correct
+                                ? "bg-gradient-to-r from-green-400 to-cyan-400 text-white"
+                                : "bg-gray-300 text-gray-700"
+                        }`}
+                        onClick={handleResultOk}
+                    >
+                        {resultModal.correct ? t("completeTask") : t("returnToTask")}
+                    </button>
+                </motion.div>
+            </motion.div>
+        );
+    }
+
+    // Таблица результата SQL
+    function ResultTable({ data }) {
+        if (!data.length) return null;
+        const columns = Object.keys(data[0]);
+        return (
+            <table className="min-w-[240px] border border-gray-500 rounded-xl mb-2 text-base">
+                <thead>
+                <tr>
+                    {columns.map((col, i) => (
+                        <th key={i} className="border px-3 py-2 font-bold bg-gray-50 dark:bg-gray-800 text-left">
+                            {col}
+                        </th>
+                    ))}
+                </tr>
+                </thead>
+                <tbody>
+                {data.map((row, i) => (
+                    <tr key={i}>
+                        {columns.map((col, j) => (
+                            <td key={j} className="border px-3 py-2">
+                                {row[col]}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        );
+    }
+
+    // Таблица задачи
     function renderTaskTable(task) {
         if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) {
             return <p>{t("noTablesAvailable")}</p>;
@@ -204,7 +312,6 @@ export default function Task() {
     // Drag and drop UI
     const renderDragAndDrop = () => (
         <div className="flex flex-col gap-4 mb-3">
-            {/* Available blocks */}
             <div
                 className="min-h-[62px] bg-blue-50 dark:bg-blue-950 rounded-xl p-3 flex flex-wrap gap-4 items-center border-2 border-dashed border-blue-200 dark:border-blue-800"
                 onDragOver={e => { e.preventDefault(); }}
@@ -225,7 +332,6 @@ export default function Task() {
                     </motion.div>
                 ))}
             </div>
-            {/* Drop zone */}
             <div
                 className="min-h-[72px] bg-green-50 dark:bg-green-950 border-2 border-dashed border-green-300 dark:border-green-800 rounded-xl p-3 flex flex-wrap gap-4 items-center"
                 ref={dropInputRef}
@@ -326,8 +432,12 @@ export default function Task() {
             </div>
         );
     }
+
     return (
         <div className="min-h-screen bg-custom-background custom-font flex flex-col relative">
+            {/* Модалка результата SQL */}
+            {renderResultModal()}
+
             {/* Hint modal */}
             <AnimatePresence>
                 {showHint && (
@@ -456,6 +566,7 @@ export default function Task() {
                             <h2 className="text-xl font-bold mb-3 custom-font" style={{ color: "var(--color-primary)" }}>{t("answerBox")}</h2>
                             {answerBox}
                             <button
+                                type="button" // Explicitly set to prevent form submission
                                 onClick={handleSubmit}
                                 className={`mt-4 w-full bg-gradient-to-r from-green-500 to-cyan-400 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:from-green-400 hover:to-green-600 transition custom-font ${
                                     solved || isValidating ? "opacity-60 cursor-not-allowed" : ""

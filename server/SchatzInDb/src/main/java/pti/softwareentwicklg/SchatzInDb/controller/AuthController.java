@@ -151,8 +151,10 @@ public class AuthController {
         dto.setFirstname(player.getFirstName());
         dto.setLastname(player.getLastName());
         dto.setUsername(player.getUsername());
+        dto.setMatriculationNumber(player.getMatriculation_number());
+        dto.setSpecialistGroup(player.getSpecialist_group());
         dto.setEmail(player.getEmail());
-        dto.setPoints((long) taskService.recalcAndSaveUserPoints(user.getId()));
+        dto.setPoints(player.getTotal_points());
         dto.setPurchasedThemes(player.getPurchasedThemes());
         dto.setCurrentTheme(player.getDesign());
 
