@@ -23,20 +23,20 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL SELECT Statement",
                         """
-                                    The SELECT statement is used to select data from a database.
-                            
-                                    Example:
+                                    Die SELECT-Anweisung wird verwendet, um Daten aus einer Datenbank auszuwählen.
+
+                                    Beispiel:
                                     ```sql
                                     SELECT CustomerName, City FROM Customers;
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name;
                                     ```
-                                    Here, column1, column2, ... are the field names of the table you want to select data from.
-                                    The table_name represents the name of the table you want to select data from.
+                                    Hier sind column1, column2, ... die Feldnamen der Tabelle, aus der du Daten auswählen möchtest.
+                                    table_name steht für den Namen der Tabelle, aus der du Daten abrufen möchtest.
                                   """,
                         SqlKategorie.SELECT,
                         null
@@ -44,26 +44,24 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL SELECT DISTINCT Statement",
                         """
-                                    The SELECT DISTINCT statement is used to return only distinct (different) values.
-                    
-                                    Example:
-                                    Select all the different countries from the "Customers" table:
+                                    Die SELECT DISTINCT-Anweisung wird verwendet, um nur verschiedene (eindeutige) Werte zurückzugeben.
+
+                                    Wähle alle verschiedenen Länder aus der Tabelle "Customers":
                                     ```sql
                                     SELECT DISTINCT Country FROM Customers;
                                     ```
-                    
-                                    Inside a table, a column often contains many duplicate values;
-                                    and sometimes you only want to list the different (distinct) values.
-                    
+
+                                    In einer Tabelle enthält eine Spalte häufig viele doppelte Werte;
+                                    manchmal möchte man jedoch nur die verschiedenen (eindeutigen) Werte auflisten.
+
                                     Syntax:
                                     ```sql
                                     SELECT DISTINCT column1, column2, ... FROM table_name;
                                     ```
-                    
-                                    SELECT Example Without DISTINCT:
-                                    If you omit the DISTINCT keyword, the SQL statement returns the "Country" value from all the records of the "Customers" table:
-                    
-                                    Example:
+
+                                    Beispiel ohne DISTINCT:
+                                    Wenn du das DISTINCT-Schlüsselwort weglässt, liefert die SQL-Anweisung den Wert der Spalte "Country" aus allen Datensätzen der Tabelle "Customers":
+
                                     ```sql
                                     SELECT Country FROM Customers;
                                     ```
@@ -74,113 +72,109 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL WHERE Clause",
                         """
-                                    The WHERE clause is used to filter records.
-                    
-                                    It is used to extract only those records that fulfill a specified condition.
-                    
-                                    Example:
-                                    Select all customers from Mexico:
+                                    Die WHERE-Klausel wird verwendet, um Datensätze zu filtern.
+
+                                    Sie wird verwendet, um nur diejenigen Datensätze auszuwählen, die eine bestimmte Bedingung erfüllen.
+
+                                    Beispiel:
+                                    Wähle alle Kunden aus Mexiko:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country='Mexico';
                                     ```
-                    
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name
                                     WHERE condition;
                                     ```
-                    
-                                    Text Fields vs. Numeric Fields:
-                                    SQL requires single quotes around text values (most database systems will also allow double quotes).
-                    
-                                    However, numeric fields should not be enclosed in quotes.
-                    
-                                    Example:
+
+                                    Textfelder vs. numerische Felder:
+                                    SQL erfordert einfache Anführungszeichen um Textwerte (die meisten Datenbanksysteme erlauben auch doppelte Anführungszeichen).
+                                    Numerische Felder dürfen jedoch nicht in Anführungszeichen gesetzt werden.
+
+                                    Beispiel:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE CustomerID=1;
                                     ```
-                    
-                                    Operators in The WHERE Clause:
-                                    You can use other operators than the = operator to filter the search.
-                    
-                                    Example:
-                                    Select all customers with a CustomerID greater than 80:
+
+                                    Operatoren in der WHERE-Klausel:
+                                    Du kannst andere Operatoren als = verwenden, um die Suche zu filtern.
+
+                                    Beispiel:
+                                    Wähle alle Kunden mit einer CustomerID größer als 80:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE CustomerID > 80;
                                     ```
                                   """,
-                            SqlKategorie.WHERE,
+                        SqlKategorie.WHERE,
                         null
                 ),
                 createMaterial(
                         "The SQL ORDER BY",
                         """
-                                    The ORDER BY keyword is used to sort the result-set in ascending or descending order.
-                            
-                                    Example:
-                                    Sort the products by price:
+                                    Das Schlüsselwort ORDER BY wird verwendet, um das Ergebnis in aufsteigender oder absteigender Reihenfolge zu sortieren.
+
+                                    Beispiel:
+                                    Sortiere die Produkte nach Preis:
                                     ```sql
                                     SELECT * FROM Products
                                     ORDER BY Price;
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name
                                     ORDER BY column1, column2, ... ASC|DESC;
                                     ```
-                            
+
                                     DESC:
-                                    The ORDER BY keyword sorts the records in ascending order by default.
-                                    To sort the records in descending order, use the DESC keyword.
-                            
-                                    Example:
-                                    Sort the products from highest to lowest price:
+                                    Das ORDER BY-Schlüsselwort sortiert die Datensätze standardmäßig in aufsteigender Reihenfolge.
+                                    Um in absteigender Reihenfolge zu sortieren, verwende das Schlüsselwort DESC.
+
+                                    Beispiel:
+                                    Sortiere die Produkte vom höchsten zum niedrigsten Preis:
                                     ```sql
                                     SELECT * FROM Products
                                     ORDER BY Price DESC;
                                     ```
-                            
-                                    Order Alphabetically:
-                                    For string values the ORDER BY keyword will order alphabetically.
-                            
-                                    Example:
-                                    Sort the products alphabetically by ProductName:
+
+                                    Alphabetische Sortierung:
+                                    Bei Textwerten sortiert das ORDER BY-Schlüsselwort alphabetisch.
+
+                                    Beispiel:
+                                    Sortiere die Produkte alphabetisch nach ProductName:
                                     ```sql
                                     SELECT * FROM Products
                                     ORDER BY ProductName;
                                     ```
-                            
-                                    Alphabetically DESC:
-                                    To sort the table reverse alphabetically, use the DESC keyword.
-                            
-                                    Example:
-                                    Sort the products by ProductName in reverse order:
+
+                                    Alphabetisch DESC:
+                                    Um die Tabelle in umgekehrter alphabetischer Reihenfolge zu sortieren, verwende das Schlüsselwort DESC.
+
+                                    Beispiel:
+                                    Sortiere die Produkte nach ProductName in umgekehrter Reihenfolge:
                                     ```sql
                                     SELECT * FROM Products
                                     ORDER BY ProductName DESC;
                                     ```
-                            
-                                    ORDER BY Several Columns:
-                                    The following SQL statement selects all customers from the "Customers" table, sorted by the "Country" and the "CustomerName" column. This means that it orders by Country,
-                                    but if some rows have the same Country, it orders them by CustomerName:
-                            
-                                    Example:
+
+                                    ORDER BY Mehrerer Spalten:
+                                    Die folgende SQL-Anweisung wählt alle Kunden aus der Tabelle "Customers" aus, sortiert nach der Spalte "Country" und dann nach "CustomerName". Wenn mehrere Zeilen dasselbe Land haben, wird zusätzlich nach Kundennamen sortiert:
+
                                     ```sql
                                     SELECT * FROM Customers
                                     ORDER BY Country, CustomerName;
                                     ```
-                            
-                                    Using Both ASC and DESC:
-                                    The following SQL statement selects all customers from the "Customers" table,
-                                    sorted ascending by the "Country" and descending by the "CustomerName" column:
-                            
-                                    Example:
+
+                                    Kombination von ASC und DESC:
+                                    Die folgende SQL-Anweisung wählt alle Kunden aus der Tabelle "Customers" aus,
+                                    sortiert aufsteigend nach "Country" und absteigend nach "CustomerName":
+
                                     ```sql
                                     SELECT * FROM Customers
                                     ORDER BY Country ASC, CustomerName DESC;
@@ -192,59 +186,57 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL AND Operator",
                         """
-                                    The WHERE clause can contain one or many AND operators.
-                            
-                                    The AND operator is used to filter records based on more than one condition,
-                                    like if you want to return all customers from Spain that start with the letter 'G':
-                            
-                                    Example:
+                                    Die WHERE-Klausel kann einen oder mehrere AND-Operatoren enthalten.
+
+                                    Der AND-Operator wird verwendet, um Datensätze basierend auf mehr als einer Bedingung zu filtern,
+                                    zum Beispiel alle Kunden aus Spanien, deren Name mit dem Buchstaben 'G' beginnt:
+
+                                    Beispiel:
                                     ```sql
                                     SELECT *
                                     FROM Customers
                                     WHERE Country = 'Spain' AND CustomerName LIKE 'G%';
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name
                                     WHERE condition1 AND condition2 AND condition3 ...;
                                     ```
-                            
-                                    AND vs OR:
-                                    - The AND operator displays a record if **all** the conditions are TRUE.
-                                    - The OR operator displays a record if **any** of the conditions are TRUE.
-                            
-                                    All Conditions Must Be True:
-                                    The following SQL statement selects all fields from Customers where Country is "Brazil",
-                                    City is "Rio de Janeiro", AND CustomerID is higher than 50:
-                            
-                                    Example:
+
+                                    AND vs. OR:
+                                    - Der AND-Operator zeigt einen Datensatz an, wenn **alle** Bedingungen TRUE sind.
+                                    - Der OR-Operator zeigt einen Datensatz an, wenn **eine** der Bedingungen TRUE ist.
+
+                                    Alle Bedingungen müssen erfüllt sein:
+                                    Die folgende SQL-Anweisung wählt alle Felder aus Customers aus, bei denen Country 'Brazil',
+                                    City 'Rio de Janeiro' und CustomerID größer als 50 ist:
+
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country = 'Brazil'
                                     AND City = 'Rio de Janeiro'
                                     AND CustomerID > 50;
                                     ```
-                            
-                                    Combining AND and OR:
-                                    You can combine the AND and OR operators.
-                                    Make sure you use parentheses to get the correct result.
-                            
-                                    Example:
-                                    Select all Spanish customers that start with either "G" or "R":
+
+                                    Kombination von AND und OR:
+                                    Du kannst AND und OR kombinieren. Verwende Klammern, um die richtige Reihenfolge zu erzwingen.
+
+                                    Beispiel:
+                                    Wähle alle spanischen Kunden, deren Name entweder mit 'G' oder 'R' beginnt:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country = 'Spain' AND (CustomerName LIKE 'G%' OR CustomerName LIKE 'R%');
                                     ```
-                            
-                                    Without parentheses, the following query:
+
+                                    Ohne Klammern würde die folgende Abfrage:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country = 'Spain' AND CustomerName LIKE 'G%' OR CustomerName LIKE 'R%';
                                     ```
-                                    will return all customers from Spain that start with "G", **plus** all customers that start with "R",
-                                    regardless of their country.
+                                    alle Kunden aus Spanien, deren Name mit 'G' beginnt, **plus** alle Kunden, deren Name mit 'R' beginnt,
+                                    unabhängig von ihrem Land, zurückgeben.
                                   """,
                         SqlKategorie.AND,
                         null
@@ -252,57 +244,56 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL OR Operator",
                         """
-                                    The WHERE clause can contain one or more OR operators.
-                            
-                                    The OR operator is used to filter records based on more than one condition.
-                                    For example, to return all customers from Germany or from Spain:
-                            
-                                    Example:
+                                    Die WHERE-Klausel kann einen oder mehrere OR-Operatoren enthalten.
+
+                                    Der OR-Operator wird verwendet, um Datensätze basierend auf mehr als einer Bedingung zu filtern.
+                                    Zum Beispiel, um alle Kunden aus Deutschland oder Spanien zurückzugeben:
+
+                                    Beispiel:
                                     ```sql
                                     SELECT *
                                     FROM Customers
                                     WHERE Country = 'Germany' OR Country = 'Spain';
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name
                                     WHERE condition1 OR condition2 OR condition3 ...;
                                     ```
-                            
-                                    OR vs AND:
-                                    - The OR operator displays a record if **any** of the conditions are TRUE.
-                                    - The AND operator displays a record if **all** of the conditions are TRUE.
-                            
-                                    At Least One Condition Must Be True:
-                                    The following SQL statement selects all fields from Customers where
-                                    either City is "Berlin", CustomerName starts with "G", or Country is "Norway":
-                            
-                                    Example:
+
+                                    OR vs. AND:
+                                    - Der OR-Operator zeigt einen Datensatz an, wenn **eine** der Bedingungen TRUE ist.
+                                    - Der AND-Operator zeigt einen Datensatz an, wenn **alle** Bedingungen TRUE sind.
+
+                                    Mindestens eine Bedingung muss erfüllt sein:
+                                    Die folgende SQL-Anweisung wählt alle Felder aus Customers aus, bei denen
+                                    City 'Berlin', CustomerName beginnt mit 'G' oder Country 'Norway' ist:
+
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE City = 'Berlin' OR CustomerName LIKE 'G%' OR Country = 'Norway';
                                     ```
-                            
-                                    Combining AND and OR:
-                                    You can combine the AND and OR operators. Use parentheses to control precedence.
-                            
-                                    Example:
-                                    Select all Spanish customers that start with either "G" or "R":
+
+                                    Kombination von AND und OR:
+                                    Du kannst AND und OR kombinieren. Verwende Klammern, um die Reihenfolge zu steuern.
+
+                                    Beispiel:
+                                    Wähle alle spanischen Kunden, deren Name entweder mit 'G' oder 'R' beginnt:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country = 'Spain' AND (CustomerName LIKE 'G%' OR CustomerName LIKE 'R%');
                                     ```
-                            
-                                    Without parentheses:
+
+                                    Ohne Klammern:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE Country = 'Spain' AND CustomerName LIKE 'G%' OR CustomerName LIKE 'R%';
                                     ```
-                                    This will return:
-                                    - all customers from Spain whose names start with "G", **plus**
-                                    - all customers whose names start with "R", regardless of their country.
+                                    Dies würde zurückgeben:
+                                    - alle Kunden aus Spanien, deren Name mit 'G' beginnt, **plus**
+                                    - alle Kunden, deren Name mit 'R' beginnt, unabhängig von ihrem Land.
                                   """,
                         SqlKategorie.OR,
                         null
@@ -310,55 +301,55 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL NOT Operator",
                         """
-                                    The NOT operator is used in combination with other operators to give the opposite (negative) result.
-                            
-                                    For example, to return all customers that are not from Spain:
-                            
-                                    Example:
+                                    Der NOT-Operator wird in Kombination mit anderen Operatoren verwendet, um das gegenteilige (negative) Ergebnis zu liefern.
+
+                                    Zum Beispiel, um alle Kunden zurückzugeben, die nicht aus Spanien sind:
+
+                                    Beispiel:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE NOT Country = 'Spain';
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column1, column2, ...
                                     FROM table_name
                                     WHERE NOT condition;
                                     ```
-                            
-                                    The NOT operator can be used with various comparison and logical operators:
-                            
+
+                                    Der NOT-Operator kann mit verschiedenen Vergleichs- und logischen Operatoren verwendet werden:
+
                                     NOT LIKE:
-                                    Select customers whose names do not start with the letter 'A':
+                                    Wähle Kunden, deren Name nicht mit dem Buchstaben 'A' beginnt:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE CustomerName NOT LIKE 'A%';
                                     ```
-                            
-                                    NOT BETWEEN :
-                                    Select customers with a CustomerID not between 10 and 60:
+
+                                    NOT BETWEEN:
+                                    Wähle Kunden mit einer CustomerID, die nicht zwischen 10 und 60 liegt:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE CustomerID NOT BETWEEN 10 AND 60;
                                     ```
-                            
+
                                     NOT IN:
-                                    Select customers who are not from Paris or London:
+                                    Wähle Kunden, die nicht aus Paris oder London kommen:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE City NOT IN ('Paris', 'London');
                                     ```
-                            
+
                                     NOT Greater Than:
-                                    Select customers with a CustomerID not greater than 50:
+                                    Wähle Kunden mit einer CustomerID, die nicht größer als 50 ist:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE NOT CustomerID > 50;
                                     ```
-                            
+
                                     NOT Less Than:
-                                    Select customers with a CustomerID not less than 50:
+                                    Wähle Kunden mit einer CustomerID, die nicht kleiner als 50 ist:
                                     ```sql
                                     SELECT * FROM Customers
                                     WHERE NOT CustomerID < 50;
@@ -370,64 +361,62 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL SUM() Function",
                         """
-                                    The SUM() function returns the total sum of a numeric column.
-                            
-                                    Example:
-                                    Return the sum of all Quantity fields in the OrderDetails table:
+                                    Die SUM()-Funktion gibt die Gesamtsumme einer numerischen Spalte zurück.
+
+                                    Beispiel:
+                                    Rückgabe der Summe aller Quantity-Felder in der OrderDetails-Tabelle:
                                     ```sql
                                     SELECT SUM(Quantity)
                                     FROM OrderDetails;
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT SUM(column_name)
                                     FROM table_name
                                     WHERE condition;
                                     ```
-                            
-                                    Add a WHERE Clause:
-                                    You can add a WHERE clause to specify conditions.
-                            
-                                    Example:
-                                    Return the sum of the Quantity field for the product with ProductID 11:
+
+                                    Hinzufügen einer WHERE-Klausel:
+                                    Du kannst eine WHERE-Klausel hinzufügen, um Bedingungen anzugeben.
+
+                                    Beispiel:
+                                    Rückgabe der Summe der Quantity-Felder für das Produkt mit ProductID 11:
                                     ```sql
                                     SELECT SUM(Quantity)
                                     FROM OrderDetails
                                     WHERE ProductId = 11;
                                     ```
-                            
-                                    Use an Alias:
-                                    Give the summarized column a name by using the AS keyword.
-                            
-                                    Example:
-                                    Name the column "total":
+
+                                    Alias verwenden:
+                                    Benenne die zusammengefasste Spalte mit dem AS-Schlüsselwort.
+
+                                    Beispiel:
+                                    Nenne die Spalte "total":
                                     ```sql
                                     SELECT SUM(Quantity) AS total
                                     FROM OrderDetails;
                                     ```
-                            
-                                    Use SUM() with GROUP BY:
-                                    Use the SUM() function and the GROUP BY clause to return the Quantity for each OrderID in the OrderDetails table.
-                            
-                                    Example:
+
+                                    SUM() mit GROUP BY:
+                                    Verwende die SUM()-Funktion und die GROUP BY-Klausel, um die Quantity für jede OrderID zurückzugeben:
                                     ```sql
                                     SELECT OrderID, SUM(Quantity) AS [Total Quantity]
                                     FROM OrderDetails
                                     GROUP BY OrderID;
                                     ```
-                            
-                                    SUM() With an Expression:
-                                    The parameter inside the SUM() function can also be an expression.
-                            
-                                    Example:
-                                    If each product costs 10 dollars:
+
+                                    SUM() mit einem Ausdruck:
+                                    Der Parameter in SUM() kann auch ein Ausdruck sein.
+
+                                    Beispiel:
+                                    Wenn jedes Produkt 10 Dollar kostet:
                                     ```sql
                                     SELECT SUM(Quantity * 10)
                                     FROM OrderDetails;
                                     ```
-                            
-                                    Or use real prices with JOIN:
+
+                                    Oder verwende echte Preise mit JOIN:
                                     ```sql
                                     SELECT SUM(Price * Quantity)
                                     FROM OrderDetails
@@ -440,58 +429,54 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL AVG() Function",
                         """
-                                    The AVG() function returns the average value of a numeric column.
-                            
-                                    Example:
-                                    Find the average price of all products:
+                                    Die AVG()-Funktion gibt den Durchschnittswert einer numerischen Spalte zurück.
+
+                                    Beispiel:
+                                    Finde den Durchschnittspreis aller Produkte:
                                     ```sql
                                     SELECT AVG(Price)
                                     FROM Products;
                                     ```
-                            
-                                    Note: NULL values are ignored.
-                            
+
+                                    Hinweis: NULL-Werte werden ignoriert.
+
                                     Syntax:
                                     ```sql
                                     SELECT AVG(column_name)
                                     FROM table_name
                                     WHERE condition;
                                     ```
-                            
-                                    Add a WHERE Clause:
-                                    You can add a WHERE clause to specify conditions.
-                            
-                                    Example:
-                                    Return the average price of products in category 1:
+
+                                    Hinzufügen einer WHERE-Klausel:
+                                    Du kannst eine WHERE-Klausel hinzufügen, um Bedingungen anzugeben.
+
+                                    Beispiel:
+                                    Durchschnittspreis der Produkte in Kategorie 1:
                                     ```sql
                                     SELECT AVG(Price)
                                     FROM Products
                                     WHERE CategoryID = 1;
                                     ```
-                            
-                                    Use an Alias:
-                                    Give the AVG column a name by using the AS keyword.
-                            
-                                    Example:
-                                    Name the column "average price":
+
+                                    Alias verwenden:
+                                    Benenne die AVG-Spalte mit AS.
+
+                                    Beispiel:
+                                    Nenne die Spalte "average price":
                                     ```sql
                                     SELECT AVG(Price) AS [average price]
                                     FROM Products;
                                     ```
-                            
-                                    Higher Than Average:
-                                    To list all records with a higher price than average, use AVG() in a subquery.
-                            
-                                    Example:
+
+                                    Höher als Durchschnitt:
+                                    Um alle Datensätze mit einem Preis über dem Durchschnitt aufzulisten, verwende AVG() in einer Subquery:
                                     ```sql
                                     SELECT * FROM Products
-                                    WHERE price > (SELECT AVG(price) FROM Products);
+                                    WHERE Price > (SELECT AVG(Price) FROM Products);
                                     ```
-                            
-                                    Use AVG() with GROUP BY:
-                                    Return the average price for each category in the Products table.
-                            
-                                    Example:
+
+                                    AVG() mit GROUP BY:
+                                    Durchschnittspreis für jede Kategorie:
                                     ```sql
                                     SELECT AVG(Price) AS AveragePrice, CategoryID
                                     FROM Products
@@ -504,63 +489,61 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL JOIN Clause",
                         """
-                                    The SQL JOIN clause is used to combine rows from two or more tables, based on a related column between them.
-                            
-                                    Example:
-                                    Join the Orders and Customers tables by CustomerID:
+                                    Die JOIN-Klausel wird verwendet, um Zeilen aus zwei oder mehr Tabellen basierend auf einer gemeinsamen Spalte zu kombinieren.
+
+                                    Beispiel:
+                                    Verbinde Orders und Customers über CustomerID:
                                     ```sql
                                     SELECT Orders.OrderID, Customers.CustomerName
                                     FROM Orders
                                     JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
                                     ```
-                            
+
                                     Syntax:
                                     ```sql
                                     SELECT column_names
                                     FROM table1
-                                    JOIN table2
-                                    ON table1.column_name = table2.column_name;
+                                    JOIN table2 ON table1.column_name = table2.column_name;
                                     ```
-                            
-                                    Use a WHERE Clause:
-                                    You can add a WHERE clause to filter joined results.
-                            
-                                    Example:
-                                    Return all orders made by customers from Germany:
+
+                                    WITH WHERE:
+                                    Du kannst eine WHERE-Klausel hinzufügen, um die verbundenen Ergebnisse zu filtern.
+
+                                    Beispiel:
+                                    Alle Bestellungen von Kunden aus Deutschland:
                                     ```sql
                                     SELECT Orders.OrderID, Customers.CustomerName, Customers.Country
                                     FROM Orders
                                     JOIN Customers ON Orders.CustomerID = Customers.CustomerID
                                     WHERE Customers.Country = 'Germany';
                                     ```
-                            
-                                    Use an Alias:
-                                    You can simplify table names using aliases.
-                            
-                                    Example:
+
+                                    Alias verwenden:
+                                    Vereinfache Tabellennamen mit Aliases.
+
+                                    Beispiel:
                                     ```sql
                                     SELECT o.OrderID, c.CustomerName
                                     FROM Orders AS o
                                     JOIN Customers AS c ON o.CustomerID = c.CustomerID;
                                     ```
-                            
-                                    JOIN Types:
-                                    SQL supports different types of joins:
-                                    - INNER JOIN (returns only matching records)
-                                    - LEFT JOIN (returns all records from the left table and matched records from the right table)
+
+                                    JOIN-Typen:
+                                    - INNER JOIN (nur übereinstimmende Datensätze)
+                                    - LEFT JOIN (alle Datensätze der linken Tabelle und übereinstimmende der rechten)
                                     - RIGHT JOIN
                                     - FULL OUTER JOIN
-                            
-                                    Example of LEFT JOIN:
-                                    List all customers and their orders (if any):
+
+                                    LEFT JOIN Beispiel:
+                                    Kunden und ihre Bestellungen (falls vorhanden):
                                     ```sql
                                     SELECT Customers.CustomerName, Orders.OrderID
                                     FROM Customers
                                     LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
                                     ```
-                            
-                                    Example of FULL JOIN:
-                                    Return all customers and all orders, even if there is no match:
+
+                                    FULL JOIN Beispiel:
+                                    Alle Kunden und alle Bestellungen, auch ohne Übereinstimmung:
                                     ```sql
                                     SELECT Customers.CustomerName, Orders.OrderID
                                     FROM Customers
@@ -573,12 +556,12 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL GROUP BY Statement",
                         """
-                                    The GROUP BY statement groups rows that have the same values into summary rows, 
-                                    like "find the number of customers in each country".
-                            
-                                    The GROUP BY statement is often used with aggregate functions 
-                                    (COUNT(), MAX(), MIN(), SUM(), AVG()) to group the result-set by one or more columns.
-                            
+                                    Die GROUP BY-Anweisung gruppiert Zeilen mit denselben Werten zu Zusammenfassungszeilen,
+                                    z.B. "Anzahl der Kunden in jedem Land ermitteln".
+
+                                    Häufig verwendet mit Aggregatfunktionen
+                                    (COUNT(), MAX(), MIN(), SUM(), AVG()) zur Gruppierung des Ergebnisses.
+
                                     Syntax:
                                     ```sql
                                     SELECT column_name(s)
@@ -587,27 +570,26 @@ public class StudyMaterialInitializer {
                                     GROUP BY column_name(s)
                                     ORDER BY column_name(s);
                                     ```
-                            
-                                    Examples:
-                            
-                                    Count the number of customers in each country:
+
+                                    Beispiele:
+
+                                    Anzahl der Kunden pro Land:
                                     ```sql
                                     SELECT COUNT(CustomerID), Country
                                     FROM Customers
                                     GROUP BY Country;
                                     ```
-                            
-                                    Count the number of customers in each country and sort the result from high to low:
+
+                                    Anzahl der Kunden pro Land, sortiert von hoch nach niedrig:
                                     ```sql
                                     SELECT COUNT(CustomerID), Country
                                     FROM Customers
                                     GROUP BY Country
                                     ORDER BY COUNT(CustomerID) DESC;
                                     ```
-                            
-                                    GROUP BY with JOIN:
-                            
-                                    List the number of orders sent by each shipper:
+
+                                    GROUP BY mit JOIN:
+                                    Anzahl der versendeten Bestellungen pro Spediteur:
                                     ```sql
                                     SELECT Shippers.ShipperName, COUNT(Orders.OrderID) AS NumberOfOrders
                                     FROM Orders
@@ -621,8 +603,8 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL HAVING Clause",
                         """
-                                    The HAVING clause was added to SQL because the WHERE keyword cannot be used with aggregate functions.
-                            
+                                    Die HAVING-Klausel wurde hinzugefügt, weil WHERE nicht mit Aggregatfunktionen verwendet werden kann.
+
                                     Syntax:
                                     ```sql
                                     SELECT column_name(s)
@@ -632,18 +614,18 @@ public class StudyMaterialInitializer {
                                     HAVING condition
                                     ORDER BY column_name(s);
                                     ```
-                            
-                                    Examples:
-                            
-                                    List the number of customers in each country. Only include countries with more than 5 customers:
+
+                                    Beispiele:
+
+                                    Anzahl der Kunden pro Land, nur Länder mit mehr als 5 Kunden:
                                     ```sql
                                     SELECT COUNT(CustomerID), Country
                                     FROM Customers
                                     GROUP BY Country
                                     HAVING COUNT(CustomerID) > 5;
                                     ```
-                            
-                                    List the number of customers in each country, sorted from high to low, only if they have more than 5 customers:
+
+                                    Sortiert von hoch nach niedrig, nur wenn mehr als 5 Kunden:
                                     ```sql
                                     SELECT COUNT(CustomerID), Country
                                     FROM Customers
@@ -651,10 +633,10 @@ public class StudyMaterialInitializer {
                                     HAVING COUNT(CustomerID) > 5
                                     ORDER BY COUNT(CustomerID) DESC;
                                     ```
-                            
-                                    More HAVING examples:
-                            
-                                    List the employees that have registered more than 10 orders:
+
+                                    Weitere HAVING-Beispiele:
+
+                                    Angestellte mit mehr als 10 Bestellungen:
                                     ```sql
                                     SELECT Employees.LastName, COUNT(Orders.OrderID) AS NumberOfOrders
                                     FROM Orders
@@ -662,8 +644,8 @@ public class StudyMaterialInitializer {
                                     GROUP BY LastName
                                     HAVING COUNT(Orders.OrderID) > 10;
                                     ```
-                            
-                                    List if the employees "Davolio" or "Fuller" have registered more than 25 orders:
+
+                                    Überprüfung für "Davolio" oder "Fuller" mit mehr als 25 Bestellungen:
                                     ```sql
                                     SELECT Employees.LastName, COUNT(Orders.OrderID) AS NumberOfOrders
                                     FROM Orders
@@ -673,67 +655,64 @@ public class StudyMaterialInitializer {
                                     HAVING COUNT(Orders.OrderID) > 25;
                                     ```
                                   """,
-                        SqlKategorie.GROUP_BY,
+                        SqlKategorie.HAVING,
                         null
                 ),
                 createMaterial(
                         "SQL Aggregate Functions",
                         """
-                                    An aggregate function is a function that performs a calculation on a set of values and returns a single value.
-                            
-                                    Aggregate functions are often used with the GROUP BY clause of the SELECT statement. 
-                                    The GROUP BY clause splits the result-set into groups of values, and the aggregate function returns a single value for each group.
-                            
-                                    The most commonly used SQL aggregate functions are:
-                            
-                                    MIN() - returns the smallest value within the selected column  
-                                    MAX() - returns the largest value within the selected column  
-                                    COUNT() - returns the number of rows in a set  
-                                    SUM() - returns the total sum of a numerical column  
-                                    AVG() - returns the average value of a numerical column
-                            
-                                    Aggregate functions ignore NULL values (except for COUNT()).
-                            
-                                    We will go through each of these aggregate functions in the next sections.
+                                    Eine Aggregatfunktion führt eine Berechnung für eine Gruppe von Werten durch und gibt einen einzelnen Wert zurück.
+
+                                    Wird oft mit GROUP BY verwendet, um das Ergebnis in Gruppen aufzuteilen und für jede Gruppe einen Wert zu erhalten.
+
+                                    Die gängigsten Aggregatfunktionen sind:
+
+                                    MIN() – kleinster Wert
+                                    MAX() – größter Wert
+                                    COUNT() – Anzahl der Zeilen
+                                    SUM() – Summe einer numerischen Spalte
+                                    AVG() – Durchschnitt einer numerischen Spalte
+
+                                    Aggregatfunktionen ignorieren NULL-Werte
+                                    (ausgenommen COUNT()).
+
+                                    Detaillierte Beschreibungen folgen in den nächsten Abschnitten.
                                   """,
-                        SqlKategorie.AGGREGATE,
+                        SqlKategorie.AGGREGATFUNKTION,
                         null
                 ),
                 createMaterial(
                         "The SQL Subquery",
                         """
-                                    A subquery is a SQL query nested inside another query.
-                            
-                                    Subqueries can be used in SELECT, FROM, or WHERE clauses and are often used to perform intermediate calculations or filtering.
-                            
+                                    Eine Subquery ist eine SQL-Abfrage, die innerhalb einer anderen Abfrage verschachtelt ist.
+
+                                    Subqueries können in SELECT-, FROM- oder WHERE-Klauseln verwendet werden,
+                                    um Zwischenergebnisse zu berechnen oder zu filtern.
+
                                     Syntax:
                                     ```sql
                                     SELECT column1
                                     FROM table1
                                     WHERE column2 = (SELECT column2 FROM table2 WHERE condition);
                                     ```
-                            
-                                    Example:
-                                    Return all products with a price higher than the average:
+
+                                    Beispiel:
+                                    Gib alle Produkte mit einem Preis über dem Durchschnitt zurück:
                                     ```sql
                                     SELECT * FROM Products
                                     WHERE Price > (SELECT AVG(Price) FROM Products);
                                     ```
-                            
+
                                     Subquery in SELECT:
-                                    You can also return a value from a subquery directly in the result set.
-                            
-                                    Example:
+                                    Du kannst einen Wert aus einer Subquery direkt in der Ergebnismenge zurückgeben:
                                     ```sql
-                                    SELECT ProductName, 
+                                    SELECT ProductName,
                                            (SELECT AVG(Price) FROM Products) AS AvgPrice
                                     FROM Products;
                                     ```
-                            
+
                                     Subquery in FROM:
-                                    Subqueries in the FROM clause are treated as temporary tables.
-                            
-                                    Example:
+                                    Subqueries in FROM werden als temporäre Tabellen betrachtet:
                                     ```sql
                                     SELECT Category, AVG_Price
                                     FROM (
@@ -742,10 +721,10 @@ public class StudyMaterialInitializer {
                                         GROUP BY CategoryID
                                     ) AS CategoryAverages;
                                     ```
-                            
-                                    Notes:
-                                    - Subqueries must return only one value when used with operators like `=`, `<`, `>`, etc.
-                                    - For multiple values, use `IN`, `ANY`, or `ALL`.
+
+                                    Hinweise:
+                                    - Subqueries müssen einen einzelnen Wert zurückgeben, wenn sie mit (=,<,>) etc. verwendet werden.
+                                    - Für mehrere Werte verwende IN, ANY oder ALL.
                                   """,
                         SqlKategorie.SUBQUERY,
                         null
@@ -753,44 +732,44 @@ public class StudyMaterialInitializer {
                 createMaterial(
                         "The SQL COUNT() Function",
                         """
-                                    The COUNT() function returns the number of rows that match a specified condition.
-                            
+                                    Die COUNT()-Funktion gibt die Anzahl der Zeilen zurück, die eine bestimmte Bedingung erfüllen.
+
                                     Syntax:
                                     ```sql
                                     SELECT COUNT(column_name)
                                     FROM table_name
                                     WHERE condition;
                                     ```
-                            
-                                    COUNT(*) counts all rows, including those with NULLs.
-                            
-                                    Example:
-                                    Count the number of customers:
+
+                                    COUNT(*) zählt alle Zeilen, einschließlich NULL-Werten.
+
+                                    Beispiel:
+                                    Anzahl der Kunden zählen:
                                     ```sql
                                     SELECT COUNT(*) FROM Customers;
                                     ```
-                            
-                                    Count only non-null values in a column:
+
+                                    Nur nicht-NULL-Werte zählen:
                                     ```sql
                                     SELECT COUNT(CustomerName) FROM Customers;
                                     ```
-                            
-                                    COUNT() with WHERE:
-                                    Count customers from Germany:
+
+                                    COUNT() mit WHERE:
+                                    Kunden aus Deutschland zählen:
                                     ```sql
                                     SELECT COUNT(*) FROM Customers
                                     WHERE Country = 'Germany';
                                     ```
-                            
-                                    COUNT() with GROUP BY:
-                                    Count the number of customers per country:
+
+                                    COUNT() mit GROUP BY:
+                                    Anzahl der Kunden pro Land zählen:
                                     ```sql
                                     SELECT Country, COUNT(CustomerID)
                                     FROM Customers
                                     GROUP BY Country;
                                     ```
-                            
-                                    COUNT() ignores NULL values when counting specific columns.
+
+                                    COUNT() ignoriert NULL-Werte bei der Zählung von Spalten.
                                   """,
                         SqlKategorie.COUNT,
                         null
