@@ -23,6 +23,9 @@ export default function Task() {
     const difficulty = pathParts[2];
     const topicName = decodeURIComponent(pathParts[4] || '');
 
+    // Log URL parameters for debugging
+    console.log("URL Parts:", { difficulty, topicName });
+
     // Получаем refetch для списка задач
     const { refetch: refetchTasksList } = useGetTasksByTopicQuery(
         { difficulty, topicName },
@@ -45,12 +48,10 @@ export default function Task() {
         open: false,
         correct: false,
         userResult: null,
-        userSql: "", // Добавляем userSql в состояние модалки
+        userSql: "",
     });
 
     const [validateSql, { isLoading: isValidating }] = useValidateSqlMutation();
-
-
 
     const {
         data: currentTask,
@@ -146,8 +147,9 @@ export default function Task() {
                 userSql: userSql,
             });
 
-            console.log(response);
+            console.log("handleSubmit response:", response);
         } catch (error) {
+            console.error("handleSubmit error:", error);
             setSubmissionStatus("error");
             setResultModal({
                 open: true,
@@ -160,13 +162,33 @@ export default function Task() {
 
     // ===== Закрыть модалку, обработать переход и завершение =====
     const handleResultOk = async () => {
+        console.log("handleResultOk called", { correct: resultModal.correct, difficulty, topicName });
+
+        // Close the modal first
         setResultModal((prev) => ({ ...prev, open: false }));
+
         if (resultModal.correct) {
-            setIsCompleted(true);
-            await refetch();
-            await dispatch(initializeAuth());
-            await refetchTasksList();
-            navigate(-1); // Navigate back only after user confirms
+            if (!difficulty || !topicName) {
+                console.error("Invalid difficulty or topicName", { difficulty, topicName });
+                toast.error(t("invalidUrl") || "Invalid URL parameters");
+                return;
+            }
+            try {
+                setIsCompleted(true);
+                await Promise.all([
+                    refetch(),
+                    dispatch(initializeAuth()),
+                    refetchTasksList()
+                ]);
+                const targetUrl = `/level/${difficulty}/topic/${encodeURIComponent(topicName)}`;
+                console.log("Navigating to:", targetUrl);
+                navigate(targetUrl);
+            } catch (error) {
+                console.error("Error in handleResultOk:", error);
+                toast.error(t("navigationError") || "Failed to navigate to task list");
+            }
+        } else {
+            console.log("Not navigating: result is not correct");
         }
     };
 
