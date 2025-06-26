@@ -128,7 +128,7 @@ export default function Navbar() {
                             className="cursor-pointer font-bold transition py-2 md:py-0 text-lg"
                             style={{ color: "var(--color-secondary)" }}
                         >
-                          {t('Progress')}
+                          {t('play')}
                         </button>
                         <button
                             onClick={() => { navigate('/materials'); setIsOpen(false); }}
