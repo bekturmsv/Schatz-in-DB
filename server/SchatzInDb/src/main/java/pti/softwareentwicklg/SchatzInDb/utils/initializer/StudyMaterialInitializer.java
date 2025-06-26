@@ -678,7 +678,7 @@ public class StudyMaterialInitializer {
 
                                     Detaillierte Beschreibungen folgen in den nächsten Abschnitten.
                                   """,
-                        SqlKategorie.AGGREGATFUNKTION,
+                        SqlKategorie.AGGREGATE,
                         null
                 ),
                 createMaterial(
