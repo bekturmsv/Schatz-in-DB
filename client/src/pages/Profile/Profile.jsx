@@ -1,10 +1,11 @@
+// src/pages/Profile/Profile.jsx
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 import { setUser, initializeAuth } from "@/features/auth/authSlice.js";
 import {
   useGetThemesQuery,
@@ -14,7 +15,6 @@ import {
 import { motion } from "framer-motion";
 import { useGetMeQuery } from "@/features/auth/authApi";
 import ProfileEditModal from "@/components/custom/ProfileEditModal.jsx";
-
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -26,7 +26,6 @@ export default function Profile() {
   const reduxTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // FIXED: Always use reduxTheme as source of truth for the current theme!
   const currentTheme = reduxTheme || "default";
 
   // API
@@ -36,7 +35,6 @@ export default function Profile() {
   const [editOpen, setEditOpen] = useState(false);
 
   const { refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
-
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -83,31 +81,26 @@ export default function Profile() {
     }
     try {
       await purchaseTheme({ name: theme.name }).unwrap();
-      toast.success(t("themePurchased", { theme: theme.name }));
       await refetchMe();
-      dispatch(initializeAuth());
+      toast.success(t("themePurchased", { theme: theme.name }));
     } catch {
       toast.error(t("purchaseFailed"));
     }
   };
 
-  // ---- КЛЮЧ: МГНОВЕННАЯ СМЕНА ТЕМЫ ----
   const handleSelectTheme = async (themeName) => {
     if (!purchasedThemeNames.includes(themeName)) {
       toast.error(t("themeNotPurchased"));
       return;
     }
     try {
-      // Сначала ставим тему в Redux (мгновенно), чтобы UI и select реагировали сразу
-      dispatch(setTheme(themeName)); // <--- МГНОВЕННО
+      dispatch(setTheme(themeName));
       if (typeof window !== "undefined") {
         document.documentElement.setAttribute("data-theme", themeName);
         localStorage.setItem("theme", themeName);
       }
       await setThemeApi({ name: themeName }).unwrap();
       toast.success(t("themeSelected", { theme: themeName }));
-      // Не обязательно сразу обновлять user, чтобы не сбросить локальную тему!
-      // dispatch(initializeAuth()); // Оставь, если хочешь синхронизацию с бэком
     } catch {
       toast.error(t("themeSelectError"));
     }
@@ -179,7 +172,7 @@ export default function Profile() {
                   className="text-xl font-bold custom-font"
                   style={{ color: "var(--color-primary)" }}
               >
-                {user.firstname} {user.lastname}
+                {(user.firstName || "")} {(user.lastName || "")}
               </h2>
               <p
                   className="mb-4 custom-font"
@@ -200,7 +193,7 @@ export default function Profile() {
                 {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
               </p>
               <Button className="custom-btn px-7 py-2 text-base"
-              onClick={() => setEditOpen(true)}
+                      onClick={() => setEditOpen(true)}
               >
                 {t("editProfile")}
               </Button>
@@ -246,7 +239,7 @@ export default function Profile() {
                 <span>
                   {t("yourProgress")}:{" "}
                   <span style={{ color: "var(--color-secondary)" }}>
-                    {user.progress.difficulty}
+                    {user.progress?.difficulty}
                   </span>
                 </span>
                 </div>
@@ -259,7 +252,7 @@ export default function Profile() {
                   >
                   {t("outOf")}
                 </span>
-                  <span className="font-bold">{user.progress.totalTasks}</span>
+                  <span className="font-bold">{user.progress?.totalTasks}</span>
                   <span
                       style={{ color: "var(--color-secondary)", opacity: 0.75 }}
                   >
@@ -335,15 +328,15 @@ export default function Profile() {
                 </label>
                 <select
                     id="theme-select"
-                    value={currentTheme} // FIXED: Use only reduxTheme
+                    value={currentTheme}
                     onChange={(e) => handleSelectTheme(e.target.value)}
                     className="w-full p-2 custom-input"
                     disabled={isSettingTheme}
                 >
                   {purchasedThemeOptions.map((theme) => (
                       <option key={theme.name} value={theme.name}>
-                        {theme.name} ({theme.cost} {t("points")}){" "}
-                        {currentTheme === theme.name ? `(${t("selected")})` : ""}
+                        {theme.name}
+                        {currentTheme === theme.name ? ` (${t("selected")})` : ""}
                       </option>
                   ))}
                 </select>
@@ -400,12 +393,10 @@ export default function Profile() {
           </div>
         </motion.section>
         <ProfileEditModal
-        user={user}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
+            user={user}
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
         />
-
       </div>
   );
-
 }

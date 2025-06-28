@@ -101,7 +101,6 @@
   "dontHaveAccount": "Sie haben noch kein Konto?",
   "errorLoadingLevels": "Fehler beim Laden der Level",
   "difficultyLevel": "Schwierigkeitsgrad",
-  "play": "Spielen",
   "totalTasksSolved": "Gelöste Aufgaben",
   "completePreviousLevelFirst": "Schließe zuerst das vorherige Level ab",
   "EASY": "Leicht",
@@ -120,7 +119,18 @@
   "dragDropInstruction": "Ziehe die obenstehenden SQL-Blöcke in das Antwortfeld und ordne sie korrekt an.",
   "editSqlWithError": "Bearbeite die fehlerhafte SQL-Anfrage",
   "sqlInputLabel": "Gib deine SQL-Abfrage ein",
+  "category": "Kategorie",
+  "allFieldsRequired": "Alle Felder sind erforderlich",
+  "profileUpdated": "Profil aktualisiert",
+  "updateFailed": "Profil konnte nicht aktualisiert werden. Bitte versuche es erneut!",
+  "saving": "Speichern...",
+  "saveChanges": "Änderungen speichern",
+  "group": "Gruppe",
+  "notSpecified": "Nicht angegeben",
+  "yourProgress": "Dein Fortschritt",
+  "lastCompletedTasks": "Zuletzt gelöste Aufgaben",
   "taskCode": "Aufgabencode",
-  "category": "Kategorie"
+  "purchaseFailed": "Thema konnte nicht gekauft werden",
+  "themeSelectError": "Thema konnte nicht gesetzt werden"
 
 }
