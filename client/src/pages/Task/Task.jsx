@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
     useGetTaskByIdQuery,
-    useGetTasksByTopicQuery,
+    useGetTasksByTopicQuery, useSubmitTaskAnswerMutation,
     useValidateSqlMutation
 } from "../../features/task/taskApi";
 import { motion, AnimatePresence } from "framer-motion";
 import { initializeAuth } from "@/features/auth/authSlice.js";
+import { useGetMeQuery } from "@/features/auth/authApi";
 
 export default function Task() {
     const { taskId } = useParams();
@@ -26,6 +27,7 @@ export default function Task() {
     // Log URL parameters for debugging
     console.log("URL Parts:", { difficulty, topicName });
 
+    const { refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
     // Получаем refetch для списка задач
     const { refetch: refetchTasksList } = useGetTasksByTopicQuery(
         { difficulty, topicName },
@@ -52,6 +54,7 @@ export default function Task() {
     });
 
     const [validateSql, { isLoading: isValidating }] = useValidateSqlMutation();
+    const [submitTaskAnswer] = useSubmitTaskAnswerMutation();
 
     const {
         data: currentTask,
@@ -176,6 +179,7 @@ export default function Task() {
             try {
                 setIsCompleted(true);
                 await Promise.all([
+                    refetchMe(),
                     refetch(),
                     dispatch(initializeAuth()),
                     refetchTasksList()

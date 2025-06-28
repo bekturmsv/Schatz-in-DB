@@ -1,4 +1,6 @@
+// src/features/theme/themeApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { setUser } from "@/features/auth/authSlice";
 
 export const themeApi = createApi({
     reducerPath: "themeApi",
@@ -21,6 +23,17 @@ export const themeApi = createApi({
                 url: `/api/themes/purchase?name=${encodeURIComponent(name)}`,
                 method: "POST",
             }),
+            async onQueryStarted(args, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    console.log(data)
+                    if (data && data.user) {
+                        dispatch(setUser(data.user));
+                    }
+                } catch (error){
+                    console.log(error)
+                }
+            },
         }),
         setTheme: builder.mutation({
             query: ({ name }) => ({

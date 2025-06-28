@@ -1,9 +1,37 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "./authApi";
-import {taskApi} from "@/features/task/taskApi.js";
-import {materialApi} from "@/features/material/materialApi.js";
-import {themeApi} from "@/features/theme/themeApi.js";
-import {ratingApi} from "@/features/rating/ratingApi.js";
+import { taskApi } from "@/features/task/taskApi.js";
+import { materialApi } from "@/features/material/materialApi.js";
+import { themeApi } from "@/features/theme/themeApi.js";
+import { ratingApi } from "@/features/rating/ratingApi.js";
+
+// Глубокий merge (поверхностно рекурсивный для простых случаев)
+function deepMerge(oldObj, newObj) {
+  if (!oldObj) return newObj;
+  if (typeof oldObj !== "object" || typeof newObj !== "object") return newObj;
+
+  const merged = { ...oldObj };
+  for (const key in newObj) {
+    if (
+        Object.prototype.hasOwnProperty.call(newObj, key)
+        && newObj[key] !== undefined
+    ) {
+      if (
+          typeof newObj[key] === "object"
+          && newObj[key] !== null
+          && !Array.isArray(newObj[key])
+          && typeof oldObj[key] === "object"
+          && oldObj[key] !== null
+          && !Array.isArray(oldObj[key])
+      ) {
+        merged[key] = deepMerge(oldObj[key], newObj[key]);
+      } else {
+        merged[key] = newObj[key];
+      }
+    }
+  }
+  return merged;
+}
 
 const initialState = {
   user: null,
@@ -39,9 +67,20 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload || null;
-      state.isAuthenticated = !!action.payload;
-      state.role = action.payload?.role || "player";
+      // Глубокий merge старого user и новых данных
+      if (action.payload === null) {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.role = "player";
+      } else if (state.user) {
+        state.user = deepMerge(state.user, action.payload);
+        state.isAuthenticated = true;
+        state.role = state.user?.role || "player";
+      } else {
+        state.user = action.payload;
+        state.isAuthenticated = !!action.payload;
+        state.role = action.payload?.role || "player";
+      }
     },
     setToken: (state, action) => {
       state.token = action.payload;
