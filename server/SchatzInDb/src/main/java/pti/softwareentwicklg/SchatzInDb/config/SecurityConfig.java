@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/task/create/query", "/api/auth/task/create").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/teacher/**").hasRole("TEACHER")
+                        .requestMatchers("/api/teacher/**").hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers("/api/player/**").hasAnyRole("PLAYER","ADMIN")
 
                         .requestMatchers(

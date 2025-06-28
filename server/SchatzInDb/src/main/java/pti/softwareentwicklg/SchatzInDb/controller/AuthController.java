@@ -140,6 +140,8 @@ public class AuthController {
         int totalTasks = total.size();
         int completed = 0;
 
+        dto.setRoles(user.getRole());
+
         for (UserSolution userSolution : solved) {
             Task task = taskRepository.getTaskByTaskCode(userSolution.getTaskCode());
             if (task.getTaskType().equals(TaskType.REGULAR)) {
@@ -157,7 +159,6 @@ public class AuthController {
         dto.setPoints(player.getTotal_points());
         dto.setPurchasedThemes(player.getPurchasedThemes());
         dto.setCurrentTheme(player.getDesign());
-
         ProgressDto progressDto = new ProgressDto();
         progressDto.setTotalTasks(totalTasks);
         progressDto.setTasksSolved(completed);
