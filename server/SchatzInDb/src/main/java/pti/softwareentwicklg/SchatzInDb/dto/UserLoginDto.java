@@ -3,6 +3,7 @@ package pti.softwareentwicklg.SchatzInDb.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pti.softwareentwicklg.SchatzInDb.model.enums.Roles;
 import pti.softwareentwicklg.SchatzInDb.model.enums.SpecialistGroup;
 import pti.softwareentwicklg.SchatzInDb.model.user.Theme;
 
@@ -21,6 +22,7 @@ public class UserLoginDto {
     private String username;
     private Integer matriculationNumber;
     private SpecialistGroup specialistGroup;
+    private Roles roles;
     private Long points;
     private Set<Theme> purchasedThemes;
     private String currentTheme;
