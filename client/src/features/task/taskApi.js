@@ -1,4 +1,3 @@
-// src/store/taskApi.js
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const taskApi = createApi({
@@ -13,6 +12,7 @@ export const taskApi = createApi({
             return headers;
         },
     }),
+    tagTypes: ['Tasks', 'Task', 'User'],
     endpoints: (builder) => ({
         getTopics: builder.query({
             query: (difficulty) => ({
@@ -25,9 +25,18 @@ export const taskApi = createApi({
                 url: '/api/task/getByDifficult',
                 params: { schwierigkeit: difficulty, sqlKategorie: topicName }
             }),
+            providesTags: (result, error, arg) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({ type: 'Task', id })),
+                        { type: 'Tasks', id: `${arg.difficulty}-${arg.topicName}` },
+                    ]
+                    : [{ type: 'Tasks', id: `${arg.difficulty}-${arg.topicName}` }],
         }),
         getTaskById: builder.query({
             query: ({ taskId }) => `api/task/getById/${taskId}`,
+            providesTags: (result, error, arg) =>
+                [{ type: 'Task', id: arg.taskId }],
         }),
         getLevels: builder.query({
             query: () => "api/task/getLevels",
@@ -38,6 +47,11 @@ export const taskApi = createApi({
                 method: 'POST',
                 body: { answer: JSON.stringify(answer) },
             }),
+            invalidatesTags: (result, error, { taskId }) => [
+                { type: 'Task', id: taskId },
+                { type: 'Tasks' },
+                { type: 'User' },
+            ],
         }),
         validateSql: builder.mutation({
             query: ({ userSql, taskCode }) => ({
@@ -46,7 +60,6 @@ export const taskApi = createApi({
                 body: { userSql, taskCode },
             }),
         }),
-        // Ключевой момент: параметр называется schwierigkeitsgrad
         getFinalTestByDifficulty: builder.query({
             query: (difficulty) => ({
                 url: "/api/test/getTestByDifficulty",

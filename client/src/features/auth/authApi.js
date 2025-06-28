@@ -13,6 +13,7 @@ export const authApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ['User'],
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -29,6 +30,7 @@ export const authApi = createApi({
           throw error;
         }
       },
+      invalidatesTags: [{ type: 'User' }],
     }),
     register: builder.mutation({
       query: (userData) => ({
@@ -45,6 +47,7 @@ export const authApi = createApi({
           throw error;
         }
       },
+      invalidatesTags: [{ type: 'User' }],
     }),
     getSpecializations: builder.query({
       query: () => ({
@@ -58,6 +61,7 @@ export const authApi = createApi({
         method: "GET",
       }),
       transformResponse: (response) => response,
+      providesTags: ['User'],
     }),
   }),
 });
