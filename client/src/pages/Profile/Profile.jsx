@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useEffect, useMemo } from "react";
+import {useEffect, useMemo, useState} from "react";
 import { setUser, initializeAuth } from "@/features/auth/authSlice.js";
 import {
   useGetThemesQuery,
@@ -12,6 +12,9 @@ import {
   useSetThemeMutation,
 } from "@/features/theme/themeApi.js";
 import { motion } from "framer-motion";
+import { useGetMeQuery } from "@/features/auth/authApi";
+import ProfileEditModal from "@/components/custom/ProfileEditModal.jsx";
+
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -30,6 +33,10 @@ export default function Profile() {
   const { data: allThemes = [], refetch: refetchThemes } = useGetThemesQuery();
   const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
   const [setThemeApi, { isLoading: isSettingTheme }] = useSetThemeMutation();
+  const [editOpen, setEditOpen] = useState(false);
+
+  const { refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
+
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -77,7 +84,7 @@ export default function Profile() {
     try {
       await purchaseTheme({ name: theme.name }).unwrap();
       toast.success(t("themePurchased", { theme: theme.name }));
-      // Можно рефетчить темы, если надо
+      await refetchMe();
       dispatch(initializeAuth());
     } catch {
       toast.error(t("purchaseFailed"));
@@ -192,7 +199,9 @@ export default function Profile() {
               >
                 {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
               </p>
-              <Button className="custom-btn px-7 py-2 text-base">
+              <Button className="custom-btn px-7 py-2 text-base"
+              onClick={() => setEditOpen(true)}
+              >
                 {t("editProfile")}
               </Button>
             </motion.div>
@@ -390,6 +399,13 @@ export default function Profile() {
             </motion.div>
           </div>
         </motion.section>
+        <ProfileEditModal
+        user={user}
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        />
+
       </div>
   );
+
 }
