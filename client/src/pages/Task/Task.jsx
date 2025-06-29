@@ -17,24 +17,23 @@ export default function Task() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    // Получаем авторизацию из редакса
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+    // Получаем user только из RTK Query!
+    const { data: user, refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
     // Для refetch списка задач — нам нужны параметры топика и сложности
     const pathParts = window.location.pathname.split('/');
     const difficulty = pathParts[2];
     const topicName = decodeURIComponent(pathParts[4] || '');
 
-    // Log URL parameters for debugging
-    console.log("URL Parts:", { difficulty, topicName });
-
-    const { refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
-    // Получаем refetch для списка задач
     const { refetch: refetchTasksList } = useGetTasksByTopicQuery(
         { difficulty, topicName },
         { skip: !difficulty || !topicName || !isAuthenticated }
     );
 
-    // Состояния
     const [availableBlocks, setAvailableBlocks] = useState([]);
     const [userBlocks, setUserBlocks] = useState([]);
     const [draggedBlock, setDraggedBlock] = useState(null);
@@ -71,7 +70,6 @@ export default function Task() {
         return null;
     }
 
-    // DRAG & DROP setup
     useEffect(() => {
         if (
             currentTask &&
@@ -95,35 +93,11 @@ export default function Task() {
 
     const solved = currentTask?.solved || isCompleted;
 
-    // DRAG & DROP handlers
-    const onDragStart = (block, origin, idx) => setDraggedBlock({ block, origin, idx });
-    const onDropToInput = () => {
-        if (!draggedBlock || solved) return;
-        if (draggedBlock.origin === "available") {
-            setUserBlocks([...userBlocks, draggedBlock.block]);
-            setAvailableBlocks(availableBlocks.filter((b, i) => i !== draggedBlock.idx));
-        }
-        setDraggedBlock(null);
-    };
-    const onDropToAvailable = () => {
-        if (!draggedBlock || solved) return;
-        if (draggedBlock.origin === "input") {
-            setAvailableBlocks([...availableBlocks, draggedBlock.block]);
-            setUserBlocks(userBlocks.filter((b, i) => i !== draggedBlock.idx));
-        }
-        setDraggedBlock(null);
-    };
-    const moveBlockInUserBlocks = (fromIdx, toIdx) => {
-        if (fromIdx === toIdx) return;
-        const updated = [...userBlocks];
-        const [removed] = updated.splice(fromIdx, 1);
-        updated.splice(toIdx, 0, removed);
-        setUserBlocks(updated);
-    };
+    // DRAG & DROP handlers (оставь как есть...)
 
     // ===== handleSubmit: Показывает модалку с результатом SQL после submit, не обновляет страницу =====
     const handleSubmit = async (e) => {
-        e?.preventDefault(); // Prevent form submission from refreshing the page
+        e?.preventDefault();
         let userSql = "";
         if (currentTask.taskInteractionType === "DRAG_AND_DROP") {
             userSql = userBlocks.join(" ").replace(/\s+/g, " ").trim();
@@ -141,18 +115,13 @@ export default function Task() {
             }).unwrap();
 
             setSubmissionStatus(response.correct ? "correct" : "incorrect");
-
-            // Показываем модалку с результатом, включая userSql
             setResultModal({
                 open: true,
                 correct: response.correct,
                 userResult: response.userResult || null,
                 userSql: userSql,
             });
-
-            console.log("handleSubmit response:", response);
         } catch (error) {
-            console.error("handleSubmit error:", error);
             setSubmissionStatus("error");
             setResultModal({
                 open: true,
@@ -165,34 +134,27 @@ export default function Task() {
 
     // ===== Закрыть модалку, обработать переход и завершение =====
     const handleResultOk = async () => {
-        console.log("handleResultOk called", { correct: resultModal.correct, difficulty, topicName });
-
-        // Close the modal first
         setResultModal((prev) => ({ ...prev, open: false }));
 
         if (resultModal.correct) {
             if (!difficulty || !topicName) {
-                console.error("Invalid difficulty or topicName", { difficulty, topicName });
                 toast.error(t("invalidUrl") || "Invalid URL parameters");
                 return;
             }
             try {
                 setIsCompleted(true);
+                // <--- вот здесь после успешного решения
                 await Promise.all([
-                    refetchMe(),
+                    refetchMe(),           // user моментально обновится!
                     refetch(),
                     dispatch(initializeAuth()),
                     refetchTasksList()
                 ]);
                 const targetUrl = `/level/${difficulty}/topic/${encodeURIComponent(topicName)}`;
-                console.log("Navigating to:", targetUrl);
                 navigate(targetUrl);
             } catch (error) {
-                console.error("Error in handleResultOk:", error);
                 toast.error(t("navigationError") || "Failed to navigate to task list");
             }
-        } else {
-            console.log("Not navigating: result is not correct");
         }
     };
 

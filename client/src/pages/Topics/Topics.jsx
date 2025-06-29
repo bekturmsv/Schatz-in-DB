@@ -22,21 +22,13 @@ export default function Topic() {
 
     const { data: finalTestData = [], isLoading: isFinalTestLoading } = useGetFinalTestByDifficultyQuery(level, { skip: !level });
 
-    // Ключи для LS
     const detectiveGreetingKey = `detective_shown_${difficulty}`;
     const detectiveCongratsKey = `detective_congrats_shown_${difficulty}`;
 
-    // Показываем Greeting только если:
-    // - Его не было в LS
-    // - И не пришёл showCongrats из location.state
     const [showDetectiveGreeting, setShowDetectiveGreeting] = useState(() => {
-        // НЕ показывать greeting если пришли с финального теста!
         return !localStorage.getItem(detectiveGreetingKey) && !(location.state && location.state.showCongrats);
     });
 
-    // Congrats показываем только если:
-    // - Его нет в LS и
-    // - Нам явно передали showCongrats (чтобы не вываливался просто так)
     const [showDetectiveCongrats, setShowDetectiveCongrats] = useState(() => {
         return !!(location.state && location.state.showCongrats);
     });
@@ -49,10 +41,9 @@ export default function Topic() {
         }
     }, [showDetectiveGreeting, detectiveGreetingKey]);
 
-    // Очищаем showCongrats из location.state, чтобы не висело навсегда
     useEffect(() => {
         if (location.state && location.state.showCongrats) {
-            window.history.replaceState({}, document.title); // чистим state без перезагрузки
+            window.history.replaceState({}, document.title);
         }
     }, [location.state]);
 
@@ -61,12 +52,15 @@ export default function Topic() {
         return null;
     }
 
-    // Handler на закрытие Congrats: отправляет на /levels
     const handleCongratsClose = () => {
         setShowDetectiveCongrats(false);
-        // Обновление LS — финальный поздравление было показано
         localStorage.setItem(detectiveCongratsKey, "true");
-        navigate("/play"); // Переход на уровни
+        navigate("/play");
+    };
+
+    // Кнопка "назад" ведёт всегда к выбору уровня
+    const handleBack = () => {
+        navigate("/play");
     };
 
     return (
@@ -84,24 +78,46 @@ export default function Topic() {
                 isEnd={true}
             />
 
-            {/* ... остальной твой код без изменений ... */}
-            {/* Все что ниже не трогаем! */}
-
-            <motion.h1
-                initial={{ opacity: 0, y: -24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10"
-                style={{
-                    color: "var(--color-primary)",
-                    textShadow: "0 2px 16px rgba(0,0,0,0.07)",
-                }}
-            >
-                {t("selectTopic")}{" "}
-                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
-                    ({t(`${difficulty.toLowerCase()}Level`)})
-                </span>
-            </motion.h1>
+            {/* Кнопка назад и заголовок на одной линии */}
+            <div className="w-full flex flex-col items-center md:items-start max-w-5xl px-3 md:px-8">
+                <div className="flex items-center gap-3 mt-10 mb-2">
+                    <button
+                        onClick={handleBack}
+                        className={`
+                            flex items-center gap-2 px-5 py-2 rounded-full
+                            bg-[var(--color-card-bg)] shadow-lg border border-[var(--color-secondary)]
+                            text-[var(--color-primary)] font-bold text-lg custom-font
+                            transition hover:bg-[var(--color-card-bg-alt)] hover:shadow-xl focus:outline-none
+                            active:scale-95
+                        `}
+                        style={{
+                            minWidth: 110,
+                            boxShadow: "0 2px 12px 0 rgba(34,197,94,0.08)"
+                        }}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span className="tracking-tight">{t("back")}</span>
+                    </button>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="text-3xl md:text-5xl font-extrabold custom-font uppercase tracking-wide drop-shadow z-10"
+                        style={{
+                            color: "var(--color-primary)",
+                            textShadow: "0 2px 16px rgba(0,0,0,0.07)",
+                            marginBottom: 0
+                        }}
+                    >
+                        {t("selectTopic")}{" "}
+                        <span className="text-xl md:text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                            ({t(`${difficulty.toLowerCase()}Level`)})
+                        </span>
+                    </motion.h1>
+                </div>
+            </div>
 
             <AnimatePresence>
                 {isLoading && (
@@ -134,7 +150,6 @@ export default function Topic() {
                 )}
             </AnimatePresence>
 
-            {/* Обычные топики */}
             {!isLoading && !isError && topics.length > 0 && (
                 <motion.ul
                     initial="hidden"
@@ -206,7 +221,6 @@ export default function Topic() {
                 </motion.ul>
             )}
 
-            {/* Кнопка финального теста, если бек вернул finalTestData */}
             {!isLoading && !isError && Array.isArray(finalTestData) && finalTestData.length > 0 && (
                 <div className="w-full flex flex-col items-center mt-8 z-10">
                     <button

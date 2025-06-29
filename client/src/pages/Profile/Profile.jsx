@@ -1,4 +1,3 @@
-// src/pages/Profile/Profile.jsx
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +29,7 @@ export default function Profile() {
 
   // API
   const { data: allThemes = [], refetch: refetchThemes } = useGetThemesQuery();
-  const [purchaseTheme, { isLoading: isPurchasing }] = usePurchaseThemeMutation();
+  const [purchaseTheme, { isLoading: isPurchasing, error: purchaseError }] = usePurchaseThemeMutation();
   const [setThemeApi, { isLoading: isSettingTheme }] = useSetThemeMutation();
   const [editOpen, setEditOpen] = useState(false);
 
@@ -42,13 +41,20 @@ export default function Profile() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Меняй тему сразу
+  // Update theme immediately
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", currentTheme);
       localStorage.setItem("theme", currentTheme);
     }
   }, [currentTheme]);
+
+  useEffect(() => {
+    if (purchaseError) {
+      console.error("Purchase error details:", purchaseError);
+      toast.error(t("purchaseFailed") + `: ${purchaseError?.data?.message || "Неизвестная ошибка"}`);
+    }
+  }, [purchaseError, t]);
 
   if (!isAuthenticated || !user) return null;
 
@@ -80,11 +86,16 @@ export default function Profile() {
       return;
     }
     try {
-      await purchaseTheme({ name: theme.name }).unwrap();
-      await refetchMe();
-      toast.success(t("themePurchased", { theme: theme.name }));
-    } catch {
-      toast.error(t("purchaseFailed"));
+      const result = await purchaseTheme({ name: theme.name }).unwrap();
+      if (result.user) {
+        dispatch(setUser(result.user));
+        toast.success(t("themePurchased", { theme: theme.name }));
+      } else {
+        toast.success(t("themePurchased", { theme: theme.name })); // Успешно, но без обновления пользователя
+        refetchMe(); // Принудительно обновляем данные пользователя
+      }
+    } catch (error) {
+      toast.error(t("purchaseFailed") + `: ${error?.data?.message || "Неизвестная ошибка"}`);
     }
   };
 
@@ -141,7 +152,7 @@ export default function Profile() {
             {t("myAccount")}
           </motion.h1>
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Левая колонка */}
+            {/* Left column */}
             <motion.div
                 variants={fadeUp}
                 custom={1}
@@ -199,13 +210,13 @@ export default function Profile() {
               </Button>
             </motion.div>
 
-            {/* Правая колонка */}
+            {/* Right column */}
             <motion.div
                 variants={fadeUp}
                 custom={2}
                 className="md:w-2/3 flex flex-col gap-8"
             >
-              {/* Очки */}
+              {/* Points */}
               <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -229,7 +240,7 @@ export default function Profile() {
               </span>
               </motion.div>
 
-              {/* Прогресс */}
+              {/* Progress */}
               <motion.div
                   variants={fadeUp}
                   custom={3}
@@ -273,7 +284,7 @@ export default function Profile() {
                 <div className="w-full bg-[var(--color-card-bg, #ececec)] rounded-full h-4 mt-[-16px] z-0"></div>
               </motion.div>
 
-              {/* Блок последних решённых задач */}
+              {/* Last completed tasks block */}
               <motion.div variants={fadeUp} custom={5} className="mb-4">
                 <h3
                     className="text-xl font-bold custom-font mb-4"
@@ -311,7 +322,7 @@ export default function Profile() {
                 )}
               </motion.div>
 
-              {/* Темы/стили */}
+              {/* Themes/styles */}
               <h3
                   className="text-xl font-bold mb-2 mt-3 custom-font"
                   style={{ color: "var(--color-primary)" }}
@@ -349,7 +360,7 @@ export default function Profile() {
                           scale: 1.07,
                           boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)",
                         }}
-                        className={`relative h-24 custom-card flex items-center justify-center shadow-lg transition-all`}
+                        className="relative h-24 custom-card flex items-center justify-center shadow-lg transition-all"
                         style={{
                           background: purchasedThemeNames.includes(theme.name)
                               ? "var(--color-card-bg)"

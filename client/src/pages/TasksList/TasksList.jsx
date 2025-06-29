@@ -37,22 +37,53 @@ export default function TasksList() {
         }),
     };
 
+    // Кнопка назад ведёт к списку тем по уровню (level)
+    const handleBack = () => {
+        navigate(`/level/${level}`);
+    };
+
     return (
         <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
-            <motion.h1
-                initial={{ opacity: 0, y: -22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10 text-center"
-                style={{
-                    color: "var(--color-primary)",
-                }}
-            >
-                {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
-                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
-                    ({t(`${difficulty.toLowerCase()}Level`)})
-                </span>
-            </motion.h1>
+
+            {/* Красивая кнопка назад и заголовок рядом */}
+            <div className="w-full flex flex-col items-center md:items-start max-w-5xl px-3 md:px-8">
+                <div className="flex items-center gap-3 mt-10 mb-2">
+                    <button
+                        onClick={handleBack}
+                        className={`
+                            flex items-center gap-2 px-5 py-2 rounded-full
+                            bg-[var(--color-card-bg)] shadow-lg border border-[var(--color-secondary)]
+                            text-[var(--color-primary)] font-bold text-lg custom-font
+                            transition hover:bg-[var(--color-card-bg-alt)] hover:shadow-xl focus:outline-none
+                            active:scale-95
+                        `}
+                        style={{
+                            minWidth: 110,
+                            boxShadow: "0 2px 12px 0 rgba(34,197,94,0.08)"
+                        }}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span className="tracking-tight">{t("back")}</span>
+                    </button>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="text-3xl md:text-5xl font-extrabold custom-font uppercase tracking-wide drop-shadow z-10 text-center"
+                        style={{
+                            color: "var(--color-primary)",
+                            marginBottom: 0
+                        }}
+                    >
+                        {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
+                        <span className="text-xl md:text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                            ({t(`${difficulty.toLowerCase()}Level`)})
+                        </span>
+                    </motion.h1>
+                </div>
+            </div>
 
             <AnimatePresence>
                 {isLoading && (
@@ -123,7 +154,7 @@ export default function TasksList() {
                                 className={`
                                     cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg
                                     ${task.solved ? "bg-green-50 dark:bg-green-900/20 pointer-events-none opacity-60" : ""}
-                                    `}
+                                `}
                                 style={{
                                     background: "var(--color-card-bg, #f8fafc)",
                                     borderColor: "var(--color-primary)",
@@ -147,21 +178,21 @@ export default function TasksList() {
                                 >
                                     {task.aufgabe?.split('\n')[0] || t("task")}
                                     <span className="ml-2 flex items-center">
-                                    {task.solved && (
-                                        <motion.span
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.08 }}
-                                            className="text-2xl"
-                                            title={t("taskCompleted")}
-                                        >
-                                            <svg className="inline w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                                                <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
-                                            </svg>
-                                        </motion.span>
-                                    )}
-                                  </span>
+                                        {task.solved && (
+                                            <motion.span
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: 0.08 }}
+                                                className="text-2xl"
+                                                title={t("taskCompleted")}
+                                            >
+                                                <svg className="inline w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                                    <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
+                                                </svg>
+                                            </motion.span>
+                                        )}
+                                    </span>
                                 </h2>
                                 <div
                                     className="text-base custom-body line-clamp-3"

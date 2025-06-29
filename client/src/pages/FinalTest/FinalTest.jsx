@@ -9,6 +9,9 @@ import {
     useValidateFinalTestMutation
 } from "../../features/task/taskApi";
 
+// Импортируй хук для получения и обновления профиля!
+import { useGetMeQuery } from "@/features/auth/authApi";
+
 export default function FinalTest() {
     const { difficulty } = useParams();
     const { t } = useTranslation();
@@ -20,6 +23,10 @@ export default function FinalTest() {
         isLoading,
         isError,
     } = useGetFinalTestByDifficultyQuery(difficulty?.toUpperCase());
+
+    // --- Вот здесь!
+    // Инициализируем хук для рефетча профиля пользователя
+    const { refetch: refetchProfile } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
     const [current, setCurrent] = useState(0);
     const [userAnswers, setUserAnswers] = useState([]);
@@ -92,7 +99,6 @@ export default function FinalTest() {
         setChecking(false);
     };
 
-    // Завершить тест (исправлено здесь)
     const handleFinish = async () => {
         setTestFinished(true);
         try {
@@ -101,10 +107,12 @@ export default function FinalTest() {
                 spentTimeInSeconds: timer,
             }).unwrap();
 
-            console.log("Difficulty ",difficulty?.toUpperCase());
+            // Вот здесь точно дожидаемся новых данных!
+            const { data } = await refetchProfile();
+            console.log("User после теста:", data);
+
             toast.success(t("testCompleted"));
             setTimeout(() => {
-                // Важно: редиректим на топики с передачей showCongrats!
                 navigate(`/level/${difficulty}`, {
                     state: { showCongrats: true }
                 });
