@@ -118,14 +118,12 @@ public class ThemeController {
 
         dto.setProgress(progressDto);
 
-        // Достаем все решенные код-ы задач пользователя
         Set<String> solvedCodes = userSolutionRepository
                 .findByUserId(user.getId())
                 .stream()
                 .map(UserSolution::getTaskCode)
                 .collect(Collectors.toSet());
 
-        // теперь последние три решённых задачи:
         List<UserSolution> lastThree = userSolutionRepository
                 .findTop3ByUserIdAndCorrectTrueOrderBySubmittedAtDesc(user.getId());
 
@@ -134,7 +132,6 @@ public class ThemeController {
             Task task = taskRepository.findByTaskCode(code)
                     .orElseThrow(() -> new EntityNotFoundException("Task not found: " + code));
 
-            // Берём все REGULAR задачи той же темы и уровня
             List<Task> themeTasks = taskRepository
                     .findBySchwierigkeitsgradAndTaskTypeAndKategorie(
                             task.getSchwierigkeitsgrad(),
@@ -142,7 +139,6 @@ public class ThemeController {
                             task.getKategorie()
                     );
 
-            // Считаем, сколько из них решено этим пользователем
             long solvedCount = userSolutionRepository
                     .countByUserIdAndCorrectTrueAndTaskCodeIn(
                             user.getId(),
