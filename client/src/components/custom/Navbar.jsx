@@ -144,6 +144,16 @@ export default function Navbar() {
                         >
                           {t('leaderboard')}
                         </button>
+
+                        {user?.role === "ADMIN" && (
+                            <button
+                                onClick={() => { navigate('/admin'); setIsOpen(false); }}
+                                className="cursor-pointer font-bold py-2 md:py-0 text-lg bg-[var(--color-secondary)] text-white rounded-xl ml-2 px-4 hover:bg-[var(--color-primary)] transition"
+                                style={{ color: "var(--color-bg)" }}
+                            >
+                              {t("management")}
+                            </button>
+                        )}
                         {user ? (
                             <span className="flex items-center gap-2 text-black py-2 md:py-0">
                       <Link

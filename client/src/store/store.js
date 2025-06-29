@@ -8,6 +8,7 @@ import {themeApi} from "@/features/theme/themeApi.js";
 import {ratingApi} from "@/features/rating/ratingApi.js";
 import {materialApi} from "@/features/material/materialApi.js";
 import {profileApi} from "@/features/profile/profileApi.js";
+import {adminApi} from "@/features/admin/adminApi.js";
 
 export const store = configureStore({
   reducer: {
@@ -20,9 +21,10 @@ export const store = configureStore({
     [ratingApi.reducerPath]: ratingApi.reducer,
     [materialApi.reducerPath]: materialApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(authApi.middleware, taskApi.middleware, themeApi.middleware, ratingApi.middleware, materialApi.middleware, profileApi.middleware),
+      getDefaultMiddleware().concat(authApi.middleware, taskApi.middleware, themeApi.middleware, ratingApi.middleware, materialApi.middleware, profileApi.middleware, adminApi.middleware),
 });
 
 window.store = store;

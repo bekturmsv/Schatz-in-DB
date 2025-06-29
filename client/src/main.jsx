@@ -23,6 +23,7 @@ import TasksList from "@/pages/TasksList/TasksList.jsx";
 import RatingPage from "@/pages/Rating/RatingPage.jsx";
 import MaterialsListPage from "@/pages/MaterialList/MaterialListPage.jsx";
 import MaterialDetailPage from "@/pages/MaterialDetail/MaterialDetailPage.jsx";
+import AdminDashboard from "@/pages/Admin/AdminDashboard.jsx";
 
 const router = createBrowserRouter([
   {
@@ -117,6 +118,14 @@ const router = createBrowserRouter([
             <ProtectedRoute>
               <MaterialDetailPage />
             </ProtectedRoute>
+        )
+      },
+      {
+        path: "/admin",
+        element: (
+            <RequireAdmin>
+              <AdminDashboard/>
+            </RequireAdmin>
         )
       }
 
