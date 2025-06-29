@@ -7,4 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class GroupJoinResponse {
     private String groupName;
+    private Object user;
 }
