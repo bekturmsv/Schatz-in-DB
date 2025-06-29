@@ -186,5 +186,8 @@
   "markdownHint": "Unterstützt Markdown: Links, Codeblöcke, YouTube. Für Code dreifache Backticks verwenden, YouTube-URL für Video einfügen.",
   "studyMaterials": "Lernmaterialien",
   "noMaterialsFound": "Keine Materialien gefunden.",
-  "tiptapHint": "Tipp: Du kannst Codeblöcke (```), Links und sogar YouTube-Videos einfügen!"
+  "tiptapHint": "Tipp: Du kannst Codeblöcke (```), Links und sogar YouTube-Videos einfügen!",
+  "deleteMaterial": "Löschen",
+  "confirmDeleteMaterial": "Möchtest du dieses Material wirklich löschen?"
+
 }
