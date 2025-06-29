@@ -2,9 +2,10 @@ import { useGetMaterialsQuery } from "../../features/material/materialApi";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
+import { getPlainText } from "@/lib/stripText.js";
 
 export default function MaterialsListPage() {
-    const { t } = useTranslation();
+    const { t } = useTranslation("materials"); // Указываем namespace
     const navigate = useNavigate();
 
     const { data = [], isLoading, isError } = useGetMaterialsQuery();
@@ -20,7 +21,7 @@ export default function MaterialsListPage() {
                     color: "var(--color-primary)",
                 }}
             >
-                Study Materials
+                {t("studyMaterials")}
             </motion.h1>
             <AnimatePresence>
                 {isLoading && (
@@ -34,7 +35,7 @@ export default function MaterialsListPage() {
                             border: "1px solid var(--color-primary)",
                         }}
                     >
-                        Loading materials...
+                        {t("loadingMaterials")}
                     </motion.p>
                 )}
                 {isError && (
@@ -48,7 +49,7 @@ export default function MaterialsListPage() {
                             border: "1px solid #f87171",
                         }}
                     >
-                        Error loading materials.
+                        {t("errorLoadingMaterials")}
                     </motion.p>
                 )}
             </AnimatePresence>
@@ -62,7 +63,7 @@ export default function MaterialsListPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.06, duration: 0.35 }}
                                 whileHover={{ scale: 1.03, boxShadow: "0 8px 32px 0 rgba(34,197,94,0.11)" }}
-                                className="cursor-pointer rounded-2xl border shadow-lg transition-all p-6 flex flex-col bg-[var(--color-card-bg)]"
+                                className="cursor-pointer rounded-2xl border shadow-lg transition-all p-6 flex flex-col bg-[var(--card-bg)]"
                                 style={{
                                     borderColor: "var(--color-primary)",
                                     color: "var(--color-primary)",
@@ -82,19 +83,19 @@ export default function MaterialsListPage() {
                                     {mat.title}
                                 </h2>
                                 <div className="flex-1 text-base text-[var(--color-secondary)] opacity-90 mb-2">
-                                    {mat.description?.slice(0, 120) || "No description."}
-                                    {mat.description && mat.description.length > 120 && "..."}
+                                    {getPlainText(mat.description).slice(0, 120) || t("noDescription")}
+                                    {mat.description && getPlainText(mat.description).length > 120 && "..."}
                                 </div>
                                 <div className="mt-3">
-                  <span className="inline-block text-sm rounded px-3 py-1 font-mono bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-200">
-                    SQL Category: {mat.sqlKategorie}
-                  </span>
+                                    <span className="inline-block text-sm rounded px-3 py-1 font-mono bg-gray-100 dark:bg-gray-800/60 text-gray-700 dark:text-gray-200">
+                                        {t("sqlCategory")}: {mat.sqlKategorie}
+                                    </span>
                                 </div>
                             </motion.div>
                         ))
                     ) : (
                         <div className="text-center opacity-70 py-12 font-mono text-base col-span-2">
-                            No materials found.
+                            {t("noMaterialsFound")}
                         </div>
                     )}
                 </div>

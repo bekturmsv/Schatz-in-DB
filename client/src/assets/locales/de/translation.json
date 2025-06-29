@@ -183,5 +183,8 @@
   "noDescription": "Keine Beschreibung.",
   "teacherId": "Lehrer-ID",
   "backToMaterials": "Zurück zu Materialien",
-  "markdownHint": "Unterstützt Markdown: Links, Codeblöcke, YouTube. Für Code dreifache Backticks verwenden, YouTube-URL für Video einfügen."
+  "markdownHint": "Unterstützt Markdown: Links, Codeblöcke, YouTube. Für Code dreifache Backticks verwenden, YouTube-URL für Video einfügen.",
+  "studyMaterials": "Lernmaterialien",
+  "noMaterialsFound": "Keine Materialien gefunden.",
+  "tiptapHint": "Tipp: Du kannst Codeblöcke (```), Links und sogar YouTube-Videos einfügen!"
 }

@@ -192,5 +192,8 @@
   "noDescription": "No description.",
   "teacherId": "Teacher ID",
   "backToMaterials": "Back to materials",
-  "markdownHint": "Supports Markdown: links, code blocks, YouTube. Use triple backticks for code, paste YouTube URL for video."
+  "markdownHint": "Supports Markdown: links, code blocks, YouTube. Use triple backticks for code, paste YouTube URL for video.",
+  "studyMaterials": "Study Materials",
+  "noMaterialsFound": "No materials found.",
+  "tiptapHint": "Tip: You can insert code blocks (```), links, and even YouTube videos!"
 }

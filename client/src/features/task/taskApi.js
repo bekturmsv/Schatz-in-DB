@@ -67,10 +67,10 @@ export const taskApi = createApi({
             }),
         }),
         validateFinalTest: builder.mutation({
-            query: ({ schwierigkeitsgrad, spentTimeInSeconds }) => ({
+            query: ({ schwierigkeit, spentTimeInSeconds }) => ({
                 url: "/api/sql/test/validate",
                 method: "POST",
-                body: { schwierigkeitsgrad, spentTimeInSeconds },
+                body: { schwierigkeit, spentTimeInSeconds },
             }),
         }),
     }),
