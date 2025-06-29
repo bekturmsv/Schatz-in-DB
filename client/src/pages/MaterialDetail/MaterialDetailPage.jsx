@@ -2,10 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetMaterialByIdQuery } from "../../features/material/materialApi";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; // Можно любой стиль
+import { renderMaterial } from "@/lib/renderMaterial.jsx";
 
 export default function MaterialDetailPage() {
     const { t } = useTranslation();
@@ -21,7 +18,7 @@ export default function MaterialDetailPage() {
                 className="self-start mb-6 text-base text-blue-600 dark:text-blue-400 underline px-2"
                 whileHover={{ x: -5, scale: 1.04 }}
             >
-                ← Back to materials
+                ← {t("backToMaterials") || "Back to materials"}
             </motion.button>
             <AnimatePresence>
                 {isLoading && (
@@ -35,7 +32,7 @@ export default function MaterialDetailPage() {
                             border: "1px solid var(--color-primary)",
                         }}
                     >
-                        Loading...
+                        {t("loadingMaterial") || "Loading..."}
                     </motion.p>
                 )}
                 {isError && (
@@ -49,7 +46,7 @@ export default function MaterialDetailPage() {
                             border: "1px solid #f87171",
                         }}
                     >
-                        Error loading material.
+                        {t("errorLoadingMaterial") || "Error loading material."}
                     </motion.p>
                 )}
             </AnimatePresence>
@@ -83,45 +80,10 @@ export default function MaterialDetailPage() {
                             Teacher ID: {data.teacher}
                         </span>
                     </div>
-                    <div className="prose prose-base max-w-none text-[var(--color-secondary)] opacity-95 dark:prose-invert custom-body"
-                         style={{ wordBreak: "break-word" }}
-                    >
-                        {data.description ? (
-                            <ReactMarkdown
-                                children={data.description}
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                    code({node, inline, className, children, ...props}) {
-                                        const match = /language-(\w+)/.exec(className || "");
-                                        return !inline && match ? (
-                                            <SyntaxHighlighter
-                                                style={vscDarkPlus}
-                                                language={match[1]}
-                                                PreTag="div"
-                                                customStyle={{
-                                                    borderRadius: "0.7em",
-                                                    fontSize: "1em",
-                                                    margin: "1.2em 0",
-                                                }}
-                                                {...props}
-                                            >
-                                                {String(children).replace(/\n$/, "")}
-                                            </SyntaxHighlighter>
-                                        ) : (
-                                            <code
-                                                className="bg-gray-200 dark:bg-gray-800 rounded px-1 py-0.5 font-mono text-[0.97em]"
-                                                {...props}
-                                            >
-                                                {children}
-                                            </code>
-                                        );
-                                    }
-                                }}
-                            />
-                        ) : (
-                            "No description."
-                        )}
-                    </div>
+                    {data.description
+                        ? renderMaterial(data.description, t)
+                        : <div>{t("noDescription") || "No description."}</div>
+                    }
                 </motion.div>
             )}
         </div>

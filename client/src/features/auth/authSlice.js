@@ -1,3 +1,4 @@
+// src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi } from "./authApi";
 import { taskApi } from "@/features/task/taskApi.js";
@@ -5,24 +6,23 @@ import { materialApi } from "@/features/material/materialApi.js";
 import { themeApi } from "@/features/theme/themeApi.js";
 import { ratingApi } from "@/features/rating/ratingApi.js";
 
-// Глубокий merge (поверхностно рекурсивный для простых случаев)
+// Поверхностно-рекурсивный deep merge
 function deepMerge(oldObj, newObj) {
   if (!oldObj) return newObj;
   if (typeof oldObj !== "object" || typeof newObj !== "object") return newObj;
-
   const merged = { ...oldObj };
   for (const key in newObj) {
     if (
-        Object.prototype.hasOwnProperty.call(newObj, key)
-        && newObj[key] !== undefined
+        Object.prototype.hasOwnProperty.call(newObj, key) &&
+        newObj[key] !== undefined
     ) {
       if (
-          typeof newObj[key] === "object"
-          && newObj[key] !== null
-          && !Array.isArray(newObj[key])
-          && typeof oldObj[key] === "object"
-          && oldObj[key] !== null
-          && !Array.isArray(oldObj[key])
+          typeof newObj[key] === "object" &&
+          newObj[key] !== null &&
+          !Array.isArray(newObj[key]) &&
+          typeof oldObj[key] === "object" &&
+          oldObj[key] !== null &&
+          !Array.isArray(oldObj[key])
       ) {
         merged[key] = deepMerge(oldObj[key], newObj[key]);
       } else {
@@ -31,6 +31,18 @@ function deepMerge(oldObj, newObj) {
     }
   }
   return merged;
+}
+
+// Нормализатор юзера (добавь нужные поля по аналогии)
+function normalizeUser(user) {
+  return {
+    ...user,
+    firstName: user.firstName || user.firstname || "",
+    lastName: user.lastName || user.lastname || "",
+    matriculationNumber: user.matriculationNumber || user.matriculation_number || "",
+    specialistGroup: user.specialistGroup || user.specialist_group || "",
+    // Добавь другие поля, если надо
+  };
 }
 
 const initialState = {
@@ -67,17 +79,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      // Глубокий merge старого user и новых данных
       if (action.payload === null) {
         state.user = null;
         state.isAuthenticated = false;
         state.role = "player";
       } else if (state.user) {
-        state.user = deepMerge(state.user, action.payload);
+        const merged = deepMerge(state.user, action.payload);
+        state.user = normalizeUser(merged);
         state.isAuthenticated = true;
         state.role = state.user?.role || "player";
       } else {
-        state.user = action.payload;
+        state.user = normalizeUser(action.payload);
         state.isAuthenticated = !!action.payload;
         state.role = action.payload?.role || "player";
       }
@@ -106,7 +118,7 @@ const authSlice = createSlice({
           state.status = "succeeded";
           state.isAuthLoading = false;
           if (action.payload) {
-            state.user = action.payload;
+            state.user = normalizeUser(action.payload);
             state.isAuthenticated = true;
             state.role = action.payload.role || "player";
           } else {
@@ -126,8 +138,6 @@ export const { setUser, setToken, logout } = authSlice.actions;
 export const logoutUser = () => async (dispatch) => {
   dispatch(logout());
   dispatch({ type: "theme/setTheme", payload: "default" });
-
-  // СБРАСЫВАЕМ ВСЕ КЭШИ RTK QUERY
   dispatch(authApi.util.resetApiState());
   dispatch(taskApi.util.resetApiState());
   dispatch(themeApi.util.resetApiState());

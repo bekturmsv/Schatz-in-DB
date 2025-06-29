@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useUpdatePlayerMutation } from "@/features/profile/profileApi";
 import { toast } from "sonner";
-import {useGetMeQuery} from "@/features/auth/authApi.js";
+import { useGetMeQuery } from "@/features/auth/authApi.js";
 
 export default function ProfileEditModal({ user, open, onClose }) {
     const { t } = useTranslation();
@@ -22,9 +22,9 @@ export default function ProfileEditModal({ user, open, onClose }) {
     useEffect(() => {
         if (user && open) {
             setForm({
-                firstName: user.firstname || "",
-                lastName: user.lastname || "",
-                username: user.nickname || user.username || "",
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                username: user.username || user.nickname || "",
                 email: user.email || "",
             });
         }
@@ -40,7 +40,7 @@ export default function ProfileEditModal({ user, open, onClose }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.firstName || !form.lastName || !form.username || !form.email) {
-            toast.error(t("allFieldsRequired") || "Все поля обязательны");
+            toast.error(t("allFieldsRequired"));
             return;
         }
         try {
@@ -54,11 +54,11 @@ export default function ProfileEditModal({ user, open, onClose }) {
                 },
             }).unwrap();
             await refetchMe();
-            toast.success(t("profileUpdated") || "Профиль обновлён");
+            toast.success(t("profileUpdated") );
             onClose();
         } catch (err) {
             toast.error(
-                t("updateFailed") || "Не удалось обновить профиль. Попробуй ещё раз!"
+                t("updateFailed")
             );
         }
     };
@@ -97,7 +97,7 @@ export default function ProfileEditModal({ user, open, onClose }) {
                             className="custom-title mb-5 text-center"
                             style={{ fontSize: "2rem" }}
                         >
-                            {t("editProfile") || "Редактировать профиль"}
+                            {t("editProfile") }
                         </h2>
                         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                             <div>
@@ -163,8 +163,8 @@ export default function ProfileEditModal({ user, open, onClose }) {
                                 disabled={isLoading}
                             >
                                 {isLoading
-                                    ? t("saving") || "Сохраняю..."
-                                    : t("saveChanges") || "Сохранить"}
+                                    ? t("saving")
+                                    : t("saveChanges") }
                             </Button>
                         </form>
                     </motion.div>
