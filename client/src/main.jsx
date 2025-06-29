@@ -24,6 +24,8 @@ import RatingPage from "@/pages/Rating/RatingPage.jsx";
 import MaterialsListPage from "@/pages/MaterialList/MaterialListPage.jsx";
 import MaterialDetailPage from "@/pages/MaterialDetail/MaterialDetailPage.jsx";
 import AdminDashboard from "@/pages/Admin/AdminDashboard.jsx";
+import RequireTeacher from "@/hoc/RequireTeacher.jsx";
+import TeacherDashboard from "@/pages/Teacher/TeacherDashboard.jsx";
 
 const router = createBrowserRouter([
   {
@@ -126,6 +128,14 @@ const router = createBrowserRouter([
             <RequireAdmin>
               <AdminDashboard/>
             </RequireAdmin>
+        )
+      },
+      {
+        path: "/teacher",
+        element: (
+            <RequireTeacher>
+              <TeacherDashboard />
+            </RequireTeacher>
         )
       }
 

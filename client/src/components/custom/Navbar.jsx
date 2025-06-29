@@ -145,9 +145,9 @@ export default function Navbar() {
                           {t('leaderboard')}
                         </button>
 
-                        {user?.role === "ADMIN" && (
+                        {user?.role === "ADMIN" || user?.role === "TEACHER" && (
                             <button
-                                onClick={() => { navigate('/admin'); setIsOpen(false); }}
+                                onClick={() => { navigate(user?.role === "ADMIN" ? "/admin" : "/teacher"); setIsOpen(false); }}
                                 className="cursor-pointer font-bold py-2 md:py-0 text-lg bg-[var(--color-secondary)] text-white rounded-xl ml-2 px-4 hover:bg-[var(--color-primary)] transition"
                                 style={{ color: "var(--color-bg)" }}
                             >
