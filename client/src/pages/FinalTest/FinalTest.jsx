@@ -92,7 +92,7 @@ export default function FinalTest() {
         setChecking(false);
     };
 
-    // Завершить тест
+    // Завершить тест (исправлено здесь)
     const handleFinish = async () => {
         setTestFinished(true);
         try {
@@ -100,6 +100,8 @@ export default function FinalTest() {
                 schwierigkeit: difficulty?.toUpperCase(),
                 spentTimeInSeconds: timer,
             }).unwrap();
+
+            console.log("Difficulty ",difficulty?.toUpperCase());
             toast.success(t("testCompleted"));
             setTimeout(() => {
                 // Важно: редиректим на топики с передачей showCongrats!
