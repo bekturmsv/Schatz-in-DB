@@ -38,7 +38,6 @@ public class GroupController {
         this.playerRepository = playerRepository;
     }
 
-    @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/createGroup")
     public ResponseEntity<Group> createGroup(
             @RequestBody CreateGroupRequest request,
@@ -50,7 +49,6 @@ public class GroupController {
         return ResponseEntity.created(uri).body(group);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getAll")
     public Iterable<Group> getAllGroups() {
         return groupRepository.findAll()
@@ -72,7 +70,6 @@ public class GroupController {
         ));
     }
 
-    @PreAuthorize("hasRole('PLAYER')")
     @PostMapping("/joinGroup")
     public ResponseEntity<?> joinGroup(@RequestBody JoinGroupRequest request, Authentication authentication) {
         String code = request.getGroupCode();
@@ -110,8 +107,7 @@ public class GroupController {
         return ResponseEntity.ok("Student quit group");
     }
 
-    @PutMapping("/group")
-    @PreAuthorize("hasRole('PLAYER')")
+    @PutMapping("/changeGroup")
     public ResponseEntity<String> changeGroup(@RequestBody ChangeGroupRequest request, Authentication authentication) {
         Player player = (Player) userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
