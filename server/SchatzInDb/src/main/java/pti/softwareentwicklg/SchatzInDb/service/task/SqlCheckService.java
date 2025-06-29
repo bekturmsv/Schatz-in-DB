@@ -144,7 +144,9 @@ public class SqlCheckService {
 
             saveTestResult(request, isCorrect);
 
-            return new SqlCheckResponse(isCorrect, null);
+            UserLoginDto dto = buildUserLoginDto(user);
+
+            return new SqlCheckResponse(isCorrect, null, null, dto);
 
         } catch (Exception e) {
             return new SqlCheckResponse(false, e.getMessage());
