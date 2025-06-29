@@ -162,6 +162,7 @@ public class AuthController {
         ProgressDto progressDto = new ProgressDto();
         progressDto.setTotalTasks(totalTasks);
         progressDto.setTasksSolved(completed);
+        dto.setGroup(player.getGroupId());
 
         dto.setProgress(progressDto);
 

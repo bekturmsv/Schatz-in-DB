@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pti.softwareentwicklg.SchatzInDb.model.enums.Roles;
 import pti.softwareentwicklg.SchatzInDb.model.enums.SpecialistGroup;
+import pti.softwareentwicklg.SchatzInDb.model.user.Group;
 import pti.softwareentwicklg.SchatzInDb.model.user.Theme;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class UserLoginDto {
     private SpecialistGroup specialistGroup;
     private Roles roles;
     private Long points;
+    private Group group;
     private Set<Theme> purchasedThemes;
     private String currentTheme;
     private ProgressDto progress;

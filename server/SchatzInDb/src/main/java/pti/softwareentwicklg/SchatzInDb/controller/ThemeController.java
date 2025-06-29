@@ -18,7 +18,6 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @PreAuthorize("hasRole('PLAYER')")
     @PostMapping("/purchase")
     public ResponseEntity<?> buyTheme(@RequestParam String name, Authentication auth) {
         try {
@@ -29,7 +28,6 @@ public class ThemeController {
         }
     }
 
-    @PreAuthorize("hasRole('PLAYER')")
     @PostMapping("/setTheme")
     public ResponseEntity<?> setTheme(@RequestParam String name, Authentication auth) {
         try {

@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/groups/joinGroup").hasAnyRole("PLAYER")
                         .requestMatchers("/api/groups/changeGroup").hasAnyRole("PLAYER")
                         .requestMatchers("/api/groups/**").hasAnyRole("TEACHER","ADMIN")
+                        .requestMatchers("/api/themes/**").hasAnyRole("PLAYER","ADMIN")
+
 
 
                         .requestMatchers(
