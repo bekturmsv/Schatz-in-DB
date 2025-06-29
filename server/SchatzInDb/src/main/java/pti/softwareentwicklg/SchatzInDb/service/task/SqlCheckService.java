@@ -194,7 +194,7 @@ public class SqlCheckService {
         int totalTasks = total.size();
         int completed = 0;
 
-        dto.setRoles(user.getRole());
+        dto.setRole(user.getRole());
 
         for (UserSolution userSolution : solved) {
             Task task = taskRepository.getTaskByTaskCode(userSolution.getTaskCode());
