@@ -93,7 +93,32 @@ export default function Task() {
 
     const solved = currentTask?.solved || isCompleted;
 
-    // DRAG & DROP handlers (оставь как есть...)
+    // DRAG & DROP handlers
+    const onDragStart = (block, origin, idx) => setDraggedBlock({ block, origin, idx });
+    const onDropToInput = () => {
+        if (!draggedBlock || solved) return;
+        if (draggedBlock.origin === "available") {
+            setUserBlocks([...userBlocks, draggedBlock.block]);
+            setAvailableBlocks(availableBlocks.filter((b, i) => i !== draggedBlock.idx));
+        }
+        setDraggedBlock(null);
+    };
+    const onDropToAvailable = () => {
+        if (!draggedBlock || solved) return;
+        if (draggedBlock.origin === "input") {
+            setAvailableBlocks([...availableBlocks, draggedBlock.block]);
+            setUserBlocks(userBlocks.filter((b, i) => i !== draggedBlock.idx));
+        }
+        setDraggedBlock(null);
+    };
+    const moveBlockInUserBlocks = (fromIdx, toIdx) => {
+        if (fromIdx === toIdx) return;
+        const updated = [...userBlocks];
+        const [removed] = updated.splice(fromIdx, 1);
+        updated.splice(toIdx, 0, removed);
+        setUserBlocks(updated);
+    };
+
 
     // ===== handleSubmit: Показывает модалку с результатом SQL после submit, не обновляет страницу =====
     const handleSubmit = async (e) => {

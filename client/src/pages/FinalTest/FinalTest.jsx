@@ -99,6 +99,7 @@ export default function FinalTest() {
         setChecking(false);
     };
 
+    // Завершить тест (добавлен рефетч профиля!)
     const handleFinish = async () => {
         setTestFinished(true);
         try {
@@ -107,12 +108,13 @@ export default function FinalTest() {
                 spentTimeInSeconds: timer,
             }).unwrap();
 
-            // Вот здесь точно дожидаемся новых данных!
-            const { data } = await refetchProfile();
-            console.log("User после теста:", data);
+            // ---- ВАЖНО! ----
+            // Ждем обновления профиля (баллы, прогресс и т.д.)
+            await refetchProfile();
 
             toast.success(t("testCompleted"));
             setTimeout(() => {
+                // Переход на страницу тем (с поздравлением)
                 navigate(`/level/${difficulty}`, {
                     state: { showCongrats: true }
                 });

@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import DetectiveStory from "@/components/custom/DetectiveStory.jsx";
 import { useEffect, useState } from "react";
 
+const PAGE_SIZE = 6;
+
 export default function Topic() {
     const { difficulty } = useParams();
     const level = difficulty?.toUpperCase();
@@ -33,7 +35,11 @@ export default function Topic() {
         return !!(location.state && location.state.showCongrats);
     });
 
+    // Пагинация: вычисляем общее число страниц и текущую страницу
     const topics = response.tasks ?? [];
+    const [page, setPage] = useState(1);
+    const totalPages = Math.ceil(topics.length / PAGE_SIZE);
+    const pagedTopics = topics.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     useEffect(() => {
         if (!showDetectiveGreeting) {
@@ -46,6 +52,10 @@ export default function Topic() {
             window.history.replaceState({}, document.title);
         }
     }, [location.state]);
+
+    useEffect(() => {
+        setPage(1); // сбросить на первую страницу при смене сложности
+    }, [difficulty]);
 
     if (!isAuthenticated) {
         navigate("/login");
@@ -62,6 +72,40 @@ export default function Topic() {
     const handleBack = () => {
         navigate("/play");
     };
+
+    const renderPagination = () => (
+        totalPages > 1 && (
+            <div className="flex gap-2 justify-center items-center mt-8 mb-4">
+                <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                >
+                    {t("previous")}
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i}
+                        className={`px-3 py-1 rounded font-semibold transition
+                            ${page === i + 1
+                            ? "bg-blue-500 text-white shadow"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        }`}
+                        onClick={() => setPage(i + 1)}
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+                <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                    onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={page === totalPages}
+                >
+                    {t("next")}
+                </button>
+            </div>
+        )
+    );
 
     return (
         <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
@@ -150,7 +194,9 @@ export default function Topic() {
                 )}
             </AnimatePresence>
 
-            {!isLoading && !isError && topics.length > 0 && (
+            {renderPagination()}
+
+            {!isLoading && !isError && pagedTopics.length > 0 && (
                 <motion.ul
                     initial="hidden"
                     animate="visible"
@@ -161,7 +207,7 @@ export default function Topic() {
                     }}
                     className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-7 z-10"
                 >
-                    {topics.map((topic, idx) => (
+                    {pagedTopics.map((topic, idx) => (
                         <motion.li
                             key={topic.name}
                             variants={{
@@ -220,6 +266,8 @@ export default function Topic() {
                     ))}
                 </motion.ul>
             )}
+
+            {renderPagination()}
 
             {!isLoading && !isError && Array.isArray(finalTestData) && finalTestData.length > 0 && (
                 <div className="w-full flex flex-col items-center mt-8 z-10">
