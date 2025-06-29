@@ -23,7 +23,7 @@ public class UserLoginDto {
     private String username;
     private Integer matriculationNumber;
     private SpecialistGroup specialistGroup;
-    private Roles roles;
+    private Roles role;
     private Long points;
     private Group group;
     private Set<Theme> purchasedThemes;
