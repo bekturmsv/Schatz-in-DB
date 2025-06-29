@@ -1,5 +1,6 @@
 import { useGetMaterialsQuery } from "@/features/teacher/teacherApi";
 import { useTranslation } from "react-i18next";
+import { getPlainText } from "@/lib/stripText.js";
 
 export default function TeacherMaterialsPage({ setSelectedMaterialId }) {
     const { t } = useTranslation();
@@ -21,7 +22,9 @@ export default function TeacherMaterialsPage({ setSelectedMaterialId }) {
                     >
                         <div className="text-lg font-semibold mb-2">{mat.title}</div>
                         <div className="mb-2 text-sm">{mat.sqlKategorie}</div>
-                        <div className="mb-2 whitespace-pre-line line-clamp-4 opacity-90">{mat.description?.slice(0, 120) || ""}</div>
+                        <div className="mb-2 text-[var(--color-secondary)] opacity-90 line-clamp-4">
+                            {getPlainText(mat.description).slice(0, 120) || ""}
+                        </div>
                     </div>
                 ))}
             </div>

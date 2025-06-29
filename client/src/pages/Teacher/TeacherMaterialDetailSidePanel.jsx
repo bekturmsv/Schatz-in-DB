@@ -1,12 +1,7 @@
-// TeacherMaterialDetailSidePanel.jsx
-
 import { useGetMaterialByIdQuery } from "@/features/teacher/teacherApi";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { renderMaterial } from "@/lib/renderMaterial.jsx";
 
 export default function TeacherMaterialDetailSidePanel({ id, onClose }) {
     const { t } = useTranslation();
@@ -50,45 +45,10 @@ export default function TeacherMaterialDetailSidePanel({ id, onClose }) {
                                         {t("teacherId")}: {data.teacher}
                                     </span>
                                 </div>
-                                <div className="prose prose-base max-w-none text-[var(--color-secondary)] opacity-95 dark:prose-invert custom-body"
-                                     style={{ wordBreak: "break-word" }}
-                                >
-                                    {data.description ? (
-                                        <ReactMarkdown
-                                            children={data.description}
-                                            remarkPlugins={[remarkGfm]}
-                                            components={{
-                                                code({node, inline, className, children, ...props}) {
-                                                    const match = /language-(\w+)/.exec(className || "");
-                                                    return !inline && match ? (
-                                                        <SyntaxHighlighter
-                                                            style={vscDarkPlus}
-                                                            language={match[1]}
-                                                            PreTag="div"
-                                                            customStyle={{
-                                                                borderRadius: "0.7em",
-                                                                fontSize: "1em",
-                                                                margin: "1.2em 0",
-                                                            }}
-                                                            {...props}
-                                                        >
-                                                            {String(children).replace(/\n$/, "")}
-                                                        </SyntaxHighlighter>
-                                                    ) : (
-                                                        <code
-                                                            className="bg-gray-200 dark:bg-gray-800 rounded px-1 py-0.5 font-mono text-[0.97em]"
-                                                            {...props}
-                                                        >
-                                                            {children}
-                                                        </code>
-                                                    );
-                                                }
-                                            }}
-                                        />
-                                    ) : (
-                                        t("noDescription")
-                                    )}
-                                </div>
+                                {data.description
+                                    ? renderMaterial(data.description, t)
+                                    : <div>{t("noDescription")}</div>
+                                }
                             </>
                         )}
                     </div>
