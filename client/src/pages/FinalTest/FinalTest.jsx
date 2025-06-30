@@ -1,21 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
     useGetFinalTestByDifficultyQuery,
     useValidateSqlMutation,
-    useValidateFinalTestMutation
+    useValidateFinalTestMutation,
+    taskApi
 } from "../../features/task/taskApi";
-
-// Импортируй хук для получения и обновления профиля!
+import { setUser } from "@/features/auth/authSlice";
 import { useGetMeQuery } from "@/features/auth/authApi";
 
 export default function FinalTest() {
     const { difficulty } = useParams();
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
     const {
@@ -24,8 +25,7 @@ export default function FinalTest() {
         isError,
     } = useGetFinalTestByDifficultyQuery(difficulty?.toUpperCase());
 
-    // --- Вот здесь!
-    // Инициализируем хук для рефетча профиля пользователя
+    // Получаем и refetch-им профиль (user/me)
     const { refetch: refetchProfile } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
     const [current, setCurrent] = useState(0);
@@ -99,32 +99,36 @@ export default function FinalTest() {
         setChecking(false);
     };
 
-    // Завершить тест (добавлен рефетч профиля!)
+    // Завершить тест
     const handleFinish = async () => {
+        console.log('handleFinish вызван');
+        console.log('До setTestFinished');
         setTestFinished(true);
+        console.log('После setTestFinished');
         try {
-            await validateFinalTest({
+            const response = await validateFinalTest({
                 schwierigkeit: difficulty?.toUpperCase(),
                 spentTimeInSeconds: timer,
             }).unwrap();
 
-            // ---- ВАЖНО! ----
-            // Ждем обновления профиля (баллы, прогресс и т.д.)
-            await refetchProfile();
+            if (response?.user) {
+                dispatch(setUser(response.user));
+            }
+            dispatch(taskApi.util.invalidateTags(['User']));
+            refetchProfile();
 
             toast.success(t("testCompleted"));
-            setTimeout(() => {
-                // Переход на страницу тем (с поздравлением)
-                navigate(`/level/${difficulty}`, {
-                    state: { showCongrats: true }
-                });
-            }, 1800);
-        } catch {
+            navigate(`/level/${difficulty}`, {
+                state: { showCongrats: true }
+            });
+
+        } catch (e) {
+            console.log('Error in handleFinish', e);
             toast.error(t("submissionError"));
+            setTestFinished(false);
         }
     };
 
-    // Helper render table
     function renderTaskTable(task) {
         if (!task.tableName || !Array.isArray(task.tableData) || !task.tableData.length) return null;
         const columns = Object.keys(task.tableData[0]);
@@ -165,11 +169,15 @@ export default function FinalTest() {
         <div className="min-h-screen bg-custom-background flex flex-col items-center font-mono">
             {showHint && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    className="fixed inset-0 z-50 flex items-center justify-center transition"
+                    style={{
+                        background: 'rgba(24, 24, 28, 0.21)', // более мягкий фон
+                        backdropFilter: 'blur(2.5px)',
+                    }}
                     onClick={() => setShowHint(false)}
                 >
                     <div
-                        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative"
+                        className="bg-white/90 p-6 rounded-lg shadow-lg w-full max-w-md relative"
                         onClick={e => e.stopPropagation()}
                     >
                         <button
@@ -179,7 +187,7 @@ export default function FinalTest() {
                             ✕
                         </button>
                         <h3 className="text-xl font-bold mb-4">{t('hint')}</h3>
-                        <p className="text-gray-700">{currentTask.hint}</p>
+                        <p className="text-gray-700 whitespace-pre-line">{currentTask.hint}</p>
                     </div>
                 </div>
             )}
@@ -262,7 +270,10 @@ export default function FinalTest() {
                 </div>
                 <div className="w-full max-w-3xl flex flex-col items-end mb-8">
                     <button
-                        onClick={handleFinish}
+                        onClick={() => {
+                            console.log("КНОПКА НАЖАТА");
+                            handleFinish();
+                        }}
                         className={`bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-3 rounded-xl font-bold text-xl shadow-xl mt-3 transition ${
                             !allCorrect || testFinished ? "opacity-50 cursor-not-allowed" : ""
                         }`}

@@ -447,7 +447,7 @@ export default function Task() {
     }
 
     return (
-        <div className="min-h-screen bg-custom-background custom-font flex flex-col relative">
+        <div className="min-h-screen bg-custom-background custom-font flex flex-col relative mt-14">
             {/* Модалка результата SQL */}
             {renderResultModal()}
 

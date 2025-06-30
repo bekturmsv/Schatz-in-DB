@@ -40,6 +40,7 @@ export const taskApi = createApi({
         }),
         getLevels: builder.query({
             query: () => "api/task/getLevels",
+            providesTags: ['User'],
         }),
         submitTaskAnswer: builder.mutation({
             query: ({ taskId, answer }) => ({

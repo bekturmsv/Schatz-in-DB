@@ -1,3 +1,5 @@
+// adminApi.js
+
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const adminApi = createApi({
@@ -12,7 +14,7 @@ export const adminApi = createApi({
             return headers;
         },
     }),
-    tagTypes: ['Users', 'Teachers', 'Players'],
+    tagTypes: ['Users', 'Teachers', 'Players', 'Specializations'],
     endpoints: (builder) => ({
         getAllUsers: builder.query({
             query: () => "/api/admin/getAllUsers",
@@ -46,6 +48,11 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ['Users', 'Players'],
         }),
+        // Добавлен новый endpoint
+        getAllSpecializations: builder.query({
+            query: () => "/api/specializations/getAll",
+            providesTags: ['Specializations'],
+        }),
     }),
 });
 
@@ -55,4 +62,5 @@ export const {
     useCreateTeacherMutation,
     useUpdateTeacherMutation,
     useUpdatePlayerMutation,
+    useGetAllSpecializationsQuery, // экспортируем новый хук
 } = adminApi;

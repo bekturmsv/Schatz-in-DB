@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { useCreateTeacherMutation } from "@/features/admin/adminApi";
+import {
+    useCreateTeacherMutation,
+    useGetAllSpecializationsQuery
+} from "@/features/admin/adminApi";
 import { useTranslation } from "react-i18next";
 
 export default function CreateTeacherPage() {
     const { t } = useTranslation();
+
     const [form, setForm] = useState({
         username: "",
         email: "",
@@ -12,7 +16,9 @@ export default function CreateTeacherPage() {
         lastName: "",
         subject: ""
     });
+
     const [createTeacher, { isLoading, isSuccess, error }] = useCreateTeacherMutation();
+    const { data: specializations, isLoading: loadingSpecializations, error: errorSpecializations } = useGetAllSpecializationsQuery();
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -74,13 +80,35 @@ export default function CreateTeacherPage() {
                     onChange={handleChange}
                     placeholder={t("lastName")}
                 />
-                <FormField
-                    label={t("subject")}
-                    name="subject"
-                    value={form.subject}
-                    onChange={handleChange}
-                    placeholder={t("subject")}
-                />
+
+                {/* Выбор специализации через select */}
+                <div className="flex flex-col w-full">
+                    <label htmlFor="subject" className="mb-1 font-semibold text-[var(--color-primary)]">
+                        {t("subject")}
+                    </label>
+                    <select
+                        id="subject"
+                        name="subject"
+                        value={form.subject}
+                        onChange={handleChange}
+                        required
+                        className="w-full py-3 px-4 rounded-xl border border-[var(--color-secondary)] bg-transparent outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition font-medium text-[var(--color-primary)] placeholder:text-[var(--color-secondary)] shadow-sm"
+                        disabled={loadingSpecializations}
+                    >
+                        <option value="" disabled hidden>
+                            {loadingSpecializations ? t("loading") : t("chooseSpecialization")}
+                        </option>
+                        {specializations && specializations.map((spec) => (
+                            <option key={spec} value={spec}>
+                                {t(spec)}
+                            </option>
+                        ))}
+                    </select>
+                    {errorSpecializations && (
+                        <div className="text-red-600 mt-1">{t("errorLoadingSpecializations")}</div>
+                    )}
+                </div>
+
                 <div className="flex justify-end items-center mt-4 gap-6">
                     <button
                         type="submit"
@@ -103,7 +131,7 @@ export default function CreateTeacherPage() {
     );
 }
 
-// Отдельный компонент поля формы для лаконичности
+// Компонент поля формы (text input)
 function FormField({ label, name, value, onChange, placeholder, required, type = "text", autoComplete }) {
     return (
         <div className="flex flex-col w-full">

@@ -202,7 +202,7 @@ export default function Register() {
 
               {specializations?.map((specialization, index) => (
                   <option key={index} value={specialization}>
-                    {specialization}
+                    {t(specialization)}
                   </option>
               ))}
             </motion.select>

@@ -5,7 +5,7 @@ import { setTheme } from "../../features/theme/themeSlice.js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
-import { setUser, initializeAuth } from "@/features/auth/authSlice.js";
+import { setUser } from "@/features/auth/authSlice.js";
 import {
   useGetThemesQuery,
   usePurchaseThemeMutation,
@@ -14,24 +14,31 @@ import {
 import { motion } from "framer-motion";
 import { useGetMeQuery } from "@/features/auth/authApi";
 import ProfileEditModal from "@/components/custom/ProfileEditModal.jsx";
+import { useJoinGroupMutation, useQuitGroupMutation } from "@/features/profile/groupApi";
 
 export default function Profile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Redux
+  // Redux state
   const user = useSelector((state) => state.auth.user);
   const reduxTheme = useSelector((state) => state.theme.currentTheme);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const currentTheme = reduxTheme || "default";
 
-  // API
+  // API queries/mutations
   const { data: allThemes = [], refetch: refetchThemes } = useGetThemesQuery();
   const [purchaseTheme, { isLoading: isPurchasing, error: purchaseError }] = usePurchaseThemeMutation();
   const [setThemeApi, { isLoading: isSettingTheme }] = useSetThemeMutation();
   const [editOpen, setEditOpen] = useState(false);
+
+  // --- Group logic ---
+  const [showGroupInput, setShowGroupInput] = useState(false);
+  const [groupCode, setGroupCode] = useState("");
+  const [joinGroup, { isLoading: isJoining }] = useJoinGroupMutation();
+  const [quitGroup, { isLoading: isQuitting }] = useQuitGroupMutation();
 
   const { refetch: refetchMe } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
@@ -41,7 +48,6 @@ export default function Profile() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Update theme immediately
   useEffect(() => {
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", currentTheme);
@@ -51,7 +57,6 @@ export default function Profile() {
 
   useEffect(() => {
     if (purchaseError) {
-      console.error("Purchase error details:", purchaseError);
       toast.error(t("purchaseFailed") + `: ${purchaseError?.data?.message || "Неизвестная ошибка"}`);
     }
   }, [purchaseError, t]);
@@ -91,8 +96,8 @@ export default function Profile() {
         dispatch(setUser(result.user));
         toast.success(t("themePurchased", { theme: theme.name }));
       } else {
-        toast.success(t("themePurchased", { theme: theme.name })); // Успешно, но без обновления пользователя
-        refetchMe(); // Принудительно обновляем данные пользователя
+        toast.success(t("themePurchased", { theme: theme.name }));
+        refetchMe();
       }
     } catch (error) {
       toast.error(t("purchaseFailed") + `: ${error?.data?.message || "Неизвестная ошибка"}`);
@@ -114,6 +119,46 @@ export default function Profile() {
       toast.success(t("themeSelected", { theme: themeName }));
     } catch {
       toast.error(t("themeSelectError"));
+    }
+  };
+
+  // --- GROUP LOGIC ---
+  const handleJoinGroup = async () => {
+    if (!groupCode.trim()) {
+      toast.error(t("pleaseEnterGroupCode") || "Введите код группы");
+      return;
+    }
+    try {
+      const result = await joinGroup({ groupCode }).unwrap();
+      // result: { groupName, user }
+      if (result?.user) {
+        dispatch(setUser(result.user));
+      }
+      toast.success(t("joinedGroup") || "Вы успешно вступили в группу");
+      setShowGroupInput(false);
+      setGroupCode("");
+      // НЕ вызывай refetchMe
+    } catch (err) {
+      toast.error(
+          (err?.data?.message) ||
+          t("joinGroupError") ||
+          "Ошибка при вступлении в группу"
+      );
+    }
+  };
+
+  const handleQuitGroup = async () => {
+    try {
+      const result = await quitGroup().unwrap();
+      if (result?.id) {
+        dispatch(setUser(result));
+      }
+      toast.success(t("leftGroup"));
+    } catch (err) {
+      toast.error(
+          (err?.data?.message) ||
+          t("quitGroupError")
+      );
     }
   };
 
@@ -152,7 +197,7 @@ export default function Profile() {
             {t("myAccount")}
           </motion.h1>
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Left column */}
+            {/* Левая колонка */}
             <motion.div
                 variants={fadeUp}
                 custom={1}
@@ -198,11 +243,67 @@ export default function Profile() {
                 {t("group")}: {user.specialistGroup || t("notSpecified")}
               </p>
               <p
-                  className="mb-4 custom-body"
+                  className="mb-2 custom-body"
                   style={{ color: "var(--color-primary)" }}
               >
                 {t("matriculationNumber")}: {user.matriculationNumber || t("notSpecified")}
               </p>
+
+              {/* --- GROUP JOIN/QUIT BUTTONS --- */}
+              {!user.group ? (
+                  <>
+                    {!showGroupInput ? (
+                        <Button
+                            className="custom-btn w-full mb-3 py-1 px-3 text-sm"
+                            onClick={() => setShowGroupInput(true)}
+                        >
+                          {t("joinGroupBtn") || "Войти в группу"}
+                        </Button>
+                    ) : (
+                        <div className="flex flex-col w-full gap-2 mb-3">
+                          <input
+                              type="text"
+                              className="input text-sm py-1"
+                              placeholder={t("enterGroupCode") || "Введите код группы"}
+                              value={groupCode}
+                              onChange={e => setGroupCode(e.target.value)}
+                              disabled={isJoining}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                                className="custom-btn flex-1 py-1 px-3 text-sm"
+                                onClick={handleJoinGroup}
+                                disabled={isJoining}
+                            >
+                              {t("confirmJoinGroup") || "Вступить"}
+                            </Button>
+                            <Button
+                                className="custom-btn flex-1 py-1 px-3 text-sm"
+                                variant="outline"
+                                onClick={() => { setShowGroupInput(false); setGroupCode(""); }}
+                            >
+                              {t("cancel") || "Отмена"}
+                            </Button>
+                          </div>
+                        </div>
+                    )}
+                  </>
+              ) : (
+                  <div className="flex flex-col items-center w-full mb-3">
+                <span className="text-base font-medium text-[var(--color-secondary)] mb-1">
+                  {t("yourGroup") || "Ваша группа"}: <b>{user.group?.name || "-"}</b>
+                </span>
+                    <Button
+                        className="custom-btn w-full py-1 px-3 text-sm"
+                        onClick={handleQuitGroup}
+                        disabled={isQuitting}
+                        variant="destructive"
+                    >
+                      {t("leaveGroupBtn") || "Выйти"}
+                    </Button>
+                  </div>
+              )}
+
               <Button className="custom-btn px-7 py-2 text-base"
                       onClick={() => setEditOpen(true)}
               >
@@ -210,13 +311,13 @@ export default function Profile() {
               </Button>
             </motion.div>
 
-            {/* Right column */}
+            {/* Правая колонка (всё как было) */}
             <motion.div
                 variants={fadeUp}
                 custom={2}
                 className="md:w-2/3 flex flex-col gap-8"
             >
-              {/* Points */}
+              {/* Очки */}
               <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -239,8 +340,7 @@ export default function Profile() {
                 {user.points} {t("points")}
               </span>
               </motion.div>
-
-              {/* Progress */}
+              {/* Прогресс */}
               <motion.div
                   variants={fadeUp}
                   custom={3}
@@ -283,8 +383,7 @@ export default function Profile() {
                 />
                 <div className="w-full bg-[var(--color-card-bg, #ececec)] rounded-full h-4 mt-[-16px] z-0"></div>
               </motion.div>
-
-              {/* Last completed tasks block */}
+              {/* Последние задачи */}
               <motion.div variants={fadeUp} custom={5} className="mb-4">
                 <h3
                     className="text-xl font-bold custom-font mb-4"
@@ -321,8 +420,7 @@ export default function Profile() {
                     </div>
                 )}
               </motion.div>
-
-              {/* Themes/styles */}
+              {/* Темы/стили */}
               <h3
                   className="text-xl font-bold mb-2 mt-3 custom-font"
                   style={{ color: "var(--color-primary)" }}
@@ -360,7 +458,7 @@ export default function Profile() {
                           scale: 1.07,
                           boxShadow: "0 8px 24px 0 rgba(34,197,94,0.12)",
                         }}
-                        className="relative h-24 custom-card flex items-center justify-center shadow-lg transition-all"
+                        className={`relative h-24 custom-card flex items-center justify-center shadow-lg transition-all`}
                         style={{
                           background: purchasedThemeNames.includes(theme.name)
                               ? "var(--color-card-bg)"
