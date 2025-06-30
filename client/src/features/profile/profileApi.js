@@ -1,3 +1,4 @@
+// features/profile/profileApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { setUser } from "@/features/auth/authSlice";
 
@@ -29,7 +30,34 @@ export const profileApi = createApi({
             },
             invalidatesTags: [{ type: 'User' }],
         }),
+        joinGroup: builder.mutation({
+            query: ({ groupCode }) => ({
+                url: `/api/groups/changeGroup`,
+                method: "POST",
+                body: { groupCode },
+            }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data: user } = await queryFulfilled;
+                    dispatch(setUser(user));
+                } catch (e) {}
+            },
+            invalidatesTags: [{ type: 'User' }],
+        }),
+        quitGroup: builder.mutation({
+            query: () => ({
+                url: `/api/groups/quitGroup`,
+                method: "POST",
+            }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data: user } = await queryFulfilled;
+                    dispatch(setUser(user));
+                } catch (e) {}
+            },
+            invalidatesTags: [{ type: 'User' }],
+        }),
     }),
 });
 
-export const { useUpdatePlayerMutation } = profileApi;
+export const { useUpdatePlayerMutation, useJoinGroupMutation, useQuitGroupMutation } = profileApi;
