@@ -46,7 +46,7 @@ const router = createBrowserRouter([
       {
         path: "/profile",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["PLAYER"]}>
             <Profile />
           </ProtectedRoute>
         ),
@@ -54,7 +54,7 @@ const router = createBrowserRouter([
       {
         path: "/play",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["PLAYER"]}>
             <DifficultyLevel />
           </ProtectedRoute>
         ),
@@ -62,7 +62,7 @@ const router = createBrowserRouter([
       {
         path: "/level/:difficulty",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER"]}>
               <Topic />
             </ProtectedRoute>
         ),
@@ -70,7 +70,7 @@ const router = createBrowserRouter([
       {
         path: "/level/:difficulty/topic/:topicName/task/:taskId",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER"]}>
               <Task/>
             </ProtectedRoute>
         )
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
       {
         path: "/level/:difficulty/final-test",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER"]}>
               <FinalTest/>
             </ProtectedRoute>
         )
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
       {
         path: "/level/:difficulty/topic/:topicName", // New route for TasksList
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER"]}>
               <TasksList />
             </ProtectedRoute>
         ),
@@ -102,14 +102,14 @@ const router = createBrowserRouter([
       },
       {
         path: "/leaderboard",
-        element: (<ProtectedRoute>
+        element: (<ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
           <RatingPage/>
         </ProtectedRoute>)
       },
       {
         path: "/materials",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
               <MaterialsListPage/>
             </ProtectedRoute>
         )
@@ -117,7 +117,7 @@ const router = createBrowserRouter([
       {
         path: "/materials/:id",
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
               <MaterialDetailPage />
             </ProtectedRoute>
         )

@@ -123,13 +123,15 @@ export default function Navbar() {
                   </button>
                   {isLogged ? (
                       <>
-                        <button
-                            onClick={() => { navigate('/play'); setIsOpen(false); }}
-                            className="cursor-pointer font-bold transition py-2 md:py-0 text-lg"
-                            style={{ color: "var(--color-secondary)" }}
-                        >
-                          {t('play')}
-                        </button>
+                        {(user?.role !== "ADMIN" && user?.role !== "TEACHER") && (
+                            <button
+                                onClick={() => { navigate('/play'); setIsOpen(false); }}
+                                className="cursor-pointer font-bold transition py-2 md:py-0 text-lg"
+                                style={{ color: "var(--color-secondary)" }}
+                            >
+                              {t('play')}
+                            </button>
+                        )}
                         <button
                             onClick={() => { navigate('/materials'); setIsOpen(false); }}
                             className="cursor-pointer hover:text-green-500 font-semibold transition py-2 md:py-0 text-lg"
@@ -144,7 +146,6 @@ export default function Navbar() {
                         >
                           {t('leaderboard')}
                         </button>
-
                         {(user?.role === "ADMIN" || user?.role === "TEACHER") && (
                             <button
                                 onClick={() => {
@@ -159,17 +160,28 @@ export default function Navbar() {
                         )}
                         {user ? (
                             <span className="flex items-center gap-2 text-black py-2 md:py-0">
-                      <Link
-                          to={"/profile"}
-                          className="cursor-pointer font-bold hover:text-green-500 transition"
-                          style={{ color: "var(--color-primary)" }}
-                      >
-                        {user.username}
-                      </Link>
-                      <b className="text-orange-500">
-                        {user.points} {t("points")}
-                      </b>
-                    </span>
+    {(user?.role === "ADMIN" || user?.role === "TEACHER") ? (
+        <span
+            className="font-bold"
+            style={{ color: "var(--color-primary)" }}
+        >
+        {user.username}
+      </span>
+    ) : (
+        <Link
+            to={"/profile"}
+            className="cursor-pointer font-bold hover:text-green-500 transition"
+            style={{ color: "var(--color-primary)" }}
+        >
+          {user.username}
+        </Link>
+    )}
+                              {(user?.role !== "ADMIN" && user?.role !== "TEACHER") && (
+                                  <b className="text-orange-500">
+                                    {user.points} {t("points")}
+                                  </b>
+                              )}
+  </span>
                         ) : (
                             <span className="text-black py-2 md:py-0">{t('loadingProfile') || "Loading..."}</span>
                         )}

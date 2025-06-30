@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { motion } from "framer-motion";
+import LeaderboardPodium from "@/components/custom/LeaderboardPodium.jsx";
+import TipsCarousel from "@/components/custom/TipsCarousel.jsx";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -88,30 +90,41 @@ const Home = () => {
           </motion.div>
 
           {/* Leaderboard */}
-          <motion.div
-              className="custom-card text-center py-16 px-8 flex flex-col items-center hover:scale-105 transition-all duration-300"
-              custom={2}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={sectionVariants}
-          >
-            <span className="mb-4 text-blue-400 text-4xl">📈</span>
-            <h2 className="text-2xl md:text-3xl font-bold">{t("leaderboard")}</h2>
-          </motion.div>
+            <Link
+                to="/leaderboard"
+                className="focus:outline-none"
+                tabIndex={0}
+                style={{ textDecoration: "none" }}
+            >
+                <motion.div
+                    className="custom-card text-center py-16 px-8 flex flex-col items-center hover:scale-105 transition-all duration-300 cursor-pointer"
+                    custom={2}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={sectionVariants}
+                    whileHover={{ scale: 1.07, boxShadow: "0 8px 24px 0 rgba(59,130,246,0.10)" }}
+                >
+                    <span className="mb-4 text-blue-400 text-4xl">📈</span>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{t("leaderboard")}</h2>
+                    <LeaderboardPodium />
+                </motion.div>
+            </Link>
 
-          {/* News and Updates */}
-          <motion.div
-              className="custom-card text-center py-16 px-8 flex flex-col items-center hover:scale-105 transition-all duration-300"
-              custom={3}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={sectionVariants}
-          >
-            <span className="mb-4 text-yellow-400 text-4xl">📰</span>
-            <h2 className="text-2xl md:text-3xl font-bold">{t("newsAndUpdates")}</h2>
-          </motion.div>
+            {/* Best SQL Tips — тот же стиль */}
+            <motion.div
+                className="custom-card text-center py-16 px-8 flex flex-col items-center hover:scale-105 transition-all duration-300"
+                custom={3}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={sectionVariants}
+            >
+                <span className="mb-4 text-yellow-400 text-4xl">💡</span>
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">{t("bestSqlTips")}</h2>
+                {/* Внутри — компонент со сменяющимися советами */}
+                <TipsCarousel />
+            </motion.div>
         </div>
       </div>
   );

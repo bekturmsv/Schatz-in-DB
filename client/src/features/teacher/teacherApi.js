@@ -1,3 +1,5 @@
+// features/teacher/teacherApi.js
+
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const teacherApi = createApi({
@@ -26,6 +28,13 @@ export const teacherApi = createApi({
                 url: "/api/materials/upload",
                 method: "POST",
                 params: { title, description, teacherId, sqlKategorie },
+            }),
+            invalidatesTags: ['Materials'],
+        }),
+        deleteMaterial: builder.mutation({
+            query: (id) => ({
+                url: `/api/materials/${id}`,
+                method: "DELETE",
             }),
             invalidatesTags: ['Materials'],
         }),
@@ -59,6 +68,7 @@ export const {
     useGetMaterialsQuery,
     useGetMaterialByIdQuery,
     useUploadMaterialMutation,
+    useDeleteMaterialMutation, // <= Экспортируй хук
     useGetGroupsQuery,
     useGetGroupByIdQuery,
     useCreateGroupMutation,

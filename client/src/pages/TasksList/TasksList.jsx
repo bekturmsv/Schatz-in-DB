@@ -3,6 +3,9 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useGetTasksByTopicQuery } from "../../features/task/taskApi.js";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+
+const PAGE_SIZE = 6;
 
 export default function TasksList() {
     const { difficulty, topicName } = useParams();
@@ -20,12 +23,56 @@ export default function TasksList() {
         { skip: !difficulty || !topicName || !isAuthenticated }
     );
 
+    const [page, setPage] = useState(1);
+
     if (!isAuthenticated) {
         navigate("/login");
         return null;
     }
 
     const tasks = Array.isArray(response) ? response : [];
+    const totalPages = Math.ceil(tasks.length / PAGE_SIZE);
+    const pagedTasks = tasks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    // Кнопка назад ведёт к списку тем по уровню (level)
+    const handleBack = () => {
+        navigate(`/level/${level}`);
+    };
+
+    // Pagination render
+    const renderPagination = () => (
+        totalPages > 1 && (
+            <div className="flex gap-2 justify-center items-center mt-8 mb-4">
+                <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                >
+                    {t("previous")}
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i}
+                        className={`px-3 py-1 rounded font-semibold transition
+                            ${page === i + 1
+                            ? "bg-blue-500 text-white shadow"
+                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        }`}
+                        onClick={() => setPage(i + 1)}
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+                <button
+                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                    onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={page === totalPages}
+                >
+                    {t("next")}
+                </button>
+            </div>
+        )
+    );
 
     const cardVariants = {
         hidden: { opacity: 0, y: 24, scale: 0.97 },
@@ -39,20 +86,46 @@ export default function TasksList() {
 
     return (
         <div className="min-h-screen font-mono flex flex-col items-center justify-center bg-custom-background custom-font relative">
-            <motion.h1
-                initial={{ opacity: 0, y: -22 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="text-4xl md:text-5xl font-extrabold mb-10 mt-4 custom-font uppercase tracking-wide drop-shadow z-10 text-center"
-                style={{
-                    color: "var(--color-primary)",
-                }}
-            >
-                {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
-                <span className="text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
-                    ({t(`${difficulty.toLowerCase()}Level`)})
-                </span>
-            </motion.h1>
+
+            {/* Красивая кнопка назад и заголовок рядом */}
+            <div className="w-full flex flex-col items-center md:items-start max-w-5xl px-3 md:px-8">
+                <div className="flex items-center gap-3 mt-10 mb-2">
+                    <button
+                        onClick={handleBack}
+                        className={`
+                            flex items-center gap-2 px-5 py-2 rounded-full
+                            bg-[var(--color-card-bg)] shadow-lg border border-[var(--color-secondary)]
+                            text-[var(--color-primary)] font-bold text-lg custom-font
+                            transition hover:bg-[var(--color-card-bg-alt)] hover:shadow-xl focus:outline-none
+                            active:scale-95
+                        `}
+                        style={{
+                            minWidth: 110,
+                            boxShadow: "0 2px 12px 0 rgba(34,197,94,0.08)"
+                        }}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span className="tracking-tight">{t("back")}</span>
+                    </button>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="text-3xl md:text-5xl font-extrabold custom-font uppercase tracking-wide drop-shadow z-10 text-center"
+                        style={{
+                            color: "var(--color-primary)",
+                            marginBottom: 0
+                        }}
+                    >
+                        {t("tasksForTopic", { topic: decodeURIComponent(topicName) })}{" "}
+                        <span className="text-xl md:text-2xl font-normal ml-2" style={{ color: "var(--color-secondary)" }}>
+                            ({t(`${difficulty.toLowerCase()}Level`)})
+                        </span>
+                    </motion.h1>
+                </div>
+            </div>
 
             <AnimatePresence>
                 {isLoading && (
@@ -85,6 +158,8 @@ export default function TasksList() {
                 )}
             </AnimatePresence>
 
+            {renderPagination()}
+
             {!isLoading && !isError && (
                 <motion.ul
                     initial="hidden"
@@ -96,8 +171,8 @@ export default function TasksList() {
                     }}
                     className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-7 z-10"
                 >
-                    {tasks.length > 0 ? (
-                        tasks.map((task, idx) => (
+                    {pagedTasks.length > 0 ? (
+                        pagedTasks.map((task, idx) => (
                             <motion.li
                                 key={task.id}
                                 variants={cardVariants}
@@ -123,7 +198,7 @@ export default function TasksList() {
                                 className={`
                                     cursor-pointer rounded-2xl border transition-all flex flex-col min-h-[110px] shadow-lg
                                     ${task.solved ? "bg-green-50 dark:bg-green-900/20 pointer-events-none opacity-60" : ""}
-                                    `}
+                                `}
                                 style={{
                                     background: "var(--color-card-bg, #f8fafc)",
                                     borderColor: "var(--color-primary)",
@@ -147,21 +222,21 @@ export default function TasksList() {
                                 >
                                     {task.aufgabe?.split('\n')[0] || t("task")}
                                     <span className="ml-2 flex items-center">
-                                    {task.solved && (
-                                        <motion.span
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.08 }}
-                                            className="text-2xl"
-                                            title={t("taskCompleted")}
-                                        >
-                                            <svg className="inline w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                                                <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
-                                            </svg>
-                                        </motion.span>
-                                    )}
-                                  </span>
+                                        {task.solved && (
+                                            <motion.span
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                transition={{ delay: 0.08 }}
+                                                className="text-2xl"
+                                                title={t("taskCompleted")}
+                                            >
+                                                <svg className="inline w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                                    <path strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2L16 9" />
+                                                </svg>
+                                            </motion.span>
+                                        )}
+                                    </span>
                                 </h2>
                                 <div
                                     className="text-base custom-body line-clamp-3"
@@ -191,6 +266,8 @@ export default function TasksList() {
                     )}
                 </motion.ul>
             )}
+
+            {renderPagination()}
         </div>
     );
 }
