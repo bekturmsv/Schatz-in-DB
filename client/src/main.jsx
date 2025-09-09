@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
+import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalProvider } from "@azure/msal-react";
 import "./index.css";
 import "./styles/theme.css";
 import "./utils/i18n";
@@ -26,10 +28,19 @@ import MaterialDetailPage from "@/pages/MaterialDetail/MaterialDetailPage.jsx";
 import AdminDashboard from "@/pages/Admin/AdminDashboard.jsx";
 import RequireTeacher from "@/hoc/RequireTeacher.jsx";
 import TeacherDashboard from "@/pages/Teacher/TeacherDashboard.jsx";
+import { msalConfig } from "@/config/msalConfig";
+import TeamsAuth from "@/components/auth/TeamsAuth";
+
+// Create MSAL instance
+const msalInstance = new PublicClientApplication(msalConfig);
 
 const router = createBrowserRouter([
   {
-    element: <MainLayout />,
+    element: (
+      <TeamsAuth>
+        <MainLayout />
+      </TeamsAuth>
+    ),
     children: [
       {
         path: "/",
@@ -146,8 +157,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
+    <MsalProvider instance={msalInstance}>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </MsalProvider>
   </StrictMode>
 );
