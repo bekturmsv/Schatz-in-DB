@@ -142,6 +142,9 @@ function TeamsAuth({ children }) {
 
     const initializeAuth = async () => {
       try {
+        // Initialize MSAL first
+        await instance.initialize();
+        
         const isTeams = await detectTeamsContext();
         
         if (isTeams) {
@@ -171,7 +174,7 @@ function TeamsAuth({ children }) {
     };
 
     initializeAuth();
-  }, [detectTeamsContext, handleTeamsAuth, handleBrowserAuth, contextType]);
+  }, [detectTeamsContext, handleTeamsAuth, handleBrowserAuth, contextType, instance]);
 
   if (isLoading) {
     return (

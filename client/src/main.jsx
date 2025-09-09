@@ -33,7 +33,6 @@ import TeamsAuth from "@/components/auth/TeamsAuth";
 
 // Create MSAL instance
 const msalInstance = new PublicClientApplication(msalConfig);
-
 const router = createBrowserRouter([
   {
     element: (
@@ -42,116 +41,116 @@ const router = createBrowserRouter([
       </TeamsAuth>
     ),
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <SignUp />,
-      },
-      {
-        path: "/profile",
-        element: (
-          <ProtectedRoute allowedRoles={["PLAYER"]}>
-            <Profile />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/play",
-        element: (
-          <ProtectedRoute allowedRoles={["PLAYER"]}>
-            <DifficultyLevel />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/level/:difficulty",
-        element: (
+        {
+          path: "/",
+          element: <Home />,
+        },
+        {
+          path: "/login",
+          element: <Login />,
+        },
+        {
+          path: "/register",
+          element: <SignUp />,
+        },
+        {
+          path: "/profile",
+          element: (
             <ProtectedRoute allowedRoles={["PLAYER"]}>
-              <Topic />
+              <Profile />
             </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/level/:difficulty/topic/:topicName/task/:taskId",
-        element: (
+          ),
+        },
+        {
+          path: "/play",
+          element: (
             <ProtectedRoute allowedRoles={["PLAYER"]}>
-              <Task/>
+              <DifficultyLevel />
             </ProtectedRoute>
-        )
-      },
-      {
-        path: "/level/:difficulty/final-test",
-        element: (
-            <ProtectedRoute allowedRoles={["PLAYER"]}>
-              <FinalTest/>
-            </ProtectedRoute>
-        )
-      },
-      {path: "/training",
-      element: <Topics/>
-      },
-      {
-        path: "/level/:difficulty/topic/:topicName", // New route for TasksList
-        element: (
-            <ProtectedRoute allowedRoles={["PLAYER"]}>
-              <TasksList />
-            </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/admin/tasks/create",
-        element: <RequireAdmin>
-          <CreateTask />
-        </RequireAdmin>
-      },
-      {
-        path: "/leaderboard",
-        element: (<ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
-          <RatingPage/>
-        </ProtectedRoute>)
-      },
-      {
-        path: "/materials",
-        element: (
-            <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
-              <MaterialsListPage/>
-            </ProtectedRoute>
-        )
-      },
-      {
-        path: "/materials/:id",
-        element: (
-            <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
-              <MaterialDetailPage />
-            </ProtectedRoute>
-        )
-      },
-      {
-        path: "/admin",
-        element: (
-            <RequireAdmin>
-              <AdminDashboard/>
-            </RequireAdmin>
-        )
-      },
-      {
-        path: "/teacher",
-        element: (
-            <RequireTeacher>
-              <TeacherDashboard />
-            </RequireTeacher>
-        )
-      }
+          ),
+        },
+        {
+          path: "/level/:difficulty",
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER"]}>
+                <Topic />
+              </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/level/:difficulty/topic/:topicName/task/:taskId",
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER"]}>
+                <Task/>
+              </ProtectedRoute>
+          )
+        },
+        {
+          path: "/level/:difficulty/final-test",
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER"]}>
+                <FinalTest/>
+              </ProtectedRoute>
+          )
+        },
+        {path: "/training",
+        element: <Topics/>
+        },
+        {
+          path: "/level/:difficulty/topic/:topicName", // New route for TasksList
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER"]}>
+                <TasksList />
+              </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/admin/tasks/create",
+          element: <RequireAdmin>
+            <CreateTask />
+          </RequireAdmin>
+        },
+        {
+          path: "/leaderboard",
+          element: (<ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
+            <RatingPage/>
+          </ProtectedRoute>)
+        },
+        {
+          path: "/materials",
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
+                <MaterialsListPage/>
+              </ProtectedRoute>
+          )
+        },
+        {
+          path: "/materials/:id",
+          element: (
+              <ProtectedRoute allowedRoles={["PLAYER", "ADMIN", "TEACHER"]}>
+                <MaterialDetailPage />
+              </ProtectedRoute>
+          )
+        },
+        {
+          path: "/admin",
+          element: (
+              <RequireAdmin>
+                <AdminDashboard/>
+              </RequireAdmin>
+          )
+        },
+        {
+          path: "/teacher",
+          element: (
+              <RequireTeacher>
+                <TeacherDashboard />
+              </RequireTeacher>
+          )
+        }
 
-    ],
-  },
+      ],
+    },
 
 ]);
 
